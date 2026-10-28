@@ -13,6 +13,10 @@ public class MainActivity extends BridgeActivity {
         SplashScreen.installSplashScreen(this);
         registerPlugin(PlayerUiPlugin.class);
         super.onCreate(savedInstanceState);
+        // Match the system splash until the local app stylesheet paints.
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setBackgroundColor(getColor(R.color.koki_background));
+        }
     }
     public void setPlayerActive(boolean active) {
         playerActive = active;
