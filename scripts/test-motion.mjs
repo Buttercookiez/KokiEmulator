@@ -1,0 +1,47 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { mkdir,writeFile,readFile } from 'node:fs/promises';
+import { makeDiagnosticRom } from './make-diagnostic-rom.mjs';
+const version=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version;
+const out='.cache/test-results';await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,channel:'msedge'});const context=await browser.newContext({viewport:{width:1326,height:940},colorScheme:'dark',reducedMotion:'no-preference'});const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',e=>{if(e.type()==='error')errors.push(e.text());});
+try{
+ await page.goto(process.env.KOKI_TEST_URL||'http://127.0.0.1:5184');
+ const second=makeDiagnosticRom();second[0x700]=8;
+ await page.getByLabel('Import GBA games',{exact:true}).setInputFiles([{name:'Motion Quest.gba',mimeType:'application/octet-stream',buffer:Buffer.from(makeDiagnosticRom())},{name:'Night Circuit.gba',mimeType:'application/octet-stream',buffer:Buffer.from(second)}]);
+ await page.locator('.game-card').nth(1).waitFor();
+ const cards=await page.locator('.game-card').evaluateAll(nodes=>nodes.map(e=>({name:getComputedStyle(e).animationName,delay:parseFloat(getComputedStyle(e).animationDelay)})));
+ assert(cards.every(c=>c.name==='koki-rise'));assert(cards[1].delay>cards[0].delay,'Cards have a short stagger');
+ await page.getByRole('button',{name:'View Motion Quest',exact:true}).click();
+ assert.equal(await page.locator('.modal').evaluate(e=>getComputedStyle(e).transform),'none','Dialog animation must not move fixed dropdown positioning');
+ await page.getByLabel('Use custom game profile',{exact:true}).check();await page.getByRole('combobox',{name:'Game speed',exact:true}).click();
+ const popup=await page.getByRole('listbox',{name:'Game speed'}).boundingBox();assert(popup.x>=0&&popup.y>=0&&popup.x+popup.width<=1326&&popup.y+popup.height<=940);
+ await page.keyboard.press('Escape');await page.getByRole('button',{name:'Close dialog',exact:true}).click();
+ await page.evaluate(async()=>{const lib=await import('/src/lib/library.ts');const {GbaEmulator}=await import('/src/lib/emulator.ts');for(const game of await lib.getGames()){const core=new GbaEmulator(document.createElement('canvas'));try{await core.load(await lib.getRom(game.id));for(const label of ['Morning','Evening'])await lib.createSnapshot(game.id,core.saveState(),{label,kind:'manual'});}finally{core.destroy();}}});
+ const nav=name=>page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
+ await nav('Save history');const group=page.locator('.save-game-group').first();await group.waitFor();
+ assert.equal(await page.locator('.save-game-group[open]').count(),0);
+ const closed=(await group.boundingBox()).height;
+ await group.locator('summary').click();
+ await page.waitForFunction(()=>!document.querySelector('.save-game-group').getAnimations().some(a=>a.playState==='running'));
+ assert((await group.boundingBox()).height>closed+50);
+ assert.equal(await group.evaluate(e=>e.style.height),'');
+ // Rapid changes must finish in the last requested state without stuck inline height.
+ await group.locator('summary').evaluate(e=>{e.click();e.click();e.click();});
+ await page.waitForFunction(()=>!document.querySelector('.save-game-group').open);
+ assert.equal(await group.evaluate(e=>e.style.height),'');
+ await group.locator('summary').press('Enter');await page.waitForFunction(()=>!document.querySelector('.save-game-group').getAnimations().some(a=>a.playState==='running'));
+ assert.equal(await group.evaluate(e=>e.open),true);await page.screenshot({path:out+'/motion-saves-desktop.png',animations:'disabled'});
+ await nav('Library');await nav('Save history');assert.equal(await page.locator('.save-game-group[open]').count(),0,'New page visits retain the collapsed default');
+ await nav('Settings');await page.getByLabel('Reduced motion',{exact:true}).check();await nav('Library');
+ assert.equal(await page.locator('.game-card').first().evaluate(e=>getComputedStyle(e).animationName),'none');
+ await nav('Save history');
+ const reduced=await page.locator('.save-game-group').first().evaluate(e=>{e.querySelector('summary').click();return{open:e.open,animations:e.getAnimations().length};});assert(reduced.open&&reduced.animations===0);
+ await nav('Settings');await page.getByLabel('Reduced motion',{exact:true}).uncheck();await page.emulateMedia({reducedMotion:'reduce'});await nav('Library');
+ assert.equal(await page.locator('.game-card').first().evaluate(e=>getComputedStyle(e).animationName),'none','System reduced-motion preference disables all entrances');
+ await page.emulateMedia({reducedMotion:'no-preference'});await page.setViewportSize({width:320,height:720});
+ await page.locator('.mobile-nav').getByRole('button',{name:'Saves',exact:true}).click();
+ await page.locator('.save-game-group summary').first().click();await page.waitForFunction(()=>!document.querySelector('.save-game-group').getAnimations().some(a=>a.playState==='running'));
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:out+'/motion-saves-mobile.png',fullPage:true,animations:'disabled'});
+ assert.deepEqual(errors,[]);const report={version,status:'passed',cardStagger:'passed',modalDropdownGeometry:'passed',saveExpansionAndKeyboard:'passed',rapidToggleAndCleanup:'passed',collapsedOnPageEntry:'passed',reducedMotionSetting:'passed',systemReducedMotion:'passed',mobile320px:'passed',errors};await writeFile(out+'/motion-report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
+}catch(e){await page.screenshot({path:out+'/motion-failure.png'}).catch(()=>{});throw e;}finally{await browser.close();}

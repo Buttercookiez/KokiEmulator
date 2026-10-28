@@ -1,0 +1,39 @@
+/* Positions use available viewport travel rather than fixed device pixels. */
+.player-shell .custom-touch-controller{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:var(--touch-opacity,.75);user-select:none;-webkit-user-select:none;touch-action:none}
+.touch-layout-area{position:absolute;top:max(68px,calc(env(safe-area-inset-top) + 56px));right:max(16px,env(safe-area-inset-right));bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px));left:max(16px,env(safe-area-inset-left))}
+.touch-piece{position:absolute;pointer-events:auto;touch-action:none}
+.touch-piece-inner{position:absolute;left:0;top:0;transform-origin:top left}
+.player-shell.immersive-player .custom-touch-controller .touch-button{background:#181c22d9;border:1px solid #ffffff42;color:#f0f1f3;box-shadow:0 2px 8px #0003}
+.player-shell.immersive-player .custom-touch-controller .touch-button.pressed{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.player-shell.immersive-player .custom-touch-controller .touch-dpad{width:132px;height:132px;display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);transform:none}
+.player-shell.immersive-player .custom-touch-controller .touch-dpad button{width:44px;height:44px}
+.player-shell.immersive-player .custom-touch-controller .dpad-center{background:#181c22d9;pointer-events:none}
+.player-shell .piece-a button,.player-shell .piece-b button{width:58px;height:58px;border-radius:50%;font-size:20px}
+.player-shell.immersive-player .custom-touch-controller .shoulder-button{width:84px;height:44px;border-radius:14px;font-size:14px}
+.player-shell .piece-select button,.player-shell .piece-start button{width:64px;height:44px;border-radius:22px;font-size:9px;letter-spacing:.8px}
+.player-shell .custom-touch-controller.editing{z-index:12;background:#0002}
+.editing .touch-piece{outline:1px dashed #ffffff70;outline-offset:4px;border-radius:14px;cursor:grab}
+.editing .touch-piece.selected{outline:2px solid var(--accent);background:var(--accent-soft)}
+.editing .touch-piece:active{cursor:grabbing}
+.editing .touch-piece-inner{pointer-events:none}
+.player-shell .touch-editor{position:absolute;z-index:14;top:max(64px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);width:min(320px,calc(100% - 24px));max-height:calc(100% - 88px - env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;touch-action:pan-y;background:#16191ff5;border:1px solid #ffffff26;border-radius:20px;padding:14px;color:#f1f3f6;box-shadow:0 12px 48px #0005}
+.touch-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+.touch-editor-heading small{font-size:10px;font-weight:400;color:#a8afba;margin-left:6px}
+.touch-editor .icon-button{width:36px;height:36px;color:#e6e8ed}
+.touch-editor p{font-size:11px;color:#a8afba;margin:0 0 12px}
+.touch-editor-size{display:flex;align-items:center;gap:14px}
+.touch-editor-size>.select-trigger{width:95px;flex-shrink:0}
+.touch-editor label{display:block;flex:1;min-width:0;font-size:11px;color:#c4cad4}
+.touch-editor output{float:right;font-size:10px;font-variant-numeric:tabular-nums}
+.touch-editor input{display:block;width:100%;height:32px;accent-color:var(--accent);touch-action:pan-x}
+.touch-opacity-label{margin-top:8px}
+.touch-editor-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.touch-editor-actions button{min-height:44px}
+.player-shell[data-mobile="false"][data-controls-visible="false"] .custom-touch-controller:not(.editing){opacity:0;pointer-events:none}
+.player-shell[data-mobile="false"][data-controls-visible="false"] .custom-touch-controller:not(.editing) .touch-piece{pointer-events:none}
+@media(max-height:550px) and (orientation:landscape){.touch-layout-area{top:max(58px,calc(env(safe-area-inset-top) + 50px));bottom:max(12px,env(safe-area-inset-bottom))}.player-shell .touch-editor{left:50%;width:290px;padding:10px;top:56px;max-height:calc(100% - 68px)}.touch-editor p{margin-bottom:5px}.touch-editor .touch-opacity-label{margin-top:0}.touch-editor-actions{margin-top:0}}
+.touch-editor-collapse{display:block;background:transparent;color:#d5dce6;text-decoration:underline;text-underline-offset:3px;font-size:10px;min-height:34px;padding:0;margin:0 0 3px}
+.touch-editor input:focus-visible{outline:1px solid var(--accent);outline-offset:2px;border-radius:8px}
+.touch-editor-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.touch-editor-choices label>.select-trigger,.touch-editor-advanced label>.select-trigger{margin-top:5px;width:100%;min-width:0;min-height:40px}
+.touch-editor-advanced{margin-top:8px;border-top:1px solid #ffffff1a;padding-top:6px}.touch-editor-advanced summary{font-size:11px;color:#e3e8f0;cursor:pointer;min-height:36px;display:flex;align-items:center}.touch-editor-advanced>label{margin:8px 0}.touch-turbo-options{display:flex;gap:16px}.touch-editor .touch-check{display:flex;align-items:center;gap:8px;min-height:36px}.touch-editor .touch-check input{width:18px;height:18px;flex-shrink:0}.turbo-badge{position:absolute;right:5px;top:4px;font-size:9px;opacity:.8}.player-shell .piece-a button,.player-shell .piece-b button{position:relative}
+

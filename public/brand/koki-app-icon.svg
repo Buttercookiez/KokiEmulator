@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Koki emulator app icon</title>
+  <rect width="64" height="64" rx="16" fill="#161616"/>
+  <g fill="#ffffff">
+    <rect x="12" y="12" width="9" height="40" rx="2"/>
+    <path d="M27 24L39 12H52L34 30H27Z"/>
+    <path d="M27 34H34L52 52H39L27 40Z"/>
+  </g>
+</svg>

@@ -1,0 +1,210 @@
+/* The screen always occupies the viewport; controls float over the game. */
+html[data-player-open="true"], html[data-player-open="true"] body { overflow: hidden; overscroll-behavior: none; }
+.player-shell.immersive-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #080808;
+  isolation: isolate;
+  touch-action: none;
+}
+.player-shell.immersive-player .player-screen-area {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: #080808;
+}
+.player-shell.immersive-player .player-screen-wrap {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
+.player-shell.immersive-player .player-screen-wrap canvas {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  aspect-ratio: 3 / 2;
+}
+.player-shell.immersive-player [data-player-chrome] {
+  --surface: #141619;
+  --ink: #f0f1f3;
+  --muted: #b3b7bd;
+  --line: #ffffff21;
+  --subtle: #ffffff10;
+  color: var(--ink);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.player-shell.immersive-player .player-header {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-height: 62px;
+  padding: max(12px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 12px max(22px, env(safe-area-inset-left));
+  border: 0;
+  background: linear-gradient(180deg, #08090bed 0%, #08090bd9 70%, #08090b00 100%);
+}
+.player-shell.immersive-player .player-heading h2 { max-width: 60vw; font-size: 13px; }
+.player-shell.immersive-player .player-header .icon-button {
+  border: 1px solid #ffffff1c;
+  background: #15171ac7;
+  color: #e1e3e7;
+}
+.player-shell.immersive-player .player-header .icon-button:hover { background: #303238; border-color: #ffffff3a; color: #fff; }
+.player-shell.immersive-player .player-header .icon-button.active { color: var(--accent); background: var(--accent-soft); }
+.player-shell.immersive-player .player-bottom-chrome {
+  position: absolute;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: linear-gradient(0deg, #08090bf5 0%, #08090beb 75%, #08090b00 100%);
+}
+.player-shell.immersive-player .player-toolbar {
+  min-height: 61px;
+  padding: 12px 18px 5px;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+}
+.player-shell.immersive-player .player-control { color: #c6c9ce; }
+.player-shell.immersive-player .player-control:hover { color: #fff; background: #ffffff12; }
+.player-shell.immersive-player .player-control.active { color: var(--accent); background: var(--accent-soft); }
+.player-shell.immersive-player .player-control kbd { color: #9298a1; }
+.player-shell.immersive-player .player-control:focus-visible,
+.player-shell.immersive-player .icon-button:focus-visible,
+.player-shell.immersive-player .touch-button:focus-visible {
+  outline: 2px solid #f0f1f3;
+  outline-offset: 3px;
+}
+.player-shell.immersive-player .player-keyboard { background: transparent; padding: 1px 18px 13px; gap: 8px 15px; color: #969da7; font-size: 9px; }
+.player-shell.immersive-player .player-keyboard kbd { font-size: 9px; padding: 1px 4px; color: #c1c6ce; background: #ffffff08; }
+.player-shell.immersive-player .player-volume { padding-left: 10px; }
+.player-shell.immersive-player .player-speed { background: #ffffff09; color: #e5e7eb; }
+.player-shell.immersive-player .player-message { z-index: 5; background: #080808b8; }
+.player-shell.immersive-player .player-message h3 { font-size: 22px; }
+.player-shell.immersive-player .player-status { top: 79px; z-index: 7; }
+.player-shell.immersive-player .player-toast { bottom: 115px; z-index: 7; transition: opacity 180ms ease; }
+.player-shell.immersive-player .touch-controller.force-touch {
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  right: 0;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  display: block;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 12px clamp(22px, 5vw, 75px) 0;
+  background: transparent;
+  opacity: var(--touch-opacity, .7);
+  pointer-events: none;
+}
+.player-shell.immersive-player .touch-controller .touch-button { pointer-events: auto; background: #15171adc; border-color: #ffffff30; color: #f0f1f3; }
+.player-shell.immersive-player .touch-controller .touch-button.pressed,
+.player-shell.immersive-player .touch-controller .touch-button:active { background: var(--accent); color: var(--accent-ink); }
+.player-shell.immersive-player .touch-controller .dpad-center { background: #15171adc; }
+.player-shell.immersive-player .touch-shoulders { margin-bottom: 8px; }
+.player-shell.immersive-player .touch-main { height: 126px; }
+.player-shell.immersive-player .touch-menu { position: absolute; bottom: 0; left: 50%; margin-top: 0; transform: translateX(-50%); }
+.player-shell.immersive-player[data-controls-visible="false"] { cursor: none; }
+.player-shell.immersive-player[data-controls-visible="false"] .player-header { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+.player-shell.immersive-player[data-controls-visible="false"] .player-bottom-chrome { opacity: 0; transform: translateY(100%); pointer-events: none; }
+.player-shell.immersive-player[data-controls-visible="false"] .touch-controller { opacity: 0; transform: translateY(18px); pointer-events: none; }
+.player-shell.immersive-player[data-controls-visible="false"] .touch-controller .touch-button { pointer-events: none; }
+.player-shell.immersive-player[data-controls-visible="false"] .player-toast { opacity: 0; pointer-events: none; }
+.player-shell.immersive-player .select-menu { color: var(--ink); }
+@media (max-width: 650px) {
+  .player-shell.immersive-player .player-header { padding: max(10px, env(safe-area-inset-top)) 14px 10px; min-height: 58px; }
+  .player-shell.immersive-player .player-heading { gap: 9px; }
+  .player-shell.immersive-player .player-heading h2 { max-width: 49vw; font-size: 12px; }
+  .player-shell.immersive-player .player-secondary-tools { display: flex; gap: 5px; }
+  .player-shell.immersive-player .player-secondary-tools button[aria-label="Export screenshot"] { display: none; }
+  .player-shell.immersive-player .player-toolbar { min-height: 58px; padding: 10px 7px; gap: 3px; }
+  .player-shell.immersive-player .player-control { font-size: 10px; gap: 4px; padding: 7px 6px; }
+  .player-shell.immersive-player .player-control kbd,
+  .player-shell.immersive-player .player-keyboard,
+  .player-shell.immersive-player .player-volume { display: none; }
+  .player-shell.immersive-player .touch-controller.force-touch { padding: 10px 18px 0; bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .player-shell.immersive-player .player-toast { bottom: 85px; max-width: calc(100% - 30px); }
+  .player-shell.immersive-player .player-status { top: 67px; }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .player-shell.immersive-player .player-header { min-height: 48px; padding: 7px max(14px, env(safe-area-inset-right)) 7px max(14px, env(safe-area-inset-left)); }
+  .player-shell.immersive-player .player-toolbar { padding: 5px 10px; min-height: 49px; }
+  .player-shell.immersive-player .player-keyboard { display: none; }
+  .player-shell.immersive-player .touch-controller.force-touch { left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom)); padding: 0 20px; }
+  .player-shell.immersive-player .touch-shoulders { margin-bottom: 4px; }
+  .player-shell.immersive-player .touch-main { height: 112px; }
+  .player-shell.immersive-player .player-toast { bottom: 66px; }
+  .player-shell.immersive-player .player-status { top: 55px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-shell.immersive-player [data-player-chrome],
+  .player-shell.immersive-player .player-toast { transition: none; }
+}
+
+
+@media(max-width:650px){
+  .player-shell.immersive-player .player-heading{flex:1;min-width:0}
+  .player-shell.immersive-player .player-heading h2{max-width:none;font-size:12px}
+  .player-shell.immersive-player .player-header-actions{gap:5px}
+  .player-shell.immersive-player .player-header .icon-button{width:36px;height:40px;min-width:36px}
+  .player-shell.immersive-player .player-secondary-tools button[aria-label="Export screenshot"]{display:inline-flex}
+  .player-shell.immersive-player .player-toolbar{flex-wrap:nowrap;justify-content:space-between;gap:3px;padding:8px 9px;min-height:70px}
+  .player-shell.immersive-player .player-toolbar>.player-control{flex-direction:column;gap:5px;min-width:39px;min-height:44px;padding:5px 3px;font-size:9px;justify-content:center}
+  .player-shell.immersive-player .player-toolbar>div.player-control>svg{display:none}
+  .player-shell.immersive-player .player-toolbar .player-speed{font-size:11px;min-width:57px;min-height:42px;padding:8px}
+  .player-shell.immersive-player .touch-controller.force-touch{bottom:calc(90px + env(safe-area-inset-bottom));padding:0 18px}
+  .player-shell.immersive-player .touch-dpad{width:132px;height:132px;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px)}
+  .player-shell.immersive-player .touch-dpad button{width:44px;height:44px}
+  .player-shell.immersive-player .touch-main{height:132px;gap:15px}
+  .player-shell.immersive-player .touch-ab{gap:10px;padding:0}
+  .player-shell.immersive-player .touch-ab button{width:54px;height:54px}
+  .player-shell.immersive-player .shoulder-button{min-height:36px}
+  .player-shell.immersive-player .touch-menu{gap:12px;bottom:-3px}
+  .player-shell.immersive-player .touch-menu button{height:32px;width:60px}
+  .player-shell.immersive-player .player-toast{bottom:94px}
+}
+@media(max-height:550px) and (orientation:landscape){
+  .player-shell.immersive-player .player-toolbar{min-height:48px}
+  .player-shell.immersive-player .touch-controller.force-touch{bottom:calc(68px + env(safe-area-inset-bottom))}
+}
+
+/* Phone gameplay keeps only a floating menu button; its panel opens toward the left. */
+.mobile-game-menu-toggle{position:absolute;z-index:16;top:max(12px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));width:44px;height:44px;display:grid;place-items:center;border:1px solid #ffffff30;border-radius:15px;background:#161b24db;color:#f1f4fa;box-shadow:0 4px 20px #0003;touch-action:manipulation}
+.mobile-game-menu-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.mobile-game-menu-dismiss{position:absolute;inset:0;z-index:10;background:#0003;cursor:default}
+.player-shell.immersive-player[data-mobile="true"] .player-header{display:none}
+.player-shell.immersive-player[data-mobile="true"] .player-bottom-chrome{z-index:15;top:max(64px,calc(env(safe-area-inset-top) + 52px));right:max(14px,env(safe-area-inset-right));left:auto;bottom:auto;width:min(390px,calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right)));max-height:calc(100% - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;touch-action:pan-y;background:#141820f5;border:1px solid #ffffff26;border-radius:22px;padding:14px;box-shadow:0 12px 48px #0006;transform-origin:top right;transition:opacity 180ms ease,transform 180ms ease}
+.player-shell.immersive-player[data-mobile="true"] .player-bottom-chrome[data-menu-open="false"]{opacity:0;transform:translateX(16px) scaleX(.9);pointer-events:none;visibility:hidden}
+.player-shell.immersive-player[data-mobile="true"] .player-bottom-chrome[data-menu-open="true"]{opacity:1;transform:none;pointer-events:auto;visibility:visible}
+.mobile-game-menu-heading{padding:3px 5px 14px;border-bottom:1px solid #ffffff16;margin-bottom:10px}
+.mobile-game-menu-heading strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.mobile-game-menu-heading span{display:block;color:#9ca7b8;font-size:10px;margin-top:4px}
+.player-shell.immersive-player[data-mobile="true"] .mobile-game-tools,.player-shell.immersive-player[data-mobile="true"] .player-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0;gap:6px;min-height:0;justify-content:stretch}
+.player-shell.immersive-player[data-mobile="true"] .mobile-game-tools{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #ffffff16}
+.player-shell.immersive-player[data-mobile="true"] .player-control{display:flex;flex-direction:column;gap:7px;min-width:0;min-height:62px;padding:10px 4px;justify-content:center;font-size:10px;line-height:1.2;background:#ffffff06;border-radius:13px;text-align:center}
+.player-shell.immersive-player[data-mobile="true"] .player-control:hover{background:#ffffff12}
+.player-shell.immersive-player[data-mobile="true"] .player-control svg{display:block;width:18px;height:18px}
+.player-shell.immersive-player[data-mobile="true"] .player-keyboard,.player-shell.immersive-player[data-mobile="true"] .player-control kbd{display:none}
+.player-shell.immersive-player[data-mobile="true"] .player-volume{display:flex;grid-column:span 2;padding:0;border:0;gap:8px}
+.player-shell.immersive-player[data-mobile="true"] .player-volume button{min-width:50px;min-height:62px}
+.player-shell.immersive-player[data-mobile="true"] .player-volume input{width:100%;min-width:0;height:44px}
+.player-shell.immersive-player[data-mobile="true"] .player-toolbar .player-speed{font-size:12px;min-width:62px;min-height:44px;padding:8px}
+.player-shell.immersive-player[data-mobile="true"] .player-toast{bottom:max(90px,calc(env(safe-area-inset-bottom) + 72px))}
+.player-shell[data-mobile="false"] .touch-layout-area{bottom:125px}
+@media(prefers-reduced-motion:reduce){.player-shell.immersive-player[data-mobile="true"] .player-bottom-chrome{transition:none}}
+.restore-preview img{display:block;width:100%;max-height:240px;object-fit:contain;background:#080808;border-radius:12px;image-rendering:pixelated;margin-bottom:16px}.restore-preview h3{font-size:17px;margin-bottom:6px}.restore-preview p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}.profile-mobile-note{grid-column:1/-1;font-size:11px;color:var(--muted);margin:0}
+
+.player-shell.immersive-player .player-screen-wrap{align-items:var(--game-screen-align,center)}.player-shell.immersive-player .player-screen-wrap canvas{width:var(--game-screen-scale,100%);height:var(--game-screen-scale,100%);object-position:center var(--game-screen-position,center)}

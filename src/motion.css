@@ -1,0 +1,27 @@
+/* Short, optional UI motion. No continuous decorative effects or gameplay input delay. */
+@keyframes koki-fade{from{opacity:0}to{opacity:1}}
+@keyframes koki-rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes koki-menu{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes koki-toast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.motion-page{animation:koki-fade 180ms ease-out}
+.motion-page>.page-heading{animation:koki-rise 220ms cubic-bezier(.2,.7,.25,1)}
+.game-card,.game-row{animation:koki-rise 230ms cubic-bezier(.2,.7,.25,1) var(--enter-delay,0ms) backwards}
+.modal-backdrop{animation:koki-fade 140ms ease-out}
+/* Opacity keeps fixed dropdowns inside dialogs correctly positioned during opening. */
+.modal{animation:koki-fade 180ms ease-out}
+.modal-heading{animation:koki-rise 160ms cubic-bezier(.2,.7,.25,1)}
+.import-actions,.select-menu{animation:koki-menu 130ms cubic-bezier(.2,.7,.25,1)}
+.toast{animation:koki-toast 180ms cubic-bezier(.2,.7,.25,1)}
+.save-game-group[open]>.save-list-global{animation:koki-fade 160ms ease-out}
+.app{transition:grid-template-columns 210ms cubic-bezier(.2,.7,.25,1),background-color 180ms ease,color 180ms ease}
+.sidebar,.app-chrome,.mobile-nav,.settings-section,.colors-section{transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease}
+.button,.icon-button,.card-play,.card-favorite,.nav-item,.mobile-nav button,.theme-switch button,.view-switch button,.select-trigger{transition:background-color 130ms ease,border-color 130ms ease,color 130ms ease,box-shadow 130ms ease,transform 130ms ease}
+.button:active:not(:disabled),.icon-button:active:not(:disabled),.card-play:active:not(:disabled){transform:scale(.97)}
+.card-favorite[aria-pressed="true"] svg{fill:currentColor}
+.card-favorite svg{transition:fill 130ms ease,color 130ms ease}
+.mobile-nav button svg{transition:transform 160ms ease}
+.mobile-nav button.active svg{transform:translateY(-2px)}
+@media(hover:hover) and (pointer:fine){.button:hover:not(:disabled),.card-play:hover:not(:disabled){transform:translateY(-1px)}}
+/* Override durations and delays, including staggered entrances, for both preferences. */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+:root[data-reduced-motion="true"] *,:root[data-reduced-motion="true"] *::before,:root[data-reduced-motion="true"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}

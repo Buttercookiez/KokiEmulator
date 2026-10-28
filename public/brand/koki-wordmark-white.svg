@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Koki logo and wordmark, white</title>
+  <g fill="#ffffff">
+    <rect x="12" y="12" width="9" height="40" rx="2"/>
+    <path d="M27 24L39 12H52L34 30H27Z"/>
+    <path d="M27 34H34L52 52H39L27 40Z"/>
+    <rect x="81" y="9" width="7" height="43" rx="1.5"/>
+    <path d="M93 29L106 16H116L100 33L118 52H108L93 36Z"/>
+    <path fill-rule="evenodd" d="M139 16A18 18 0 1 1 139 52A18 18 0 1 1 139 16ZM139 23A11 11 0 1 0 139 45A11 11 0 1 0 139 23Z"/>
+    <rect x="165" y="9" width="7" height="43" rx="1.5"/>
+    <path d="M177 29L190 16H200L184 33L202 52H192L177 36Z"/>
+    <rect x="211" y="19" width="7" height="33" rx="1.5"/>
+    <rect x="211" y="7" width="7" height="7" rx="2"/>
+  </g>
+</svg>

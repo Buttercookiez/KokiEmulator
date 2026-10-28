@@ -1,0 +1,57 @@
+[
+  {
+    "title": "Aunt Flora's Mansion",
+    "genre": "Puzzle",
+    "developer": "velipso; original game by anna anthropy",
+    "source": "https://github.com/velipso/auntflora",
+    "license": "0BSD; port made with the original author’s permission",
+    "url": "https://github.com/velipso/auntflora/releases/download/v1.1/AuntFlorasMansion.gba",
+    "file": "Aunt Flora's Mansion.gba",
+    "bytes": 2097152,
+    "sha256": "b406300f8cd953a08663146d220bb9f540b58f8bfbd106e725ffae1b9fc53b5d"
+  },
+  {
+    "title": "Minicraft",
+    "genre": "Survival / crafting",
+    "developer": "Vulcalien; original Minicraft by Markus Persson",
+    "source": "https://github.com/Vulcalien/minicraft-gba",
+    "license": "GPL-3.0-or-later",
+    "url": "https://github.com/Vulcalien/minicraft-gba/releases/download/2.0/minicraft-gba_2.0_SRAM-32KB.zip",
+    "file": "Minicraft.gba",
+    "bytes": 131072,
+    "sha256": "173c893f23f12f2db767fd80cf111aabde56ee6652a9b390c2f4e2aee7a4fd01"
+  },
+  {
+    "title": "Skyland",
+    "genre": "Strategy",
+    "developer": "Evan Bowman",
+    "source": "https://github.com/evanbowman/skyland-beta/releases/tag/2026.9.30.0",
+    "license": "MPL-2.0; developer-provided release",
+    "url": "https://github.com/evanbowman/skyland-beta/releases/download/2026.9.30.0/Skyland.gba",
+    "file": "Skyland.gba",
+    "bytes": 26697692,
+    "sha256": "73050b14462c461423d5ff994fc42519784ef903fbd8a7512ab91376a37c129e"
+  },
+  {
+    "title": "Tigermoth",
+    "genre": "Arcade shooter",
+    "developer": "pmprog",
+    "source": "https://pmprog.itch.io/tigermoth",
+    "license": "MIT; official GBA Jam 2021 release",
+    "url": "https://gbajam21.github.io/entries/tigermoth/tigermoth-20210617-beta2.gba",
+    "file": "Tigermoth.gba",
+    "bytes": 250560,
+    "sha256": "0c4f898315b9147522ccdb1d1c234d7b43c65d40bfe21be4eedcf722e45f3e7f"
+  },
+  {
+    "title": "uCity Advance",
+    "genre": "City building",
+    "developer": "Antonio Niño Díaz / SkyLyrac",
+    "source": "https://github.com/AntonioND/ucity-advance",
+    "license": "GPL-3.0 code; CC-BY-NC-SA-4.0 art and original audio; other music under Mod Archive Distribution License",
+    "url": "https://github.com/AntonioND/ucity-advance/releases/download/v1.0.3/ucity-advance-v1.0.3.gba",
+    "file": "uCity Advance.gba",
+    "bytes": 1933560,
+    "sha256": "069230a67939896c15cba86f0bffe31d12655597e2ac4cfed5b832e216b57bff"
+  }
+]

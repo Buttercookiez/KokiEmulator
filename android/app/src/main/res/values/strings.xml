@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Koki\'s Emulator</string>
+    <string name="title_activity_main">Koki\'s Emulator</string>
+    <string name="package_name">com.koki.emulator</string>
+    <string name="custom_url_scheme">com.koki.emulator</string>
+</resources>

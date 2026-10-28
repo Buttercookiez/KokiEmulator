@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none" role="img" aria-labelledby="gh-title gh-desc">
+  <title id="gh-title">Koki graphite handheld</title>
+  <desc id="gh-desc">An original matte graphite handheld with a softly beveled shell, inset glass display, Koki boot logo and tactile monochrome controls.</desc>
+  <defs>
+    <linearGradient id="gh-edge" x1="400" y1="100" x2="400" y2="437" gradientUnits="userSpaceOnUse"><stop stop-color="#343638"/><stop offset=".64" stop-color="#1b1d1f"/><stop offset="1" stop-color="#101113"/></linearGradient>
+    <linearGradient id="gh-face" x1="271" y1="65" x2="511" y2="432" gradientUnits="userSpaceOnUse"><stop stop-color="#444648"/><stop offset=".4" stop-color="#303234"/><stop offset="1" stop-color="#242628"/></linearGradient>
+    <linearGradient id="gh-rim" x1="400" y1="79" x2="400" y2="414" gradientUnits="userSpaceOnUse"><stop stop-color="#77797b" stop-opacity=".72"/><stop offset=".32" stop-color="#4b4d4e" stop-opacity=".45"/><stop offset="1" stop-color="#5e6062" stop-opacity=".24"/></linearGradient>
+    <linearGradient id="gh-bezel" x1="400" y1="105" x2="400" y2="345" gradientUnits="userSpaceOnUse"><stop stop-color="#151618"/><stop offset="1" stop-color="#232527"/></linearGradient>
+    <linearGradient id="gh-glass" x1="290" y1="127" x2="505" y2="316" gradientUnits="userSpaceOnUse"><stop stop-color="#101113"/><stop offset="1" stop-color="#050607"/></linearGradient>
+    <linearGradient id="gh-reflection" x1="304" y1="130" x2="465" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".048"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="gh-control" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#292c2f"/><stop offset="1" stop-color="#17191b"/></linearGradient>
+    <filter id="gh-shadow" x="-16%" y="-30%" width="132%" height="180%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="21" stdDeviation="18" flood-color="#000" flood-opacity=".38"/></filter>
+    <filter id="gh-keyshadow" x="-30%" y="-30%" width="160%" height="170%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000" flood-opacity=".48"/></filter>
+    <clipPath id="gh-screen"><rect x="257" y="127" width="286" height="190" rx="5"/></clipPath>
+    <g id="gh-brand" fill="#fff">
+      <rect x="12" y="12" width="9" height="40" rx="2"/><path d="M27 24L39 12H52L34 30H27Z"/><path d="M27 34H34L52 52H39L27 40Z"/>
+      <rect x="81" y="9" width="7" height="43" rx="1.5"/><path d="M93 29L106 16H116L100 33L118 52H108L93 36Z"/>
+      <path fill-rule="evenodd" d="M139 16A18 18 0 1 1 139 52A18 18 0 1 1 139 16ZM139 23A11 11 0 1 0 139 45A11 11 0 1 0 139 23Z"/>
+      <rect x="165" y="9" width="7" height="43" rx="1.5"/><path d="M177 29L190 16H200L184 33L202 52H192L177 36Z"/>
+      <rect x="211" y="19" width="7" height="33" rx="1.5"/><rect x="211" y="7" width="7" height="7" rx="2"/>
+    </g>
+  </defs>
+  <g filter="url(#gh-shadow)">
+    <path d="M119 95C178 76 249 65 400 65S622 76 681 95C716 108 734 139 748 185L765 252C775 289 757 341 724 371L699 394C674 418 559 438 400 438S126 418 101 394L76 371C43 341 25 289 35 252L52 185C66 139 84 108 119 95Z" fill="url(#gh-edge)" stroke="#121314" stroke-width="2"/>
+    <path d="M119 83C178 64 249 53 400 53S622 64 681 83C716 96 734 127 748 173L765 240C775 277 757 329 724 359L699 382C674 406 559 426 400 426S126 406 101 382L76 359C43 329 25 277 35 240L52 173C66 127 84 96 119 83Z" fill="url(#gh-face)" stroke="url(#gh-rim)" stroke-width="2"/>
+    <path d="M65 173C77 136 93 112 126 101C189 81 277 72 400 72S611 81 674 101C707 112 723 136 735 173" stroke="#a1a3a5" stroke-opacity=".08" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 319C82 353 94 365 114 378C155 402 275 416 400 416S645 402 686 378C706 365 718 353 736 319" stroke="#050607" stroke-opacity=".34" stroke-width="2" stroke-linecap="round"/>
+    <rect x="231" y="101" width="338" height="246" rx="20" fill="#1b1d1f" stroke="#55585a" stroke-opacity=".55" stroke-width="1.5"/>
+    <rect x="235" y="104" width="330" height="240" rx="17" fill="url(#gh-bezel)" stroke="#090a0b" stroke-width="1.5"/>
+    <rect x="253" y="123" width="294" height="198" rx="8" fill="#030405" stroke="#4a4d50" stroke-opacity=".4"/>
+    <rect x="257" y="127" width="286" height="190" rx="5" fill="url(#gh-glass)"/>
+    <g clip-path="url(#gh-screen)"><path d="M257 127H543V151L302 317H257Z" fill="url(#gh-reflection)"/><path d="M257 128H543" stroke="#fff" stroke-opacity=".07"/></g>
+    <use href="#gh-brand" transform="translate(316 195) scale(.72)" opacity=".94"/>
+    <rect x="378" y="273" width="44" height="2" rx="1" fill="#282b2e"/><rect x="378" y="273" width="29" height="2" rx="1" fill="#9fa3a5"/>
+    <path d="M371 332H429" stroke="#53575a" stroke-opacity=".5" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="593" cy="113" r="3" fill="#d1d5d5"/><circle cx="593" cy="113" r="6" stroke="#717578" stroke-opacity=".32"/>
+    <circle cx="139" cy="234" r="58" fill="#17191b" fill-opacity=".17" stroke="#6e7275" stroke-opacity=".12"/>
+    <g filter="url(#gh-keyshadow)"><path d="M126 184H152V220H188V246H152V282H126V246H90V220H126Z" fill="#0d0f10" stroke="#606568" stroke-opacity=".57" stroke-width="1.5"/><path d="M128 187H150V222H185V244H150V279H128V244H93V222H128Z" fill="url(#gh-control)"/><circle cx="139" cy="233" r="12" fill="#1a1d1f" stroke="#373c3e" stroke-opacity=".75"/><path d="M133 201L139 195L145 201M106 227L100 233L106 239M133 265L139 271L145 265M172 227L178 233L172 239" stroke="#7c8285" stroke-opacity=".38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <path d="M594 220L643 173C663 153 695 164 699 188C702 201 695 215 685 224L636 271C617 290 586 279 581 256C577 243 584 229 594 220Z" fill="#101214" fill-opacity=".28" stroke="#6a7073" stroke-opacity=".15"/>
+    <g filter="url(#gh-keyshadow)"><circle cx="663" cy="200" r="27" fill="#111315" stroke="#676d71" stroke-opacity=".48" stroke-width="1.5"/><circle cx="663" cy="198" r="23" fill="url(#gh-control)"/><circle cx="610" cy="251" r="27" fill="#111315" stroke="#676d71" stroke-opacity=".48" stroke-width="1.5"/><circle cx="610" cy="249" r="23" fill="url(#gh-control)"/></g>
+    <g stroke="#c8cdcf" stroke-opacity=".76" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M657 205L663 191L669 205M659 201H667"/><path d="M606 242V256H612C620 256 620 249 612 249H606M612 249C619 249 619 242 612 242H606"/></g>
+    <g id="gh-select">
+      <title>Select</title>
+      <rect x="345" y="367" width="40" height="14" rx="7" fill="#111315" stroke="#62686c" stroke-opacity=".42"/>
+      <rect x="347" y="369" width="36" height="9" rx="4.5" fill="#363b3e" stroke="#171a1c" stroke-width=".75"/>
+      <path d="M352 370H378" stroke="#7d858a" stroke-opacity=".42" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M354.5 391H350.5V394H354.5V397H350.5M359.5 391H355.5V397H359.5M355.5 394H358.5M360.5 391V397H364.5M369.5 391H365.5V397H369.5M365.5 394H368.5M374.5 391H370.5V397H374.5M375.5 391H379.5M377.5 391V397" stroke="#b5bdc2" stroke-opacity=".72" stroke-width=".85" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="gh-start">
+      <title>Start</title>
+      <rect x="415" y="367" width="40" height="14" rx="7" fill="#111315" stroke="#62686c" stroke-opacity=".42"/>
+      <rect x="417" y="369" width="36" height="9" rx="4.5" fill="#363b3e" stroke="#171a1c" stroke-width=".75"/>
+      <path d="M422 370H448" stroke="#7d858a" stroke-opacity=".42" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M427 391H423V394H427V397H423M428 391H432M430 391V397M433 397L435 391L437 397M434 395H436M438 397V391H441L442 392V393L441 394H438M440 394L442 397M443 391H447M445 391V397" stroke="#b5bdc2" stroke-opacity=".72" stroke-width=".85" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g stroke="#111416" stroke-width="5" stroke-linecap="round"><path d="M586 337L608 355M598 329L620 347M610 321L632 339M622 313L644 331"/></g>
+    <g stroke="#646b6f" stroke-opacity=".25" stroke-width="1" stroke-linecap="round"><path d="M586 334L608 352M598 326L620 344M610 318L632 336M622 310L644 328"/></g>
+    <path d="M129 332H147M129 338H141" stroke="#b8bec1" stroke-opacity=".27" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

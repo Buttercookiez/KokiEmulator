@@ -1,0 +1,94 @@
+{
+  "name": "kokis-emulator",
+  "version": "0.4.2",
+  "private": true,
+  "description": "An offline GBA emulator with a quiet monochrome library for Windows and Android.",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "author": "Koki",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "postinstall": "node scripts/sync-core.mjs && node scripts/sync-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run && node --test electron/storage.test.cjs",
+    "test:emulator": "node scripts/test-emulator.mjs",
+    "test:app": "node scripts/test-app.mjs",
+    "test:native": "node scripts/test-native.mjs",
+    "build": "npm run typecheck && node scripts/sync-core.mjs && node scripts/sync-assets.mjs && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "desktop:dev": "node scripts/desktop-dev.mjs",
+    "desktop:build": "npm run build && electron-builder --win portable --x64",
+    "android:sync": "npm run build && cap sync android",
+    "android:build": "node scripts/build-android.mjs",
+    "test:keyboard": "node scripts/test-keyboard.mjs",
+    "test:ui": "node scripts/test-ui-controls.mjs",
+    "test:covers": "node scripts/test-covers.mjs",
+    "test:themes": "node scripts/test-themes.mjs",
+    "test:immersive": "node scripts/test-immersive.mjs",
+    "test:save-history": "node scripts/test-save-history.mjs",
+    "test:profiles": "node scripts/test-profiles.mjs",
+    "test:mobile-controls": "node scripts/test-mobile-controls.mjs",
+    "test:mobile-play": "node scripts/test-mobile-play.mjs",
+    "test:motion": "node scripts/test-motion.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3",
+    "@fontsource-variable/inter": "5.3.0",
+    "@wasm-gaming/mgba-wasm": "0.1.1",
+    "fflate": "0.8.3",
+    "idb": "8.0.4",
+    "lucide-react": "1.61.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/cli": "8.5.3",
+    "@types/node": "22.19.11",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0",
+    "fake-indexeddb": "6.2.5",
+    "playwright": "1.64.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "4.1.0"
+  },
+  "build": {
+    "appId": "com.koki.emulator",
+    "productName": "Koki's Emulator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/main.cjs",
+      "electron/preload.cjs",
+      "electron/storage.cjs",
+      "package.json",
+      "licenses/**/*",
+      "docs/EMULATOR-CORE.md",
+      "THIRD-PARTY-NOTICES.md",
+      "!node_modules{,/**/*}",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "assets/brand/koki-app-icon.ico"
+    },
+    "portable": {
+      "artifactName": "Kokis-Emulator-${version}-Windows.exe"
+    },
+    "electronLanguages": [
+      "en-US"
+    ],
+    "compression": "maximum"
+  }
+}
