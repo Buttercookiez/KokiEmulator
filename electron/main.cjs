@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, protocol, session, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, protocol, session, shell, nativeTheme } = require('electron');
 const fs = require('node:fs/promises');
 const { mkdirSync } = require('node:fs');
 const path = require('node:path');
@@ -26,6 +26,7 @@ let window;
 let library;
 let pendingCloseToken;
 let allowClose = false;
+let startupBackground = nativeTheme.shouldUseDarkColors ? '#0e0e0e' : '#f7f7f7';
 const csp = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' blob: data:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'";
 
 function isAppUrl(value) {
@@ -102,7 +103,7 @@ function createWindow() {
   pendingCloseToken = null;
   window = new BrowserWindow({
     width: 1340, height: 900, minWidth: 720, minHeight: 560,
-    title: "Koki's Emulator", backgroundColor: '#111111',
+    title: "Koki's Emulator", backgroundColor: startupBackground,
     icon: app.isPackaged ? path.join(process.resourcesPath, 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', 'koki-gba.png'),
     autoHideMenuBar: true, show: false,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, backgroundThrottling: !testMode },
@@ -126,6 +127,12 @@ app.whenReady().then(async () => {
   if (!ownsInstance) return;
   library = createLocalStorage(path.join(app.getPath('userData'), 'library'));
   await library.prepare();
+  try {
+    const saved = await library.read('library.json');
+    const theme = saved ? JSON.parse(Buffer.from(saved).toString('utf8'))?.settings?.theme : 'system';
+    const dark = theme === 'dark' || theme !== 'light' && nativeTheme.shouldUseDarkColors;
+    startupBackground = dark ? '#0e0e0e' : '#f7f7f7';
+  } catch { /* The renderer reports library errors and offers recovery. */ }
   registerBundleProtocol();
   registerIpc();
   session.defaultSession.setPermissionRequestHandler((_contents, permission, callback) => callback(permission === 'fullscreen'));

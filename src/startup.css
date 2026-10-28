@@ -1,0 +1,34 @@
+/* Small, local-only startup artwork shared by the Android and Windows apps. */
+:root{--startup-background:#f8f8f8;--startup-foreground:#171717}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--startup-background:#101010;--startup-foreground:#f2f2f2}}
+html[data-theme="dark"]{--startup-background:#101010;--startup-foreground:#f2f2f2}
+html,body{margin:0;min-height:100%}
+html[data-startup="pending"] body,html[data-startup="leaving"] body{overflow:hidden;background:var(--bg,var(--startup-background))}
+.startup-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;align-content:center;gap:24px;padding:24px;background:var(--bg,var(--startup-background));color:var(--ink,var(--startup-foreground));opacity:1;transition:opacity 180ms ease;isolation:isolate}
+.startup-splash[data-leaving="true"]{opacity:0}
+.startup-symbol{display:block;width:96px;height:96px;overflow:visible;flex-shrink:0;animation:koki-startup-lock 350ms 860ms cubic-bezier(.2,.7,.3,1) both}
+.startup-piece{fill:currentColor;opacity:0;transform-box:fill-box;transform-origin:center}
+.startup-stem{animation:koki-startup-stem 620ms 20ms cubic-bezier(.18,.75,.25,1) both}
+.startup-upper{animation:koki-startup-upper 660ms 120ms cubic-bezier(.18,.75,.25,1) both}
+.startup-lower{animation:koki-startup-lower 660ms 240ms cubic-bezier(.18,.75,.25,1) both}
+.startup-guide{fill:none;stroke:currentColor;stroke-width:.45;opacity:.09;animation:koki-startup-guide 240ms 830ms forwards}
+.startup-fallback{position:absolute;top:calc(50% + 72px);left:24px;right:24px;margin:0;text-align:center;font:13px/1.7 Arial,sans-serif;color:currentColor;opacity:0;visibility:hidden;animation:koki-startup-fallback 0s 6s forwards}
+.startup-fallback a{color:inherit;text-underline-offset:3px;margin-left:6px}
+.startup-noscript{font:13px/1.7 Arial,sans-serif;text-align:center}
+.startup-recovery{color:var(--ink,var(--startup-foreground));background:var(--bg,var(--startup-background));font:13px/1.7 Arial,sans-serif;text-align:center}
+.startup-recovery[data-banner="true"]{position:fixed;z-index:10001;bottom:max(20px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);padding:12px 16px;border:1px solid currentColor;border-radius:10px}
+.startup-recovery:not([data-banner="true"]){min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px;box-sizing:border-box}
+.startup-recovery p{margin:0}
+.startup-recovery button{font:inherit;min-height:44px;padding:8px 16px;border:1px solid currentColor;border-radius:7px;background:transparent;color:inherit;cursor:pointer}
+.startup-recovery[data-banner="true"] button{margin-left:12px}
+.startup-recovery button:focus-visible,.startup-fallback a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+@keyframes koki-startup-stem{0%{opacity:0;transform:translate(-19px,0) rotate(-7deg)}65%{opacity:1;transform:translate(1px,0) rotate(0)}100%{opacity:1;transform:none}}
+@keyframes koki-startup-upper{0%{opacity:0;transform:translate(20px,-18px) rotate(14deg)}70%{opacity:1;transform:translate(-.5px,.5px) rotate(0)}100%{opacity:1;transform:none}}
+@keyframes koki-startup-lower{0%{opacity:0;transform:translate(20px,18px) rotate(-14deg)}70%{opacity:1;transform:translate(-.5px,-.5px) rotate(0)}100%{opacity:1;transform:none}}
+@keyframes koki-startup-lock{from{transform:scale(1.025)}to{transform:scale(1)}}
+@keyframes koki-startup-guide{to{opacity:0}}
+@keyframes koki-startup-fallback{to{opacity:1;visibility:visible}}
+@media(prefers-reduced-motion:reduce){.startup-splash{transition:none}.startup-symbol,.startup-piece{animation:none;opacity:1;transform:none}.startup-guide{animation:none;opacity:0}}
+:root[data-reduced-motion="true"] .startup-splash{transition:none}
+:root[data-reduced-motion="true"] .startup-symbol,:root[data-reduced-motion="true"] .startup-piece{animation:none;opacity:1;transform:none}
+:root[data-reduced-motion="true"] .startup-guide{animation:none;opacity:0}

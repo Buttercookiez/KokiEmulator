@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-startup="pending">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -7,10 +7,21 @@
     <meta name="description" content="Your games. Your space. A private, offline Game Boy Advance library." />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'" />
     <link rel="icon" type="image/svg+xml" href="./brand/koki-app-icon.svg" />
+    <link rel="stylesheet" href="/src/startup.css" />
     <title>Koki's Emulator</title>
   </head>
   <body>
+    <div id="startup-splash" class="startup-splash" data-startup-splash role="status" aria-label="Opening Koki">
+      <svg class="startup-symbol" viewBox="0 0 64 64" width="96" height="96" aria-hidden="true" focusable="false">
+        <g class="startup-guide"><rect x="12" y="12" width="9" height="40" rx="2"/><path d="M27 24L39 12H52L34 30H27Z"/><path d="M27 34H34L52 52H39L27 40Z"/></g>
+        <g class="startup-piece startup-stem" data-startup-piece="stem"><rect x="12" y="12" width="9" height="40" rx="2"/></g>
+        <g class="startup-piece startup-upper" data-startup-piece="upper"><path d="M27 24L39 12H52L34 30H27Z"/></g>
+        <g class="startup-piece startup-lower" data-startup-piece="lower"><path d="M27 34H34L52 52H39L27 40Z"/></g>
+      </svg>
+      <p class="startup-fallback" data-startup-fallback>Koki is taking longer to open. <a href="./index.html">Reload</a></p>
+      <noscript><p class="startup-noscript">Enable JavaScript to open Koki.</p></noscript>
+    </div>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/startup.ts"></script>
   </body>
 </html>

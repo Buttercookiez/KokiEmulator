@@ -23,6 +23,8 @@
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/koki_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/koki_splash_mark</item>
+        <!-- Duration describes the icon animation; it does not delay startup. -->
+        <item name="windowSplashScreenAnimationDuration">580</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

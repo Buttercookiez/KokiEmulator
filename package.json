@@ -1,6 +1,6 @@
 {
   "name": "kokis-emulator",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "description": "An offline GBA emulator with a quiet monochrome library for Windows and Android.",
   "type": "module",

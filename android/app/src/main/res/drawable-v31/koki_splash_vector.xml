@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="34.8" android:translateY="34.8" android:scaleX="0.6" android:scaleY="0.6">
+        <path android:fillColor="@color/koki_foreground" android:fillAlpha="0.08" android:pathData="M14,12H19Q21,12 21,14V50Q21,52 19,52H14Q12,52 12,50V14Q12,12 14,12Z"/>
+        <path android:fillColor="@color/koki_foreground" android:fillAlpha="0.08" android:pathData="M27,24L39,12H52L34,30H27Z"/>
+        <path android:fillColor="@color/koki_foreground" android:fillAlpha="0.08" android:pathData="M27,34H34L52,52H39L27,40Z"/>
+        <group android:name="koki_stem" android:pivotX="32" android:pivotY="32">
+            <path android:name="koki_stem_fill" android:fillColor="@color/koki_foreground" android:fillAlpha="0" android:pathData="M14,12H19Q21,12 21,14V50Q21,52 19,52H14Q12,52 12,50V14Q12,12 14,12Z"/>
+        </group>
+        <group android:name="koki_upper" android:pivotX="32" android:pivotY="32">
+            <path android:name="koki_upper_fill" android:fillColor="@color/koki_foreground" android:fillAlpha="0" android:pathData="M27,24L39,12H52L34,30H27Z"/>
+        </group>
+        <group android:name="koki_lower" android:pivotX="32" android:pivotY="32">
+            <path android:name="koki_lower_fill" android:fillColor="@color/koki_foreground" android:fillAlpha="0" android:pathData="M27,34H34L52,52H39L27,40Z"/>
+        </group>
+    </group>
+</vector>

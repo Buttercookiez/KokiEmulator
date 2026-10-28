@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/koki_splash_vector">
+    <target android:name="koki_stem" android:animation="@animator/koki_splash_stem_motion"/>
+    <target android:name="koki_stem_fill" android:animation="@animator/koki_splash_stem_opacity"/>
+    <target android:name="koki_upper" android:animation="@animator/koki_splash_upper_motion"/>
+    <target android:name="koki_upper_fill" android:animation="@animator/koki_splash_upper_opacity"/>
+    <target android:name="koki_lower" android:animation="@animator/koki_splash_lower_motion"/>
+    <target android:name="koki_lower_fill" android:animation="@animator/koki_splash_lower_opacity"/>
+</animated-vector>
