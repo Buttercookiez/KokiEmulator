@@ -82,7 +82,7 @@
       "target": [
         "portable"
       ],
-      "icon": "assets/brand/koki-app-icon.ico"
+      "icon": "assets/app-icons/koki-gba.ico"
     },
     "portable": {
       "artifactName": "Kokis-Emulator-${version}-Windows.exe"
@@ -90,6 +90,12 @@
     "electronLanguages": [
       "en-US"
     ],
-    "compression": "maximum"
+    "compression": "maximum",
+    "extraResources": [
+      {
+        "from": "assets/app-icons/koki-gba.png",
+        "to": "koki-gba.png"
+      }
+    ]
   }
 }

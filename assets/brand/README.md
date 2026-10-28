@@ -14,4 +14,4 @@ Use the symbol at 24 px or larger. Keep clear space around it equal to the stem 
 
 The interface uses neutral black, white, and gray. Primary buttons invert between light and dark appearances. Artwork may keep its original color or use the optional monochrome treatment.
 
-The Android launcher uses `../android/koki-gba-launcher.svg`, which adds a small outlined GBA label. Regenerate its legacy, adaptive, and themed resources with `node scripts/generate-android-icons.cjs`. The shared brand and Windows icon stay unchanged; `--include-windows` also regenerates the Windows ICO.
+The GBA app uses `../app-icons/koki-gba.svg`, with a small outlined GBA label. Generate Android launcher resources with `node scripts/generate-android-icons.cjs`; add `--include-windows` for both platforms, or use `--windows-only` for the Windows PNG and multi-resolution ICO. The general Koki collection branding stays unchanged.

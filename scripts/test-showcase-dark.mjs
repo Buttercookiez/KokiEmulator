@@ -155,7 +155,7 @@ try {
   assert(await introPage.evaluate(selector=>!document.activeElement?.closest(selector)&&document.activeElement!==document.body,introSelector),'Keyboard focus must reach the website after the intro');
   const desktop=await newContext({viewport:{width:1440,height:1000},colorScheme:'dark'});
   const page=await desktop.newPage();monitor(page);await ready(page);await noOverflow(page,'Desktop');
-  assert.equal(cleanHeading(await page.locator('h1').innerText()),'Koki emulators');
+  assert.equal(cleanHeading(await page.locator('h1').innerText()),'Koki Emulators');
   assert.equal(await page.locator('.hero [data-device-model]').count(),0,'Homepage must introduce the collection rather than the GBA product');
   assert.equal(await page.locator('.hero').getByRole('link',{name:/Download/}).count(),0);
   assert.equal(await page.locator('.hero').getByRole('link',{name:'Explore emulators',exact:true}).getAttribute('href'),'#emulators');

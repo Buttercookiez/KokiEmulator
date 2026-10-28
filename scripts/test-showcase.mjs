@@ -13,7 +13,7 @@ try{
  await page.goto(base);await settleIntro(page);
  assert.equal(await page.evaluate(()=>window.__kokiGsap),'3.15.0');
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Desktop must not overflow horizontally');
- assert.equal(cleanHeading(await page.locator('h1').innerText()),'Koki emulators');
+ assert.equal(cleanHeading(await page.locator('h1').innerText()),'Koki Emulators');
  assert.equal(await page.locator('.hero [data-device-model]').count(),0,'Homepage hero introduces the emulator collection');
  assert.equal(await page.locator('.hero').getByRole('link',{name:/Download/}).count(),0,'Homepage hero should not send visitors straight to one product download');
  const collectionArt=page.locator('[data-collection-art]');assert.equal(await collectionArt.getAttribute('aria-hidden'),'true');assert.equal(await collectionArt.evaluate(e=>getComputedStyle(e).pointerEvents),'none');

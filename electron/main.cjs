@@ -103,7 +103,7 @@ function createWindow() {
   window = new BrowserWindow({
     width: 1340, height: 900, minWidth: 720, minHeight: 560,
     title: "Koki's Emulator", backgroundColor: '#111111',
-    icon: path.join(app.getAppPath(), 'dist', 'brand', 'koki-app-icon.png'),
+    icon: app.isPackaged ? path.join(process.resourcesPath, 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', 'koki-gba.png'),
     autoHideMenuBar: true, show: false,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, backgroundThrottling: !testMode },
   });

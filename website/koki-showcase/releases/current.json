@@ -6,8 +6,8 @@
   "artifacts": [
     {
       "file": "Kokis-Emulator-0.4.2-Windows.exe",
-      "bytes": 102835849,
-      "sha256": "1a026cabd6d85dcd8192e5e1c6e2a0f0ee97abc98db52b7a1deef9a24e93e332",
+      "bytes": 102848400,
+      "sha256": "f7a549f2247a32ddc7091a0cac5b16f56a3bd6a194ecee28d312164638efe8e4",
       "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/v0.4.2/Kokis-Emulator-0.4.2-Windows.exe"
     },
     {
