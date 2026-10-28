@@ -123,3 +123,13 @@ main section[id]{scroll-margin-top:0}
 @media(max-width:760px){:root{--nav-scroll-offset:88px}.site-header{height:72px}.site-header .header-inner{height:72px;padding-inline:24px;gap:12px}.site-header:is([data-scrolled="true"],[data-menu-open="true"]) .header-inner{width:calc(100% - 24px);height:58px;padding-inline:10px;transform:translateY(8px);border-radius:12px}.site-header .header-actions{margin-left:auto}.site-header .header-download{min-height:44px;padding:0 11px;gap:8px;font-size:11px}.site-header .menu-toggle{display:grid;place-items:center}.site-header .mobile-menu{display:grid;gap:2px}}
 @media(max-width:420px){.site-header .header-inner{padding-inline:20px;gap:10px}.site-header .header-download{padding-inline:10px;gap:7px}}
 @media(prefers-reduced-motion:reduce){.site-header,.site-header::before,.site-header .header-inner,.site-header .desktop-nav>a,.site-header .desktop-nav>a::after,.site-header .header-download,.site-header .header-download::before,.site-header .header-download .icon,.site-header .mobile-menu,.site-header .mobile-menu a,.menu-toggle-lines>span{transition:none!important}.site-header .header-download:hover .icon{transform:none}}
+
+/* Homepage spacing and inset row controls. */
+body[data-page="home"] main .section-space{padding-block:104px}
+body[data-page="home"] main .section-heading{margin-bottom:44px}
+body[data-page="home"] .emulator-card{min-height:108px;padding:30px 28px 30px 20px}
+body[data-page="home"] .faq-list summary{min-height:84px;padding:22px 20px 22px 0}
+body[data-page="home"] .faq-list summary>span{flex:0 0 20px;text-align:center}
+body[data-page="home"] .faq-list p{padding-right:40px;padding-bottom:28px}
+@media(max-width:1000px){body[data-page="home"] main .section-space{padding-block:88px}}
+@media(max-width:760px){body[data-page="home"] main .section-space{padding-block:72px}body[data-page="home"] main .section-heading{margin-bottom:34px}body[data-page="home"] .emulator-card{min-height:100px;padding:26px 12px;gap:14px}body[data-page="home"] .emulator-card .circle-arrow{width:20px}body[data-page="home"] .faq-list summary{min-height:80px;padding:22px 16px 22px 0;gap:18px}body[data-page="home"] .faq-list p{padding-right:32px;padding-bottom:26px}}
