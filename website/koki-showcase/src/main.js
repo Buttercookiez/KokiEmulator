@@ -67,6 +67,7 @@
   let downloading=false;
   const digest=async(bytes)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
   $$('.download-windows').forEach(button=>button.addEventListener('click',async event=>{
+    if(button.dataset.directDownload==='true')return;
     event.preventDefault();if(downloading)return;downloading=true;const wrap=button.closest('.download-card,.simple-download'),progress=$('.download-progress',wrap),status=$('.download-status',wrap),original=button.innerHTML;
     button.setAttribute('aria-busy','true');const feedback=$('.download-feedback',wrap);if(feedback)feedback.hidden=false;progress.hidden=false;progress.value=0;status.classList.remove('download-error');status.textContent='Preparing your Windows download…';button.textContent='Preparing… 0%';
     try{

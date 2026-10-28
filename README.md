@@ -141,3 +141,14 @@ Live website: https://koki-emulators.almondpin2.chatgpt.site/
 Install its dependencies with `npm ci` from that directory. The website build reads the parent project’s `release/BUILD-INFO.json` and verified Windows/Android artifacts, so prepare those app releases before running its `npm run build`. Then run `npm run dev` to preview it.
 
 Generated releases, build output, dependencies, local game ROMs and saves are excluded from Git. Homebrew provenance, artwork credits and third-party licenses remain with the source.
+
+## Deploy the landing page to Vercel
+
+Import this repository with the Root Directory set to the repository root (`.`). The tracked `vercel.json` selects the landing-page build, disables Vite app detection, and serves `website/koki-showcase/dist-vercel`. Leave the build/install/output values from the repository configuration.
+
+```sh
+npm ci --prefix website/koki-showcase --ignore-scripts
+npm run build:landing
+```
+
+This build needs no Electron install or local `release/` files. Download buttons use the GitHub preview release described in `website/koki-showcase/releases/current.json`. The emulator’s existing `npm run build` remains the app build. Set `SITE_URL` for a custom canonical domain; otherwise Vercel’s production URL is used.

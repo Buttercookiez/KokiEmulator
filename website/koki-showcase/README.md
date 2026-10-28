@@ -29,3 +29,7 @@ The collection monogram rests at 55% opacity and softly rises to 66% while respo
 Desktop fine-pointer wheel scrolling uses locally bundled Lenis 1.3.27 with ScrollTrigger synchronization. After wheel inertia stops, a section boundary within 42px gently settles to the shared 24px anchor offset. Keyboard/pointer input cancels pending inertia; anchors use the same driver. Touch and reduced-motion retain native scrolling. Small magnetic button offsets reset on leave, focus and click; modals pause page scrolling, and browser Back restores a synchronized position. Lenis attribution and MIT license are linked on /credits/.
 
 Headings omit trailing periods. The loading screen assembles the three original Split K pieces on each document load, with independent fail-open timers and reduced-motion skipping. The GBA concept has aligned Select/Start controls, no L/R controls or external captions. iOS uses an Apple silhouette; return links use a consistent left arrow.
+
+## Vercel / public Git builds
+
+`npm run build:vercel` writes `dist-vercel/` using committed release metadata and direct GitHub release downloads. It works from a fresh Git checkout with only this package’s dependencies installed. `npm run build` retains the existing bundled-download build and requires the parent local release artifacts. Vercel is configured from the repository-root `vercel.json`; do not deploy the repository-root Vite app as the landing page.

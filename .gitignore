@@ -23,3 +23,5 @@ public/vendor/mgba/
 *.jks
 *.keystore
 .env*
+
+dist-vercel/

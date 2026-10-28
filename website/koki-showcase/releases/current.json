@@ -1,0 +1,20 @@
+{
+  "version": "0.4.2",
+  "application": "Koki's Emulator",
+  "channel": "preview",
+  "releaseUrl": "https://github.com/Buttercookiez/KokiEmulator/releases/tag/v0.4.2",
+  "artifacts": [
+    {
+      "file": "Kokis-Emulator-0.4.2-Windows.exe",
+      "bytes": 102835849,
+      "sha256": "1a026cabd6d85dcd8192e5e1c6e2a0f0ee97abc98db52b7a1deef9a24e93e332",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/v0.4.2/Kokis-Emulator-0.4.2-Windows.exe"
+    },
+    {
+      "file": "koki-emulator-android-debug.apk",
+      "bytes": 1391919,
+      "sha256": "bc32b47a7d8ce30e4074d21f6f9fcac60578887aa10523cbbc40ead697d071e7",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/v0.4.2/koki-emulator-android-debug.apk"
+    }
+  ]
+}

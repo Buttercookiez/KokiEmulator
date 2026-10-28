@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci --prefix website/koki-showcase --ignore-scripts",
+  "buildCommand": "npm run build:landing",
+  "outputDirectory": "website/koki-showcase/dist-vercel",
+  "cleanUrls": true,
+  "trailingSlash": true
+}

@@ -30,7 +30,8 @@
     "test:profiles": "node scripts/test-profiles.mjs",
     "test:mobile-controls": "node scripts/test-mobile-controls.mjs",
     "test:mobile-play": "node scripts/test-mobile-play.mjs",
-    "test:motion": "node scripts/test-motion.mjs"
+    "test:motion": "node scripts/test-motion.mjs",
+    "build:landing": "npm run build:vercel --prefix website/koki-showcase"
   },
   "dependencies": {},
   "devDependencies": {
