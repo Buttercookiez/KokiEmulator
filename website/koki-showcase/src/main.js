@@ -43,19 +43,79 @@
   const gsap = window.gsap;
   if (gsap) gsap.registerPlugin(...[window.ScrollTrigger, window.ScrollToPlugin].filter(Boolean));
   let smoothScroll=null;
-  const navButton = $('.menu-toggle'), mobileNav = $('#mobile-menu');
-  const closeNav = () => { if (!navButton) return; navButton.setAttribute('aria-expanded', 'false'); navButton.setAttribute('aria-label','Open navigation'); mobileNav.hidden = true; document.body.style.overflow = ''; };
-  navButton?.addEventListener('click', () => { const open = navButton.getAttribute('aria-expanded') !== 'true'; navButton.setAttribute('aria-expanded',String(open)); navButton.setAttribute('aria-label',open ? 'Close navigation' : 'Open navigation'); mobileNav.hidden = !open; document.body.style.overflow = open ? 'hidden' : ''; if (open && gsap && !reduced()) gsap.fromTo(mobileNav,{opacity:0,y:-8},{opacity:1,y:0,duration:.25,clearProps:'all'}); });
-  addEventListener('resize', () => { if(innerWidth > 760) closeNav(); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && navButton?.getAttribute('aria-expanded') === 'true') { closeNav(); navButton.focus(); } });
+  const siteHeader = $('.site-header'), navButton = $('.menu-toggle'), mobileNav = $('#mobile-menu');
+  const anchorOffset = target => target === document.body || target?.id === 'main' ? 0 : parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-scroll-offset')) || 104;
+  let navOpen = false, navCloseTimer = 0, navFrame = 0;
+  const setNavOpen = (open, restoreFocus = false) => {
+    if (!navButton || !mobileNav || !siteHeader) return;
+    clearTimeout(navCloseTimer);
+    navOpen = open;
+    navButton.setAttribute('aria-expanded', String(open));
+    navButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    if (open) {
+      mobileNav.hidden = false;
+      mobileNav.inert = false;
+      if (!reduced()) mobileNav.getBoundingClientRect();
+      siteHeader.dataset.menuOpen = 'true';
+    } else {
+      siteHeader.dataset.menuOpen = 'false';
+      mobileNav.inert = true;
+      if (reduced()) mobileNav.hidden = true;
+      else navCloseTimer = setTimeout(() => { if (!navOpen) mobileNav.hidden = true; }, 220);
+    }
+    if (restoreFocus) navButton.focus({ preventScroll: true });
+  };
+  const closeNav = () => { if (navOpen) setNavOpen(false); };
+  navButton?.addEventListener('click', () => setNavOpen(!navOpen));
+  siteHeader?.addEventListener('click', event => { if (event.target.closest('a[href]')) closeNav(); });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && navOpen) { event.preventDefault(); setNavOpen(false, true); }
+  });
+  document.addEventListener('pointerdown', event => {
+    if (navOpen && !siteHeader.contains(event.target)) closeNav();
+  }, { passive: true });
+  document.addEventListener('focusin', event => {
+    if (navOpen && !siteHeader.contains(event.target)) closeNav();
+  });
+  const navLinks = $$('[data-nav-section]');
+  const navSections = $$('.desktop-nav [data-nav-section]').map(link => document.getElementById(link.dataset.navSection)).filter(Boolean);
+  const updateNavigation = () => {
+    navFrame = 0;
+    if (!siteHeader) return;
+    siteHeader.dataset.scrolled = String(scrollY > 24);
+    let active = null;
+    const boundary = siteHeader.offsetHeight + 48;
+    for (const section of navSections) if (section.getBoundingClientRect().top <= boundary) active = section.id;
+    if (navSections.length && scrollY + innerHeight >= document.documentElement.scrollHeight - 20) active = navSections.at(-1).id;
+    for (const link of navLinks) {
+      if (link.dataset.navSection === active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+  };
+  const scheduleNavigation = () => { if (!navFrame) navFrame = requestAnimationFrame(updateNavigation); };
+  addEventListener('scroll', scheduleNavigation, { passive: true });
+  addEventListener('resize', () => { if (innerWidth > 760) closeNav(); scheduleNavigation(); }, { passive: true });
+  addEventListener('pageshow', scheduleNavigation);
+  document.fonts?.ready.then(scheduleNavigation);
+  updateNavigation();
   $$('a[href]').forEach(link => link.addEventListener('click', event => {
     const url = new URL(link.href, location.href); if(url.origin !== location.origin || url.pathname !== location.pathname || !url.hash) return;
     let target; try { target = $(decodeURIComponent(url.hash)); } catch { return; } if (!target) return;
     event.preventDefault(); closeNav();
     if(smoothScroll) smoothScroll.to(target);
-    else if(gsap && window.ScrollToPlugin && !reduced()) gsap.to(window,{duration:.8,scrollTo:{y:target,offsetY:24,autoKill:true},ease:'power3.inOut'});
-    else { const top=target.getBoundingClientRect().top+scrollY-24; window.scrollTo({top,behavior:'instant'}); }
+    else if(gsap && window.ScrollToPlugin && !reduced()) gsap.to(window,{duration:.8,scrollTo:{y:target,offsetY:anchorOffset(target),autoKill:true},ease:'power3.inOut'});
+    else { const top=Math.max(0,target.getBoundingClientRect().top+scrollY-anchorOffset(target)); window.scrollTo({top,behavior:'instant'}); }
     history.replaceState(null,'',url.hash);
+    if (link.closest('#mobile-menu')) {
+      const destination = target.querySelector('h1,h2') || target;
+      const previousTabIndex = destination.getAttribute('tabindex');
+      destination.setAttribute('tabindex', '-1');
+      destination.focus({ preventScroll: true });
+      destination.addEventListener('blur', () => {
+        if (previousTabIndex === null) destination.removeAttribute('tabindex');
+        else destination.setAttribute('tabindex', previousTabIndex);
+      }, { once: true });
+    }
   }));
   const dialog = $('.coming-dialog');
   const plans = { color:{name:'Koki for Game Boy Color',art:'gameboy.svg',copy:'Game Boy Color support is planned. No release date yet.'}, ds:{name:'Koki for Nintendo DS',art:'dual-screen.svg',copy:'Nintendo DS support is planned. No release date yet.'}, psp:{name:'Koki for PlayStation Portable',art:'portable.svg',copy:'PSP support is planned. No release date yet.'} };
@@ -96,7 +156,7 @@
           cancelSettle();
           if(source!=='wheel'||document.querySelector('dialog[open]')||getSelection()?.toString())return;
           source='native';
-          const points=$$('main>section[id],main>.gba-features,main>.how-to').map(section=>Math.max(0,Math.min(lenis.limit,section.getBoundingClientRect().top+window.scrollY-24)));
+          const points=$$('main>section[id],main>.gba-features,main>.how-to').map(section=>Math.max(0,Math.min(lenis.limit,section.getBoundingClientRect().top+window.scrollY-anchorOffset(section))));
           const nearest=points.reduce((best,value)=>Math.abs(value-window.scrollY)<Math.abs(best-window.scrollY)?value:best,Infinity);
           const gap=Math.abs(nearest-window.scrollY);
           if(gap>2&&gap<=42)lenis.scrollTo(nearest,{lerp:0,duration:.32,easing:ease});
@@ -114,14 +174,14 @@
         const resize=()=>{cancelSettle();lenis.resize();};
         document.addEventListener('keydown',key,true);document.addEventListener('pointerdown',interrupt,{passive:true});document.addEventListener('touchstart',interrupt,{passive:true});addEventListener('resize',resize,{passive:true});
         smoothScroll={
-          to:target=>{cancelSettle();source='anchor';lenis.resize();lenis.scrollTo(target,{offset:-24,lerp:0,duration:.85,easing:ease});},
+          to:target=>{cancelSettle();source='anchor';lenis.resize();lenis.scrollTo(Math.max(0,target.getBoundingClientRect().top+window.scrollY-anchorOffset(target)),{lerp:0,duration:.85,easing:ease});},
           pause:()=>{interrupt();lenis.stop();},
           resume:()=>{if(!document.querySelector('dialog[open]')){lenis.start();lenis.resize();interrupt();}},
           resize
         };
         scrollingCleanup=()=>{cancelSettle();offScroll();offVirtual();document.removeEventListener('keydown',key,true);document.removeEventListener('pointerdown',interrupt);document.removeEventListener('touchstart',interrupt);removeEventListener('resize',resize);lenis.destroy();smoothScroll=null;};
       }
-      const buttons=$$('.hero-actions .button:not([disabled]),.header-actions .button:not([disabled]),.download-card a.button,.simple-download a.button');
+      const buttons=$$('.hero-actions .button:not([disabled]),.download-card a.button,.simple-download a.button');
       const releases=[];
       buttons.forEach(button=>{
         button.setAttribute('data-magnetic','');
