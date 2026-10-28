@@ -2,7 +2,7 @@
 
 A playable, offline Game Boy Advance emulator for Windows and Android, built around mGBA. The interface uses the original Split K identity, locally bundled Inter typography, neutral colors, and light, dark, and system appearances.
 
-Version 0.4.2 includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
+Version 0.4.3 adds an assembling K startup splash on Windows and Android, with saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
 
 ## Use the app
 
