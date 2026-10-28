@@ -13,3 +13,5 @@ Matching transparent PNG exports are included. The symbols and app icon are 512 
 Use the symbol at 24 px or larger. Keep clear space around it equal to the stem width. Invert the mark for dark surfaces; do not stretch it or close the gaps.
 
 The interface uses neutral black, white, and gray. Primary buttons invert between light and dark appearances. Artwork may keep its original color or use the optional monochrome treatment.
+
+The Android launcher uses `../android/koki-gba-launcher.svg`, which adds a small outlined GBA label. Regenerate its legacy, adaptive, and themed resources with `node scripts/generate-android-icons.cjs`. The shared brand and Windows icon stay unchanged; `--include-windows` also regenerates the Windows ICO.

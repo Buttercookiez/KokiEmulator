@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp"
-    android:viewportWidth="108" android:viewportHeight="108">
-    <group android:translateX="10.8" android:translateY="10.8" android:scaleX="1.35" android:scaleY="1.35">
-        <path android:fillColor="#FFFFFF" android:pathData="M14,12H19Q21,12 21,14V50Q21,52 19,52H14Q12,52 12,50V14Q12,12 14,12Z"/>
-        <path android:fillColor="#FFFFFF" android:pathData="M27,24L39,12H52L34,30H27Z"/>
-        <path android:fillColor="#FFFFFF" android:pathData="M27,34H34L52,52H39L27,40Z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="18.16" android:translateY="18.16" android:scaleX="1.12" android:scaleY="1.12">
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M14.7 10H18.95Q20.65 10 20.65 11.7V42.3Q20.65 44 18.95 44H14.7Q13 44 13 42.3V11.7Q13 10 14.7 10Z"/>
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M25.75 20.2L35.95 10H47L31.7 25.3H25.75Z"/>
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M25.75 28.7H31.7L47 44H35.95L25.75 33.8Z"/>
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M39.2 47.5H35.8Q35 47.5 35 48.3V52.2Q35 53 35.8 53H39.2V49.9H37.2V50.8H38.2V52H36V48.5H39.2Z"/>
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M40.7 47.5H43.6Q45 47.5 45 49Q45 49.9 44.2 50.1Q45.2 50.3 45.2 51.4Q45.2 53 43.6 53H40.7Z M41.7 48.4V49.7H43.5Q44 49.7 44 49.05Q44 48.4 43.5 48.4Z M41.7 50.6V52.1H43.5Q44.2 52.1 44.2 51.35Q44.2 50.6 43.5 50.6Z"/>
+        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="M46.3 53L48.1 47.5H49.5L51.3 53H50.2L49.8 51.6H47.8L47.4 53Z M48.1 50.7H49.5L48.8 48.5Z"/>
     </group>
 </vector>

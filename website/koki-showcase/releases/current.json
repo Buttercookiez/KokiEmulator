@@ -12,8 +12,8 @@
     },
     {
       "file": "koki-emulator-android-debug.apk",
-      "bytes": 1391919,
-      "sha256": "bc32b47a7d8ce30e4074d21f6f9fcac60578887aa10523cbbc40ead697d071e7",
+      "bytes": 1394867,
+      "sha256": "a3efb36ff51da94a9dc5ef29fced621db309174b42e35b4053e819f5556492c3",
       "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/v0.4.2/koki-emulator-android-debug.apk"
     }
   ]

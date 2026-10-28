@@ -6,7 +6,7 @@ const path = require('node:path');
   const root = path.resolve(__dirname, '..');
   const brand = path.join(root, 'assets', 'brand');
   const res = path.join(root, 'android', 'app', 'src', 'main', 'res');
-  const icon = await fs.readFile(path.join(brand, 'koki-app-icon.svg'), 'utf8');
+  const icon = await fs.readFile(path.join(root, 'assets', 'android', 'koki-gba-launcher.svg'), 'utf8');
   const round = icon.replace('<rect width="64" height="64" rx="16" fill="#161616"/>', '<circle cx="32" cy="32" r="32" fill="#161616"/>');
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
@@ -22,8 +22,27 @@ const path = require('node:path');
       await fs.writeFile(path.join(destination, 'ic_launcher.png'), await render(icon, size));
       await fs.writeFile(path.join(destination, 'ic_launcher_round.png'), await render(round, size));
     }
+    // Derive adaptive + themed foregrounds from the same outlined artwork.
+    const paths = await page.evaluate(svg => {
+      const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+      return [...document.querySelectorAll('path')].map(element => element.getAttribute('d'));
+    }, icon);
+    const foreground = '<?xml version="1.0" encoding="utf-8"?>\n' +
+      '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">\n' +
+      '    <group android:translateX="18.16" android:translateY="18.16" android:scaleX="1.12" android:scaleY="1.12">\n' +
+      paths.map(d => '        <path android:fillColor="#FFFFFF" android:fillType="evenOdd" android:pathData="' + d + '"/>').join('\n') +
+      '\n    </group>\n</vector>\n';
+    await fs.writeFile(path.join(res, 'drawable', 'koki_launcher_foreground.xml'), foreground);
+    const preview = path.join(root, '.cache', 'android-icon');
+    await fs.mkdir(preview, { recursive: true });
+    await fs.writeFile(path.join(preview, 'koki-gba-icon.png'), await render(icon, 512));
+    await fs.writeFile(path.join(preview, 'koki-gba-icon-round.png'), await render(round, 192));
+    console.log('Generated GBA Android launcher icons, adaptive/themed foreground, and previews.');
+    // Windows continues to use the shared Koki mark; opt in to its regeneration.
+    if (!process.argv.includes('--include-windows')) return;
+    const windowsIcon = await fs.readFile(path.join(brand, 'koki-app-icon.svg'), 'utf8');
     const images = [];
-    for (const size of [16, 24, 32, 48, 64, 128, 256]) images.push({ size, bytes: await render(icon, size) });
+    for (const size of [16, 24, 32, 48, 64, 128, 256]) images.push({ size, bytes: await render(windowsIcon, size) });
     const directory = Buffer.alloc(6 + images.length * 16);
     directory.writeUInt16LE(1, 2);
     directory.writeUInt16LE(images.length, 4);
@@ -39,6 +58,6 @@ const path = require('node:path');
       offset += image.bytes.length;
     });
     await fs.writeFile(path.join(brand, 'koki-app-icon.ico'), Buffer.concat([directory, ...images.map((image) => image.bytes)]));
-    console.log('Generated legacy Android launcher icons and a multi-resolution Windows ICO from the original SVG.');
+    console.log('Generated a multi-resolution Windows ICO from the shared Koki SVG.');
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });
