@@ -54,7 +54,7 @@ export interface Settings {
 export type GameProfile = Partial<Pick<Settings, 'speed' | 'filter' | 'controls' | 'dsControls' | 'touchLayouts' | 'touchOpacity' | 'gameScreen' | 'turbo' | 'touchVibration'>>;
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system', lightColor: 'monochrome', darkColor: 'monochrome', artworkColor: true, volume: 0.7, speed: 1,
-  autoResume: true, rewindSeconds: 10, touchOpacity: 0.75, touchLayouts: normalizeTouchLayouts(undefined), gameScreen: normalizeScreen(IS_NDS ? {scale:.7,position:'top'} : undefined), turbo: normalizeTurbo(undefined), touchVibration: false, filter: 'pixel', touchControls: true,
+  autoResume: true, rewindSeconds: IS_NDS ? 0 : 10, touchOpacity: 0.75, touchLayouts: normalizeTouchLayouts(undefined), gameScreen: normalizeScreen(undefined), turbo: normalizeTurbo(undefined), touchVibration: false, filter: 'pixel', touchControls: true,
   controls: { ...DEFAULT_CONTROLS },
 };
 export interface NativeStorage {

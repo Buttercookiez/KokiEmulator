@@ -15,5 +15,6 @@ export function inspectRom(bytes: Uint8Array, fileName: string): { title: string
   return { title: (friendlyName || headerTitle || 'Untitled game').slice(0, 150), code };
 }
 export async function romHash(bytes: Uint8Array): Promise<string> {
-  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes.slice().buffer)), byte => byte.toString(16).padStart(2, '0')).join('');
+  const data = bytes.buffer instanceof ArrayBuffer ? new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength) : bytes.slice();
+  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)), byte => byte.toString(16).padStart(2, '0')).join('');
 }

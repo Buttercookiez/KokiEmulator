@@ -244,7 +244,6 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     if (next.length) touchButtons.current.set(pointer, next); else touchButtons.current.delete(pointer);
     new Set([...previous, ...next]).forEach(syncButton); setTouchCount(touchButtons.current.size);
     if (next.length && next.some(button => !previous.includes(button)) && currentSettings.current.touchVibration) touchFeedback();
-    revealControls();
   }
   function saveTouchPreferences(patch: Partial<Settings>, scope: 'game' | 'global') {
     if (scope === 'game') { onProfileSettings(patch); if (!settings.touchControls) onSettings({touchControls:true}); }
@@ -255,15 +254,15 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
 
   const gamePicture = previewScreen ?? settings.gameScreen;
   const picturePosition = IS_NDS && !mobile ? 'center' : gamePicture.position;
-  const dsOptions = IS_NDS && <div className="nds-screen-options"><Select aria-label="DS screen layout" value={dsLayout} onChange={v=>{setDsLayout(v as DsLayout);onSettings({dsLayout:v as DsLayout});}} options={[{value:"vertical",label:"Stacked screens"},{value:"horizontal",label:"Side by side"},{value:"bottom",label:"Touchscreen only"}]} /><button className="player-control" onClick={()=>{setDsSwap(v=>!v);onSettings({dsSwap:!dsSwap});}} aria-pressed={dsSwap}>Swap screens</button><span>X/Y keys in Settings · Touch the lower screen</span></div>;
-  return <div ref={shell} className="player-shell immersive-player" style={{'--game-screen-scale': (gamePicture.scale * 100) + '%', '--game-screen-position': picturePosition, '--game-screen-align': picturePosition === 'top' ? 'flex-start' : picturePosition === 'bottom' ? 'flex-end' : 'center'} as CSSProperties} data-mobile={mobile} data-controls-visible={controlsVisible} data-player-state={error ? 'error' : !ready ? 'loading' : paused ? 'paused' : 'running'} role="dialog" aria-modal="true" aria-label={`${game.title} player`}
-    onPointerMove={revealControls} onPointerDownCapture={() => { keyboardNavigation.current = false; revealControls(); }}
+  const dsOptions = IS_NDS && <div className="nds-screen-options" data-player-chrome inert={!controlsVisible || editingTouch} aria-hidden={!controlsVisible || editingTouch}><Select aria-label="DS screen layout" value={dsLayout} onChange={v=>{setDsLayout(v as DsLayout);onSettings({dsLayout:v as DsLayout});}} options={[{value:"vertical",label:"Stacked screens"},{value:"horizontal",label:"Side by side"},{value:"bottom",label:"Touchscreen only"}]} /><button className="player-control" onClick={()=>{setDsSwap(v=>!v);onSettings({dsSwap:!dsSwap});}} aria-pressed={dsSwap} aria-label="Swap screens">{mobile ? "Swap" : "Swap screens"}</button><span className="nds-screen-hint">X/Y keys in Settings · Touch the lower screen</span></div>;
+  return <div ref={shell} className="player-shell immersive-player" style={{'--game-screen-scale': (gamePicture.scale * 100) + '%', '--game-screen-position': picturePosition, '--game-screen-align': picturePosition === 'top' ? 'flex-start' : picturePosition === 'bottom' ? 'flex-end' : 'center'} as CSSProperties} data-mobile={mobile} data-system={IS_NDS ? "nds" : "gba"} data-ds-layout={dsLayout} data-touch-controls={showTouch && settings.touchControls} data-controls-visible={controlsVisible} data-player-state={error ? 'error' : !ready ? 'loading' : paused ? 'paused' : 'running'} role="dialog" aria-modal="true" aria-label={`${game.title} player`}
+    onPointerMove={event => { if (event.pointerType !== "touch") revealControls(); }} onPointerDownCapture={() => { keyboardNavigation.current = false; revealControls(); }}
     onFocusCapture={() => { updateControlFocus(); revealControls(); }} onBlurCapture={() => { queueMicrotask(updateControlFocus); }}>
     <header className="player-header" data-player-chrome inert={mobile || !controlsVisible} aria-hidden={mobile || !controlsVisible}>
       <div className="player-heading"><button className="icon-button" onClick={() => void closePlayer()} disabled={closing} aria-label="Save and return to library">{closing ? <LoaderCircle size={17} className="spinner" /> : <ArrowLeft size={18} />}</button><div><h2>{game.title}</h2></div></div>
       <div className="player-header-actions"><div className="player-secondary-tools"><button className={`icon-button ${showTouch ? 'active' : ''}`} onClick={() => { setShowTouch(value => !value); finishPointerAction(); }} aria-label="Toggle on-screen controls" aria-pressed={showTouch}><Gamepad2 size={18} /></button><button className="icon-button" disabled={!ready || busy} onClick={() => void job(async () => { const blob = await emulator.current!.screenshot(); await downloadBlob(blob, `${game.title}-screenshot.png`); announce('Screenshot exported'); }).finally(finishPointerAction)} aria-label="Export screenshot"><Camera size={18} /></button></div><button className="icon-button" onClick={() => void toggleFullscreen()} aria-label="Toggle fullscreen"><Expand size={17} /></button></div>
     </header>
-    {!mobile && dsOptions}
+    {dsOptions}
     <div className="player-screen-area"><div className={`player-screen-wrap filter-${settings.filter}`}><canvas ref={canvas} width={240} height={160} tabIndex={0} onPointerDown={focusGame} data-system={IS_NDS ? "nds" : "gba"} aria-label={`${game.title} game screen`} aria-describedby="player-keyboard" /></div>
       {!ready && !error && <div className="player-message"><LoaderCircle className="spinner" size={26} /><h3>Loading game</h3></div>}
       {error && <div className="player-message"><Gamepad2 size={28} /><h3>Couldn’t start this game</h3><p>{error}</p><div className="player-error-actions"><button className="button" onClick={() => void closePlayer()}>Return to library</button></div></div>}
@@ -274,7 +273,6 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     {mobile && !editingTouch && <button className="mobile-game-menu-toggle" data-player-chrome aria-label={menuOpen ? 'Close game menu' : 'Open game menu'} aria-expanded={menuOpen} aria-controls="mobile-game-menu" onClick={() => { releaseControls(); setMenuOpen(value => !value); revealControls(); }}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>}
     {mobile && menuOpen && <button className="mobile-game-menu-dismiss" aria-label="Dismiss game menu" onClick={() => { setMenuOpen(false); focusGame(); }} />}
     <div id="mobile-game-menu" className="player-bottom-chrome" data-menu-open={menuOpen} data-player-chrome inert={mobile ? !menuOpen : !controlsVisible} aria-hidden={mobile ? !menuOpen : !controlsVisible}>
-      {mobile && dsOptions}
       {mobile && <div className="mobile-game-menu-heading"><strong>{game.title}</strong><span>{busy ? 'Saving…' : savedAt ? 'Saved on this device' : 'Game menu'}</span></div>}
       {mobile && <div className="mobile-game-tools">
         <button className="player-control" disabled={closing} onClick={() => void closePlayer()} aria-label="Save and return to library"><ArrowLeft size={18} />Library</button>

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const memory = vi.hoisted(() => ({ files: new Map<string, Blob>(), rejectMove: false, rejectAppend: false, shortRead: false, maxRead: 0, maxWrite: 0 }));
-vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: () => true } }));
+vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: () => true, getPlatform: () => 'android', convertFileSrc: (uri: string) => uri.replace('file://', 'https://localhost/_capacitor_file_/') } }));
 vi.mock('@capacitor/filesystem', () => ({
   Directory: { Data: 'DATA', Cache: 'CACHE' },
   Filesystem: {
@@ -79,5 +79,36 @@ describe('bounded Android binary transfers', () => {
     await exportFile(new Blob([new Uint8Array(600001)]), 'backup.zip');
     expect(memory.files.get('exports/backup.zip')?.size).toBe(600001);
     expect(memory.maxWrite).toBe(256 * 1024); expect(Share.share).toHaveBeenCalledWith(expect.objectContaining({ files: ['file://exports/backup.zip'] }));
+  });
+});
+
+
+describe('Android streamed ROM reads', () => {
+  it('streams a local ROM without any base64 read calls', async () => {
+    const { Filesystem } = await import('@capacitor/filesystem');
+    const bytes = new Uint8Array(2 * 1024 * 1024 + 7); bytes[bytes.length - 1] = 91;
+    memory.files.set('library/roms/fast.nds', new Blob([bytes]));
+    const fetchMock = vi.fn(async () => new Response(new Blob([bytes]).stream()));
+    vi.stubGlobal('location', new URL('https://localhost'));
+    vi.stubGlobal('fetch', fetchMock); vi.mocked(Filesystem.readFile).mockClear();
+    try {
+      const restored = await readFile('roms/fast.nds');
+      expect(Buffer.from(restored!).equals(Buffer.from(bytes))).toBe(true);
+      expect(fetchMock.mock.calls.length).toBe(1); expect(Filesystem.readFile).not.toHaveBeenCalled();
+    } finally { vi.unstubAllGlobals(); }
+  });
+  it('rejects truncated streamed data rather than loading a corrupt ROM', async () => {
+    memory.files.set('library/roms/short.nds', new Blob([new Uint8Array(1024 * 1024)]));
+    vi.stubGlobal('location', new URL('https://localhost'));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array(10))));
+    try { await expect(readFile('roms/short.nds')).rejects.toThrow('incomplete'); }
+    finally { vi.unstubAllGlobals(); }
+  });
+  it('falls back to bounded reads when the local file route is unavailable', async () => {
+    memory.files.set('library/roms/fallback.nds', new Blob([new Uint8Array(1024 * 1024 + 3)]));
+    vi.stubGlobal('location', new URL('https://localhost'));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, {status:404})));
+    try { expect((await readFile('roms/fallback.nds'))?.length).toBe(1024 * 1024 + 3); expect(memory.maxRead).toBe(256 * 1024); }
+    finally { vi.unstubAllGlobals(); }
   });
 });

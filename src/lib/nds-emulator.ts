@@ -51,7 +51,7 @@ export class NdsEmulator {
     private turbo = normalizeTurbo(undefined);
     private audio: EmulatorAudio | null = null;
     private audioPtr = 0;
-    private rom = new Uint8Array();
+    private rom: Uint8Array = new Uint8Array();
     private history: Uint8Array[] = [];
     private rewind = 0;
     private rewinding = false;
@@ -97,7 +97,7 @@ export class NdsEmulator {
         }
         if (this.dead)
             throw Error('The DS player closed while loading.');
-        this.rom = rom.slice();
+        this.rom = rom;
         this.loadRom(save);
         if (state?.length)
             this.loadState(state);
@@ -161,7 +161,7 @@ export class NdsEmulator {
             this.core._free(this.audioPtr);
         if (this.instance)
             this.core._koki_destroy(this.instance);
-    } this.instance = 0; this.core = null; this.history = []; }
+    } this.instance = 0; this.core = null; this.rom = new Uint8Array(); this.image = null; this.history = []; }
     private pointer = (event: PointerEvent) => { if (!this.loaded || !this.running)
         return; const end = ['pointerup', 'pointercancel', 'lostpointercapture'].includes(event.type); if (this.pen !== null && this.pen !== event.pointerId)
         return; if (event.type === 'pointerdown') {
@@ -208,8 +208,9 @@ export class NdsEmulator {
                     mask |= 128;
             }
             this.core._koki_set_key_mask(this.instance, (~turboMask(mask, this.turbo, now)) & 4095);
-            const due = Math.min(4, Math.floor(this.accrued));
-            this.accrued = Math.min(4, this.accrued - due);
+            const due = Math.min(2, Math.floor(this.accrued));
+            const budgetStart = performance.now();
+            this.accrued = Math.min(1, this.accrued - due);
             for (let i = 0; i < due; i++) {
                 if (this.rewinding) {
                     const s = this.history.pop();
@@ -219,10 +220,10 @@ export class NdsEmulator {
                 else {
                     this.core._koki_run_frame(this.instance);
                     this.frame++;
-                    if (this.rewind && this.frame % 30 === 0) {
+                    if (this.rewind && this.frame % 60 === 0) {
                         const s = this.rawState();
                         this.history.push(s);
-                        const max = Math.min(this.rewind * 2, Math.floor(32 * 1024 * 1024 / s.length));
+                        const max = Math.min(this.rewind, Math.floor(32 * 1024 * 1024 / s.length));
                         if (this.history.length > max)
                             this.history.splice(0, this.history.length - max);
                     }
@@ -233,11 +234,13 @@ export class NdsEmulator {
                     this.audio.push(this.core.HEAP16.slice(this.audioPtr >> 1, (this.audioPtr >> 1) + n * 2));
                 }
                 this.statsFrames++;
+                // Do not compound a slow frame into four consecutive blocking frames.
+                if (performance.now() - budgetStart >= 24) break;
             }
             if (due)
                 this.render();
             if (now - this.lastStats >= 1000) {
-                this.options.onStats?.({ fps: this.statsFrames * 1000 / (now - this.lastStats), rewindSeconds: this.history.length / 2 });
+                this.options.onStats?.({ fps: this.statsFrames * 1000 / (now - this.lastStats), rewindSeconds: this.history.length });
                 this.statsFrames = 0;
                 this.lastStats = now;
             }

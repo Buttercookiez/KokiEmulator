@@ -1,0 +1,29 @@
+import { describe, expect, it, vi } from 'vitest';
+vi.mock('../platform', async importOriginal => ({...await importOriginal<typeof import('../platform')>(), IS_NDS:true}));
+const files = vi.hoisted(() => new Map<string, Uint8Array>());
+vi.mock('./storage', () => ({readFile:async (path:string)=>files.get(path)??null,writeFile:async(path:string,bytes:Uint8Array)=>{files.set(path,bytes);},removeFile:async()=>{},exportFile:async()=>{}}));
+import { DEFAULT_SETTINGS } from '../types';
+import { defaultTouchLayout } from './touch-layout';
+import { legacyNdsTouchLayout, upgradeNdsPlayerDefaults } from './nds-player-defaults';
+describe('DS mobile defaults migration', () => {
+ it('runs once and allows rewind to be re-enabled on a later launch', async () => {
+  const old={...structuredClone(DEFAULT_SETTINGS),rewindSeconds:10,gameScreen:{scale:.7,position:'top'},touchLayouts:{portrait:legacyNdsTouchLayout(),landscape:legacyNdsTouchLayout(true)}};
+  files.set('library.json',new TextEncoder().encode(JSON.stringify({version:1,games:[],snapshots:[],settings:old})));
+  vi.resetModules();let lib=await import('./library');const settings=await lib.getSettings();expect(settings.rewindSeconds).toBe(0);
+  await lib.saveSettings({...settings,rewindSeconds:10});
+  vi.resetModules();lib=await import('./library');expect((await lib.getSettings()).rewindSeconds).toBe(10);
+ });
+ it('updates stock controls and old screen framing with rewind disabled', () => {
+  const old = {...structuredClone(DEFAULT_SETTINGS), rewindSeconds:10, gameScreen:{scale:.7,position:'top' as const}, touchLayouts:{portrait:legacyNdsTouchLayout(),landscape:legacyNdsTouchLayout(true)}};
+  const result=upgradeNdsPlayerDefaults(old);
+  expect(result.touchLayouts.portrait).toEqual(defaultTouchLayout()); expect(result.touchLayouts.landscape).toEqual(defaultTouchLayout(true));
+  expect(result.rewindSeconds).toBe(0); expect(result.gameScreen).toEqual({scale:1,position:'center'});
+  expect(old.rewindSeconds).toBe(10);
+ });
+ it('preserves edited controls, custom framing and a custom rewind duration', () => {
+  const old={...structuredClone(DEFAULT_SETTINGS),rewindSeconds:5,gameScreen:{scale:.8,position:'bottom' as const},touchLayouts:{portrait:legacyNdsTouchLayout(),landscape:legacyNdsTouchLayout(true)}};
+  old.touchLayouts.landscape.a.x=.31;
+  const result=upgradeNdsPlayerDefaults(old);
+  expect(result.touchLayouts.landscape).toEqual(old.touchLayouts.landscape); expect(result.gameScreen).toEqual(old.gameScreen); expect(result.rewindSeconds).toBe(5);
+ });
+});

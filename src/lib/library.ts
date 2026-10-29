@@ -9,8 +9,9 @@ import { normalizeControls } from './controls';
 import { normalizeGameProfile } from './profiles';
 import { normalizeTouchLayouts } from './touch-layout';
 import { normalizeScreen, normalizeTurbo } from './mobile-play';
+import { upgradeNdsPlayerDefaults } from './nds-player-defaults';
 
-interface LibraryIndex { ndsEngine?: string; version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
+interface LibraryIndex { ndsPlayerDefaults?: number; ndsEngine?: string; version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
 const MAX_BACKUP = 512 * 1024 * 1024;
 const INDEX = 'library.json';
 const romPath = (id: string) => `roms/${id}.${ROM_EXTENSION}`;
@@ -27,8 +28,8 @@ function normalizeCoverPreference(game: Game) { if (game.coverHidden !== true) d
 async function loadIndex(): Promise<LibraryIndex> {
   if (cached) return cached;
   const bytes = await readFile(INDEX);
-  if (!bytes) return cached = { version: 1, games: [], snapshots: [], settings: clone(DEFAULT_SETTINGS) };
-  try { const data = JSON.parse(strFromU8(bytes)) as LibraryIndex; if (data.version !== 1 || !Array.isArray(data.games) || !Array.isArray(data.snapshots)) throw new Error(); data.settings = normalizeSettings(data.settings); data.games.forEach(normalizeCoverPreference); return cached = data; }
+  if (!bytes) return cached = { ...(IS_NDS ? {ndsPlayerDefaults:2} : {}), version: 1, games: [], snapshots: [], settings: clone(DEFAULT_SETTINGS) };
+  try { const data = JSON.parse(strFromU8(bytes)) as LibraryIndex; if (data.version !== 1 || !Array.isArray(data.games) || !Array.isArray(data.snapshots)) throw new Error(); data.settings = normalizeSettings(data.settings); if (IS_NDS && data.ndsPlayerDefaults !== 2) { data.settings = upgradeNdsPlayerDefaults(data.settings); data.ndsPlayerDefaults = 2; } data.games.forEach(normalizeCoverPreference); return cached = data; }
   catch { throw new Error('Your library index could not be read. Restore a Koki backup to recover it; your game files have not been removed.'); }
 }
 function normalizeSettings(value: Partial<Settings> = {}): Settings {
@@ -39,7 +40,7 @@ function normalizeSettings(value: Partial<Settings> = {}): Settings {
     lightColor: normalizeThemeColor(value.lightColor), darkColor: normalizeThemeColor(value.darkColor),
     filter: ['pixel', 'smooth', 'lcd'].includes(value.filter ?? '') ? value.filter! : defaults.filter,
     volume: number(value.volume, defaults.volume, 0, 1), speed: number(value.speed, 1, 0.5, 4),
-    rewindSeconds: number(value.rewindSeconds, 10, 0, 20), touchOpacity: number(value.touchOpacity, 0.75, 0.2, 1),
+    rewindSeconds: number(value.rewindSeconds, defaults.rewindSeconds, 0, 20), touchOpacity: number(value.touchOpacity, 0.75, 0.2, 1),
     controls: normalizeControls(value.controls),
     ...(IS_NDS ? {dsLayout: ['vertical','horizontal','bottom'].includes(value.dsLayout ?? '') ? value.dsLayout : 'vertical', dsSwap:value.dsSwap===true, dsControls:{x:typeof value.dsControls?.x === 'string' ? value.dsControls.x.slice(0,40) : 'KeyI',y:typeof value.dsControls?.y === 'string' ? value.dsControls.y.slice(0,40) : 'KeyU'}} : {}),
     touchLayouts: normalizeTouchLayouts(value.touchLayouts),

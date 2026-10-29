@@ -20,6 +20,37 @@ const NATIVE_CHUNK_SIZE = 256 * 1024;
 async function readNativeFile(path: string): Promise<Uint8Array> {
   const { size } = await Filesystem.stat({ directory: Directory.Data, path });
   if (!Number.isSafeInteger(size) || size < 0) throw new Error('The saved file size could not be read.');
+  // Android's local file route streams an InputStream directly to WebView.
+  // Large ROM reads avoid hundreds of base64 bridge round trips and Java copies.
+  if (size >= 1024 * 1024 && Capacitor.getPlatform() === 'android' && typeof location !== 'undefined') {
+    let response: Response | undefined;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const { uri } = await Filesystem.getUri({ directory: Directory.Data, path });
+      const url = new URL(Capacitor.convertFileSrc(uri));
+      if (url.origin === location.origin && url.pathname.startsWith('/_capacitor_file_/')) {
+        response = await fetch(url.href, { signal: controller.signal, cache: 'no-store' });
+        if (!response.ok) response = undefined;
+      }
+    } catch { /* Older WebViews retain the bounded bridge fallback below. */ }
+    try {
+      if (response?.body) {
+        const bytes = new Uint8Array(size), reader = response.body.getReader();
+        let offset = 0;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (offset + value.length > size) throw new Error('The saved file size changed while loading.');
+            bytes.set(value, offset); offset += value.length;
+          }
+        } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+        if (offset !== size) throw new Error('The saved file is incomplete. Import it again or restore a backup.');
+        return bytes;
+      }
+    } finally { clearTimeout(timeout); }
+  }
   const bytes = new Uint8Array(size);
   for (let offset = 0; offset < size; offset += NATIVE_CHUNK_SIZE) {
     const length = Math.min(NATIVE_CHUNK_SIZE, size - offset);
