@@ -1,0 +1,37 @@
+{
+  "description": "Disable unused fast-memory mirrors and fault handler for Koki native JIT slow-memory build. Original files verified before patching.",
+  "patches": [
+    {
+      "file": "src/ARMJIT_Memory.cpp",
+      "sha256": "e4fc36e7c54adc0f5301a118c494288e9c2a9a84fef23de0cedbdacec354a8b5",
+      "edits": [
+        [
+          "bool ARMJIT_Memory::IsFastMemSupported()\n{",
+          "bool ARMJIT_Memory::IsFastMemSupported()\n{\n#ifdef KOKI_NDS_BOUNDED_MEMORY\n    PageSize = sysconf(_SC_PAGESIZE);\n    PageShift = __builtin_ctz(PageSize);\n    return false;\n#endif"
+        ],
+        [
+          "    ARMJIT_Global::Init();\n#if defined(__SWITCH__)",
+          "    ARMJIT_Global::Init();\n#ifdef KOKI_NDS_BOUNDED_MEMORY\n    // Koki uses the JIT slow-memory path. No mirrored 8 GB address space,\n    // shared-memory descriptor or signal handler is needed for this path.\n    PageSize = sysconf(_SC_PAGESIZE);\n    PageShift = __builtin_ctz(PageSize);\n    MemoryBase = static_cast<u8*>(mmap(nullptr, MemoryTotalSize,\n        PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0));\n    if (MemoryBase == MAP_FAILED) { MemoryBase = nullptr; throw std::bad_alloc(); }\n    FastMem9Start = nullptr;\n    FastMem7Start = nullptr;\n    return;\n#endif\n#if defined(__SWITCH__)"
+        ],
+        [
+          "ARMJIT_Memory::~ARMJIT_Memory() noexcept\n{",
+          "ARMJIT_Memory::~ARMJIT_Memory() noexcept\n{\n#ifdef KOKI_NDS_BOUNDED_MEMORY\n    if (MemoryBase) munmap(MemoryBase, MemoryTotalSize);\n    MemoryBase = nullptr;\n    ARMJIT_Global::DeInit();\n    return;\n#endif"
+        ]
+      ]
+    },
+    {
+      "file": "src/ARMJIT_Global.cpp",
+      "sha256": "d94b979988ee4d714c8c454018746acf471e0a7780cb1bc9b5ec1565e2d0b2e4",
+      "edits": [
+        [
+          "        ARMJIT_Memory::RegisterFaultHandler();",
+          "#ifndef KOKI_NDS_BOUNDED_MEMORY\n        ARMJIT_Memory::RegisterFaultHandler();\n#endif"
+        ],
+        [
+          "        ARMJIT_Memory::UnregisterFaultHandler();",
+          "#ifndef KOKI_NDS_BOUNDED_MEMORY\n        ARMJIT_Memory::UnregisterFaultHandler();\n#endif"
+        ]
+      ]
+    }
+  ]
+}

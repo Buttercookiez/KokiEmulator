@@ -1,6 +1,6 @@
 # NDS gameplay performance: findings and native Android proposal
 
-Status: investigation complete. Native backend implementation needs owner approval. Public app remains 0.1.4; the active core and release manifest are unchanged.
+Status: owner approved the native Android backend and GPL-3.0-or-later NDS distribution on 2026-10-29. Native integration is in progress; see ../NDS-NATIVE.md.
 
 ## Results
 
@@ -22,9 +22,9 @@ Initial pinned integration reference: rafaelvcaetano/melonDS-android at c42995ca
 
 The Android port documents 64-bit JIT and threaded rendering as performance features. This is a stronger candidate than another small WASM presentation change, but is not a full-speed guarantee for Zelda on this phone.
 
-## Approval needed
+## Owner approval
 
-Approve this native Android backend and GPL-3.0-compatible distribution/source licensing for the combined NDS app. Existing in-game saves need validation; old checkpoints remain accessible through the compatibility engine. The separately distributed GBA app is outside this licensing change.
+The owner explicitly approved this native Android backend and GPL-3.0-compatible distribution/source licensing for the combined NDS app. Existing in-game saves need validation; old checkpoints remain accessible through the compatibility engine. The separately distributed GBA app is outside this licensing change.
 
 ## Release gates
 
@@ -38,4 +38,4 @@ Approve this native Android backend and GPL-3.0-compatible distribution/source l
 
 ## Automatic approval review
 
-Automatic approval review rejected the combined engine/worker rewrite as an expansive compatibility-breaking change beyond the lag request. A narrower presentation-only experiment was subsequently allowed after baseline reproduction and checkpoint checks. The native engine and licensing decision remain pending explicit owner approval.
+Automatic approval review rejected the combined engine/worker rewrite as an expansive compatibility-breaking change beyond the lag request. A narrower presentation-only experiment was subsequently allowed after baseline reproduction and checkpoint checks. The owner subsequently explicitly approved the native engine and GPL-3.0 NDS distribution.

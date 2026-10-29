@@ -32,4 +32,8 @@ for (const item of manifest.artifacts)
 await fs.copyFile(path.join(root, 'engines/nds-manifest.json'), path.join(staged, 'vendor/nds/PROVENANCE.json'));
 await fs.copyFile(path.join(root,'engines/nds-source-manifest.json'),path.join(staged,'vendor/nds/SOURCE-MANIFEST.json'));
 await fs.copyFile(path.join(root,'docs/NDS-CORE.md'),path.join(staged,'vendor/nds/BUILDING.md'));
+await fs.mkdir(path.join(staged,'vendor/nds-native'),{recursive:true});
+await fs.cp(path.join(root,'licenses/nds-native'),path.join(staged,'vendor/nds-native'),{recursive:true});
+await fs.copyFile(path.join(root,'native/nds/manifest.json'),path.join(staged,'vendor/nds-native/PROVENANCE.json'));
+await fs.copyFile(path.join(root,'docs/NDS-NATIVE.md'),path.join(staged,'vendor/nds-native/BUILDING.md'));
 console.log('Pinned source-built SkyEmu DS core verified; no runtime downloads.');

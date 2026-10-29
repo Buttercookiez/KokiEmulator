@@ -1,4 +1,5 @@
-import { IS_NDS, NDS_ENGINE_ID, SYSTEM, ROM_EXTENSION, ROM_PATTERN, MAX_STATE_SIZE } from '../platform';
+import { Capacitor } from '@capacitor/core';
+import { IS_NDS, NDS_ENGINE_ID, NATIVE_NDS_ENGINE_ID, SYSTEM, ROM_EXTENSION, ROM_PATTERN, MAX_STATE_SIZE } from '../platform';
 import { unzipSync, zipSync, strFromU8, strToU8 } from 'fflate';
 import { DEFAULT_SETTINGS } from '../types';
 import type { Game, GameProfile, Settings, Snapshot } from '../types';
@@ -15,7 +16,7 @@ interface LibraryIndex { ndsPlayerDefaults?: number; ndsEngine?: string; version
 const MAX_BACKUP = 512 * 1024 * 1024;
 const INDEX = 'library.json';
 const romPath = (id: string) => `roms/${id}.${ROM_EXTENSION}`;
-const batteryPath = (id: string) => `saves/${id}.sav`;
+const batteryPath = (id: string, engine?: string) => `saves/${id}${engine === NATIVE_NDS_ENGINE_ID ? '.native' : ''}.sav`;
 const snapshotPath = (id: string) => `states/${id}.state`;
 let pending: Promise<unknown> = Promise.resolve();
 let cached: LibraryIndex | undefined;
@@ -42,7 +43,7 @@ function normalizeSettings(value: Partial<Settings> = {}): Settings {
     volume: number(value.volume, defaults.volume, 0, 1), speed: number(value.speed, 1, 0.5, 4),
     rewindSeconds: number(value.rewindSeconds, defaults.rewindSeconds, 0, 20), touchOpacity: number(value.touchOpacity, 0.75, 0.2, 1),
     controls: normalizeControls(value.controls),
-    ...(IS_NDS ? {dsLayout: ['vertical','horizontal','bottom'].includes(value.dsLayout ?? '') ? value.dsLayout : 'vertical', dsSwap:value.dsSwap===true, dsControls:{x:typeof value.dsControls?.x === 'string' ? value.dsControls.x.slice(0,40) : 'KeyI',y:typeof value.dsControls?.y === 'string' ? value.dsControls.y.slice(0,40) : 'KeyU'}} : {}),
+    ...(IS_NDS ? {dsEngine:value.dsEngine === 'compatibility'?'compatibility':'native',dsLayout: ['vertical','horizontal','bottom'].includes(value.dsLayout ?? '') ? value.dsLayout : 'vertical', dsSwap:value.dsSwap===true, dsControls:{x:typeof value.dsControls?.x === 'string' ? value.dsControls.x.slice(0,40) : 'KeyI',y:typeof value.dsControls?.y === 'string' ? value.dsControls.y.slice(0,40) : 'KeyU'}} : {}),
     touchLayouts: normalizeTouchLayouts(value.touchLayouts),
     gameScreen: normalizeScreen(value.gameScreen ?? defaults.gameScreen), turbo: normalizeTurbo(value.turbo), touchVibration: value.touchVibration === true,
     autoResume: typeof value.autoResume === 'boolean' ? value.autoResume : true,
@@ -128,7 +129,7 @@ export async function deleteGame(id: string): Promise<void> {
       const backup = await readFile(backupPath);
       if (backup) { const archived = JSON.parse(strFromU8(backup)) as LibraryIndex; archived.games = archived.games.filter(game => game.id !== id); archived.snapshots = archived.snapshots.filter(snapshot => snapshot.gameId !== id); await writeFile(backupPath, strToU8(JSON.stringify(archived))); }
     }
-    const snapshots = index.snapshots.filter(item => item.gameId === id); index.games = index.games.filter(item => item.id !== id); index.snapshots = index.snapshots.filter(item => item.gameId !== id); return [romPath(id), batteryPath(id), `saves/${id}.previous.sav`, ...(IS_NDS ? [`migrations/pre-0.1.1/${id}.sav`] : []), ...snapshots.map(item => snapshotPath(item.id))]; });
+    const snapshots = index.snapshots.filter(item => item.gameId === id); index.games = index.games.filter(item => item.id !== id); index.snapshots = index.snapshots.filter(item => item.gameId !== id); return [romPath(id), batteryPath(id), ...(IS_NDS ? [batteryPath(id,NATIVE_NDS_ENGINE_ID),`saves/${id}.native.previous.sav`] : []), `saves/${id}.previous.sav`, ...(IS_NDS ? [`migrations/pre-0.1.1/${id}.sav`] : []), ...snapshots.map(item => snapshotPath(item.id))]; });
   await Promise.all(paths.map(removeFile));
 }
 export async function prepareNdsEngine(): Promise<boolean> {
@@ -143,7 +144,7 @@ export async function prepareNdsEngine(): Promise<boolean> {
       if (save && !await readFile(backup)) await writeFile(backup, save);
     }
     let legacy = false;
-    for (const snapshot of index.snapshots) if (snapshot.engine !== NDS_ENGINE_ID) {
+    for (const snapshot of index.snapshots) if (snapshot.engine !== NDS_ENGINE_ID && snapshot.engine !== NATIVE_NDS_ENGINE_ID) {
       snapshot.engine ||= 'pilas-legacy'; snapshot.kind = 'backup';
       if (!snapshot.label.startsWith('Earlier DS engine: ')) snapshot.label = ('Earlier DS engine: ' + snapshot.label).slice(0, 100);
       legacy = true;
@@ -153,14 +154,14 @@ export async function prepareNdsEngine(): Promise<boolean> {
   });
 }
 export async function getSnapshots(gameId?: string): Promise<Snapshot[]> { return clone((await indexForRead()).snapshots.filter(item => !gameId || item.gameId === gameId).sort((a, b) => b.createdAt - a.createdAt)); }
-export async function createSnapshot(gameId: string, bytes: Uint8Array, options: { label: string; kind: Snapshot['kind']; thumbnail?: string }): Promise<Snapshot> {
+export async function createSnapshot(gameId: string, bytes: Uint8Array, options: { label: string; kind: Snapshot['kind']; thumbnail?: string; engine?: string }): Promise<Snapshot> {
   if (!bytes.length || bytes.length > MAX_STATE_SIZE) throw new Error('The emulator did not produce a valid snapshot.');
   const result = await transaction(async index => {
     if (!index.games.some(game => game.id === gameId)) throw new Error('The game is no longer in your library.');
-    const snapshot: Snapshot = { id: crypto.randomUUID(), gameId, label: options.label.trim().slice(0, 100) || 'Checkpoint', kind: options.kind, createdAt: Date.now(), thumbnail: options.thumbnail, ...(IS_NDS ? { engine: NDS_ENGINE_ID } : {}) };
+    const snapshot: Snapshot = { id: crypto.randomUUID(), gameId, label: options.label.trim().slice(0, 100) || 'Checkpoint', kind: options.kind, createdAt: Date.now(), thumbnail: options.thumbnail, ...(IS_NDS ? { engine: options.engine ?? NDS_ENGINE_ID } : {}) };
     await writeFile(snapshotPath(snapshot.id), bytes); index.snapshots.push(snapshot);
     const limit = options.kind === 'manual' ? 30 : 5;
-    const older = index.snapshots.filter(item => item.gameId === gameId && item.kind === options.kind && (!IS_NDS || item.engine === NDS_ENGINE_ID)).sort((a, b) => b.createdAt - a.createdAt).slice(limit);
+    const older = index.snapshots.filter(item => item.gameId === gameId && item.kind === options.kind && (!IS_NDS || item.engine === (options.engine ?? NDS_ENGINE_ID))).sort((a, b) => b.createdAt - a.createdAt).slice(limit);
     const remove = new Set(older.map(item => item.id)); index.snapshots = index.snapshots.filter(item => !remove.has(item.id));
     return { snapshot: clone(snapshot), stale: older.map(item => snapshotPath(item.id)) };
   });
@@ -171,17 +172,19 @@ export async function getSnapshotData(id: string): Promise<Uint8Array> {
   const bytes = await readFile(snapshotPath(id)); if (!bytes) throw new Error('The checkpoint file is missing.'); return bytes;
 }
 export async function deleteSnapshot(id: string): Promise<void> { await transaction(async index => { index.snapshots = index.snapshots.filter(item => item.id !== id); }); await removeFile(snapshotPath(id)); }
-export async function readBattery(gameId: string): Promise<Uint8Array | null> { await pending; return readFile(batteryPath(gameId)); }
-export async function writeBattery(gameId: string, bytes: Uint8Array): Promise<void> {
+export async function readBattery(gameId: string, engine?: string): Promise<Uint8Array | null> { await pending; return await readFile(batteryPath(gameId, engine)) ?? (engine === NATIVE_NDS_ENGINE_ID ? readFile(batteryPath(gameId)) : null); }
+export async function writeBattery(gameId: string, bytes: Uint8Array, engine?: string): Promise<void> {
   if (!bytes.length || bytes.length > (IS_NDS ? 8 : 1) * 1024 * 1024) throw new Error('Invalid game save data.');
-  await transaction(async index => { if (!index.games.some(game => game.id === gameId)) throw new Error('Game not found.'); const previous = await readFile(batteryPath(gameId)); if (previous) await writeFile(`saves/${gameId}.previous.sav`, previous); await writeFile(batteryPath(gameId), bytes); });
+  await transaction(async index => { if (!index.games.some(game => game.id === gameId)) throw new Error('Game not found.'); const previous = await readFile(batteryPath(gameId, engine)); if (previous) await writeFile(`saves/${gameId}${engine === NATIVE_NDS_ENGINE_ID ? ".native" : ""}.previous.sav`, previous); await writeFile(batteryPath(gameId, engine), bytes); });
 }
-export async function exportBattery(gameId: string): Promise<Blob | null> { const bytes = await readBattery(gameId); return bytes ? new Blob([bytes.slice().buffer], { type: 'application/octet-stream' }) : null; }
+async function preferredBatteryEngine(){const index=await indexForRead();return IS_NDS && Capacitor.getPlatform?.()==='android' && Capacitor.isPluginAvailable?.('NativeNds') && index.settings.dsEngine!=='compatibility' ? NATIVE_NDS_ENGINE_ID : undefined;}
+export async function exportBattery(gameId: string): Promise<Blob | null> { const bytes = await readBattery(gameId, await preferredBatteryEngine()); return bytes ? new Blob([bytes.slice().buffer], { type: 'application/octet-stream' }) : null; }
 export async function importBattery(gameId: string, file: File): Promise<void> {
-  if (file.size < 512 || file.size > (IS_NDS ? 8 : 1) * 1024 * 1024) throw new Error('Choose an ordinary .sav game save between 512 bytes and 1 MB.');
+  if (file.size < 512 || file.size > (IS_NDS ? 8 : 1) * 1024 * 1024) throw new Error(`Choose an ordinary .sav game save between 512 bytes and ${IS_NDS ? 8 : 1} MB.`);
   if (!/\.sav$/i.test(file.name)) throw new Error('Choose a .sav game save. My Boy! save states are not interchangeable.');
-  await writeBattery(gameId, new Uint8Array(await file.arrayBuffer()));
-  await transaction(async index => { for (const snapshot of index.snapshots) if (snapshot.gameId === gameId && snapshot.kind === 'auto') { snapshot.kind = 'backup'; snapshot.label = `Before save import: ${snapshot.label}`.slice(0, 100); } });
+  const engine=await preferredBatteryEngine();
+  await writeBattery(gameId, new Uint8Array(await file.arrayBuffer()), engine);
+  await transaction(async index => { for (const snapshot of index.snapshots) if (snapshot.gameId === gameId && snapshot.kind === 'auto' && (!IS_NDS || (snapshot.engine===NATIVE_NDS_ENGINE_ID)===(engine===NATIVE_NDS_ENGINE_ID))) { snapshot.kind = 'backup'; snapshot.label = `Before save import: ${snapshot.label}`.slice(0, 100); } });
 }
 export async function saveCover(gameId: string, file: File): Promise<void> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 8 * 1024 * 1024) throw new Error('Choose a PNG, JPEG or WebP image under 8 MB.');
@@ -192,14 +195,14 @@ export async function saveCover(gameId: string, file: File): Promise<void> {
 export async function exportLibrary(): Promise<Blob> {
   const index = clone(await indexForRead()); const entries: Record<string, Uint8Array> = { 'koki-library.json': strToU8(JSON.stringify({ format: (IS_NDS ? 'koki-nds-library' : 'koki-library'), ...index })) };
   let total = 0;
-  for (const game of index.games) for (const path of [romPath(game.id), batteryPath(game.id)]) { const bytes = await readFile(path); if (!bytes && path === romPath(game.id)) throw new Error(`The game file for ${game.title} is missing. Import it again before backing up.`); if (bytes) { total += bytes.length; if (total > MAX_BACKUP) throw new Error('This collection exceeds the 512 MB backup limit. Export game saves separately.'); entries[`data/${path}`] = bytes; } }
+  for (const game of index.games) for (const path of [romPath(game.id), batteryPath(game.id), ...(IS_NDS ? [batteryPath(game.id, NATIVE_NDS_ENGINE_ID)] : [])]) { const bytes = await readFile(path); if (!bytes && path === romPath(game.id)) throw new Error(`The game file for ${game.title} is missing. Import it again before backing up.`); if (bytes) { total += bytes.length; if (total > MAX_BACKUP) throw new Error('This collection exceeds the 512 MB backup limit. Export game saves separately.'); entries[`data/${path}`] = bytes; } }
   for (const snapshot of index.snapshots) { const bytes = await readFile(snapshotPath(snapshot.id)); if (!bytes) throw new Error(`Checkpoint ${snapshot.label} is missing. Remove that checkpoint before backing up.`); total += bytes.length; if (total > MAX_BACKUP) throw new Error('This backup exceeds 512 MB.'); entries[`data/${snapshotPath(snapshot.id)}`] = bytes; }
   const zip = zipSync(entries, { level: 1 }); return new Blob([zip.slice().buffer], { type: 'application/zip' });
 }
 export async function importLibrary(file: File): Promise<void> {
   if (file.size > MAX_BACKUP) throw new Error('Choose a Koki backup under 512 MB.');
   let expanded = 0;
-  const archive = unzipSync(new Uint8Array(await file.arrayBuffer()), { filter(entry) { expanded += entry.originalSize; if (expanded > MAX_BACKUP || entry.originalSize > 40 * 1024 * 1024) throw new Error('This backup exceeds the supported size.'); return true; } });
+  const archive = unzipSync(new Uint8Array(await file.arrayBuffer()), { filter(entry) { expanded += entry.originalSize; if (expanded > MAX_BACKUP || entry.originalSize > (IS_NDS ? 512 : 40) * 1024 * 1024) throw new Error('This backup exceeds the supported size.'); return true; } });
   if (!archive['koki-library.json']) throw new Error('This ZIP is not a Koki library backup.');
   let incoming: LibraryIndex & { format: string };
   try { incoming = JSON.parse(strFromU8(archive['koki-library.json'])); } catch { throw new Error('The backup manifest is damaged.'); }
@@ -213,6 +216,7 @@ export async function importLibrary(file: File): Promise<void> {
     if (!Number.isFinite(game.lastPlayed)) delete game.lastPlayed;
     for (const field of ['cover', 'screenshot'] as const) if (typeof game[field] !== 'string' || !/^data:image\/(png|jpeg|webp);base64,/.test(game[field]!) || game[field]!.length > 2 * 1024 * 1024) delete game[field];
     const battery = archive[`data/${batteryPath(game.id)}`]; if (battery && (battery.length < 512 || battery.length > 1024 * 1024)) throw new Error('The backup contains an invalid game save.');
+    const nativeSave = IS_NDS ? archive[`data/${batteryPath(game.id,NATIVE_NDS_ENGINE_ID)}`] : undefined; if (nativeSave && (nativeSave.length < 512 || nativeSave.length > 8*1024*1024)) throw new Error('The backup contains an invalid native save.');
   }
   const gameIds = new Set(incoming.games.map(game => game.id));
   for (const snapshot of incoming.snapshots) {
@@ -225,7 +229,8 @@ export async function importLibrary(file: File): Promise<void> {
   try { await loadIndex(); } catch { const damaged = await readFile(INDEX); if (damaged) await writeFile('library-recovery.json', damaged); cached = { version: 1, games: [], snapshots: [], settings: clone(DEFAULT_SETTINGS) }; }
   await transaction(async index => {
     for (const snapshot of incoming.snapshots) { const existing = index.snapshots.find(item => item.id === snapshot.id); if (existing && existing.gameId !== snapshot.gameId) throw new Error('A checkpoint identifier conflicts with an existing game.'); }
-    for (const game of incoming.games) { await writeFile(romPath(game.id), archive[`data/${romPath(game.id)}`]); const existing = index.games.find(item => item.id === game.id); if (!existing) index.games.push({ ...game, title: game.title.slice(0, 150) }); else { if (game.profile) existing.profile = clone(game.profile); else delete existing.profile; delete existing.cover; if (game.cover) existing.cover = game.cover; if (game.coverHidden === true) existing.coverHidden = true; else delete existing.coverHidden; } const save = archive[`data/${batteryPath(game.id)}`]; if (save) { const previous = await readFile(batteryPath(game.id)); if (previous) await writeFile(`saves/${game.id}.previous.sav`, previous); await writeFile(batteryPath(game.id), save); for (const snapshot of index.snapshots) if (snapshot.gameId === game.id && snapshot.kind === 'auto') { snapshot.kind = 'backup'; snapshot.label = `Before backup restore: ${snapshot.label}`.slice(0, 100); } } }
+    for (const game of incoming.games) { await writeFile(romPath(game.id), archive[`data/${romPath(game.id)}`]); const existing = index.games.find(item => item.id === game.id); if (!existing) index.games.push({ ...game, title: game.title.slice(0, 150) }); else { if (game.profile) existing.profile = clone(game.profile); else delete existing.profile; delete existing.cover; if (game.cover) existing.cover = game.cover; if (game.coverHidden === true) existing.coverHidden = true; else delete existing.coverHidden; } const save = archive[`data/${batteryPath(game.id)}`]; if (save) { const previous = await readFile(batteryPath(game.id)); if (previous) await writeFile(`saves/${game.id}.previous.sav`, previous); await writeFile(batteryPath(game.id), save); for (const snapshot of index.snapshots) if (snapshot.gameId === game.id && snapshot.kind === 'auto' && (!IS_NDS || snapshot.engine!==NATIVE_NDS_ENGINE_ID)) { snapshot.kind = 'backup'; snapshot.label = `Before backup restore: ${snapshot.label}`.slice(0, 100); } } }
+    if (IS_NDS) for (const game of incoming.games) { const path=batteryPath(game.id,NATIVE_NDS_ENGINE_ID),save=archive[`data/${path}`]; if(save){const previous=await readFile(path);if(previous)await writeFile(`saves/${game.id}.native.previous.sav`,previous);await writeFile(path,save);for(const snapshot of index.snapshots)if(snapshot.gameId===game.id&&snapshot.kind==='auto'&&snapshot.engine===NATIVE_NDS_ENGINE_ID){snapshot.kind='backup';snapshot.label=`Before backup restore: ${snapshot.label}`.slice(0,100);}} }
     for (const snapshot of incoming.snapshots) { const existing = index.snapshots.find(item => item.id === snapshot.id); await writeFile(snapshotPath(snapshot.id), archive[`data/${snapshotPath(snapshot.id)}`]); if (!existing) index.snapshots.push(snapshot); else Object.assign(existing, snapshot); }
     index.settings = settings;
   });

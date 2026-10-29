@@ -7,3 +7,5 @@ export const ROM_ACCEPT = IS_NDS ? '.nds,.srl,.zip,application/octet-stream' : '
 export const ROM_PATTERN = IS_NDS ? /\.(nds|srl)$/i : /\.(gba|bin)$/i;
 export const IMPORT_PATTERN = IS_NDS ? /\.(nds|srl|zip)$/i : /\.(gba|bin|zip)$/i;
 export const MAX_STATE_SIZE = (IS_NDS ? 64 : 2) * 1024 * 1024;
+
+export const NATIVE_NDS_ENGINE_ID = 'melonds-431ab4b-android-v1';

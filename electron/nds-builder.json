@@ -20,7 +20,10 @@
     "engines/nds-source-manifest.json",
     "engines/nds-core/**/*",
     "scripts/build-nds-core.mjs",
-    "docs/NDS-CORE.md"
+    "docs/NDS-CORE.md",
+    "LICENSE-NDS.txt",
+    "native/nds/manifest.json",
+    "docs/NDS-NATIVE.md"
   ],
   "win": {
     "target": [
@@ -29,7 +32,7 @@
     "icon": "assets/app-icons/koki-nds.ico"
   },
   "portable": {
-    "artifactName": "Koki-NDS-0.1.4-Windows.exe"
+    "artifactName": "Koki-NDS-0.2.0-Windows.exe"
   },
   "electronLanguages": [
     "en-US"
@@ -43,6 +46,7 @@
   ],
   "extraMetadata": {
     "kokiSystem": "nds",
-    "version": "0.1.4"
+    "version": "0.2.0",
+    "license": "GPL-3.0-or-later"
   }
 }

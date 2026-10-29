@@ -29,3 +29,9 @@
 .player-shell.immersive-player[data-mobile="true"] .nds-screen-options{width:250px;flex-wrap:nowrap;flex-direction:row;align-items:center}
 .player-shell.immersive-player[data-mobile="true"] .nds-screen-options .select-trigger{flex:1;min-width:0;width:auto;height:36px;min-height:36px;padding:7px 10px;font-size:11px}
 .player-shell.immersive-player[data-mobile="true"] .nds-screen-options .player-control{flex:0 0 auto;flex-direction:row;min-height:36px;height:36px;padding:6px 10px;line-height:1}
+/* The native texture renders below WebView; only the player overlays remain visible. */
+html[data-native-nds="true"],html[data-native-nds="true"] body,html[data-native-nds="true"] #root,html[data-native-nds="true"] .app{background:transparent!important}
+html[data-native-nds="true"] .app>.sidebar,html[data-native-nds="true"] .app>.main-shell{visibility:hidden}
+html[data-native-nds="true"] .player-shell.immersive-player,html[data-native-nds="true"] .player-screen-area,html[data-native-nds="true"] .player-screen-wrap,html[data-native-nds="true"] .player-screen-wrap canvas{background:transparent!important}
+
+html[data-native-nds="true"] .mobile-nav{visibility:hidden}

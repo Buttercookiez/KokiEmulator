@@ -13,3 +13,7 @@ No commercial games or Nintendo BIOS images are included. Four homebrew game scr
 ## NDS preview
 
 Koki NDS 0.1.1 uses SkyEmu DS, built from pinned MIT-licensed source. The open BIOS replacement is BSD-2-Clause; the ROM save database carries its own MIT notice from the melonDS team. Compiler/runtime notices are also included in licenses/nds/. The Koki bridge is MIT-licensed. See [NDS source and build notes](docs/NDS-CORE.md) and the offline license reader. The earlier binary-only port is not bundled in this release.
+
+## NDS 0.2.0 native Android
+
+Koki NDS is distributed under GPL-3.0-or-later; see LICENSE-NDS.txt. Android uses the pinned melonDS-android-lib core at 431ab4bd0003c4356e25fce89640ae1004579b9b, with JIT and threaded software rendering. FreeBIOS and generated firmware are used. Full corresponding source, bridge, build scripts and dependency manifests accompany the release. See docs/NDS-NATIVE.md. Native core GPL, teakra MIT and FatFs notices are retained in licenses/nds-native/ and in the offline license reader. SkyEmu compatibility and Windows components retain the licenses listed above.

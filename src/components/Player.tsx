@@ -1,4 +1,5 @@
-import { IS_NDS, NDS_ENGINE_ID } from '../platform';
+import { IS_NDS, NDS_ENGINE_ID, NATIVE_NDS_ENGINE_ID } from '../platform';
+import { NativeNdsEmulator, nativeNdsAvailable } from '../lib/nds-native';
 import { NdsEmulator, type DsLayout } from '../lib/nds-emulator';
 import type { EmulatorButton } from '../types';
 import './NdsPlayer.css';
@@ -32,6 +33,8 @@ function isEditingControl(event: KeyboardEvent) {
 }
 
 export function Player({ game, settings, initialSnapshot, skipAutoResume = false, registerCloseSave, onSettings, onProfileSettings, onClose, notify }: Props) {
+  const useNative = IS_NDS && nativeNdsAvailable() && (initialSnapshot ? initialSnapshot.engine === NATIVE_NDS_ENGINE_ID : settings.dsEngine !== 'compatibility');
+  const activeEngine = useNative ? NATIVE_NDS_ENGINE_ID : NDS_ENGINE_ID;
   const [dsLayout,setDsLayout] = useState<DsLayout>(()=> { const x=settings.dsLayout ?? localStorage.getItem('koki-nds-layout'); return x==='horizontal'||x==='bottom'?x:'vertical'; });
   const [dsSwap,setDsSwap] = useState(settings.dsSwap === true);
   const shell = useRef<HTMLDivElement>(null);
@@ -40,7 +43,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   const touchButtons = useRef(new Map<number, EmulatorButton[]>());
   const rewindPointers = useRef(new Set<number>());
   const rewindKey = useRef(false);
-  const emulator = useRef<GbaEmulator | NdsEmulator | null>(null);
+  const emulator = useRef<GbaEmulator | NdsEmulator | NativeNdsEmulator | null>(null);
   const currentSettings = useRef(settings); currentSettings.current = settings;
   const [ready, setReady] = useState(false); const [error, setError] = useState(''); const [paused, setPaused] = useState(false);
   const [busy, setBusy] = useState(false); const [closing, setClosing] = useState(false); const [stats, setStats] = useState({ fps: 0, rewindSeconds: 0 });
@@ -89,20 +92,20 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   function stopClock() { if (runningSince.current !== null) { played.current += (performance.now() - runningSince.current) / 1000; runningSince.current = null; } }
   function startClock() { if (runningSince.current === null) runningSince.current = performance.now(); }
   function playedSeconds() { return Math.round(game.playTime + played.current + (runningSince.current === null ? 0 : (performance.now() - runningSince.current) / 1000)); }
-  async function persistBattery() { const core = emulator.current; if (!core?.loaded) return; const bytes = core.exportSave(); if (bytes?.length) await writeBattery(game.id, bytes); await updateGame(game.id, { playTime: playedSeconds(), lastPlayed: Date.now() }); setSavedAt(Date.now()); }
+  async function persistBattery() { const core = emulator.current; if (!core?.loaded) return; const bytes = await core.exportSave(); if (bytes?.length) await writeBattery(game.id, bytes, activeEngine); await updateGame(game.id, { playTime: playedSeconds(), lastPlayed: Date.now() }); setSavedAt(Date.now()); }
   async function checkpoint(kind: Snapshot['kind'], name: string) {
     const core = emulator.current; if (!core?.loaded) throw new Error('The game is still loading.');
-    const bytes = core.saveState(); let thumbnail: string | undefined;
+    const bytes = await core.saveState(); let thumbnail: string | undefined;
     try { thumbnail = await dataUrl(await core.screenshot()); } catch { /* The state remains useful when a screenshot is unavailable. */ }
-    await createSnapshot(game.id, bytes, { label: name, kind, thumbnail });
+    await createSnapshot(game.id, bytes, { label: name, kind, thumbnail, engine: activeEngine });
     if (thumbnail) await updateGame(game.id, { screenshot: thumbnail });
     await persistBattery();
   }
   function queueSave(kind: Snapshot['kind'], name: string) { const next = saving.current.catch(() => undefined).then(() => checkpoint(kind, name)); saving.current = next; return next; }
   async function job(action: () => Promise<void>) { if (busy || closingRef.current) return; setBusy(true); try { await action(); } catch (failure) { notify(message(failure), true); announce(message(failure)); } finally { setBusy(false); } }
   async function quickSave() { await job(async () => { await queueSave('manual', 'Quick save'); announce('Checkpoint saved on this device'); }); finishPointerAction(); }
-  async function restore(snapshot: Snapshot) { await job(async () => { await queueSave('backup', 'Before restoring a checkpoint'); const bytes = await getSnapshotData(snapshot.id); emulator.current?.loadState(bytes); await persistBattery(); setShowSaves(false); emulator.current?.play(); setPaused(false); startClock(); requestAnimationFrame(focusGame); announce(`Restored ${snapshot.label}`); }); }
-  async function quickLoad() { const available = await getSnapshots(game.id); const latest = available.find(item => item.kind === 'manual') ?? available[0]; if (!latest) { announce('Create a checkpoint first'); return; } await restore(latest); }
+  async function restore(snapshot: Snapshot) { await job(async () => { await queueSave('backup', 'Before restoring a checkpoint'); const bytes = await getSnapshotData(snapshot.id); await emulator.current?.loadState(bytes); await persistBattery(); setShowSaves(false); emulator.current?.play(); setPaused(false); startClock(); requestAnimationFrame(focusGame); announce(`Restored ${snapshot.label}`); }); }
+  async function quickLoad() { const available = (await getSnapshots(game.id)).filter(s => !IS_NDS || s.engine === activeEngine); const latest = available.find(item => item.kind === 'manual') ?? available[0]; if (!latest) { announce('Create a checkpoint first'); return; } await restore(latest); }
   function togglePause() { const core = emulator.current; if (!core?.loaded) return; revealControls(); if (core.isRunning) { core.pause(); releaseControls(); setPaused(true); stopClock(); void queueSave('auto', 'Auto-save').catch(failure => notify(message(failure), true)); } else { core.play(); setPaused(false); startClock(); focusGame(); } }
   async function leaveFullscreen() { if (document.fullscreenElement?.contains(shell.current)) await document.exitFullscreen(); }
   async function toggleFullscreen() {
@@ -122,7 +125,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
       closingRef.current = false; setClosing(false); notify(`Could not save before closing: ${message(failure)}. Your game is paused so you can retry.`, true); announce('Save failed. Your game is still open; try saving again.');
     }
   }
-  async function showSaveHistory() { if (!ready || busy) return; setPendingRestore(null); emulator.current?.pause(); releaseControls(); stopClock(); setPaused(true); setSnapshots(await getSnapshots(game.id)); setShowSaves(true); }
+  async function showSaveHistory() { if (!ready || busy) return; setPendingRestore(null); emulator.current?.pause(); releaseControls(); stopClock(); setPaused(true); setSnapshots((await getSnapshots(game.id)).filter(s => !IS_NDS || s.engine === activeEngine)); setShowSaves(true); }
 
   const pinControls = menuOpen || editingTouch || !ready || Boolean(error) || paused || showSaves || busy || closing || rewinding || touchCount > 0 || controlFocused;
   useEffect(() => {
@@ -142,14 +145,15 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   }, []);
   useEffect(() => {
     let disposed = false;
-    const core = new (IS_NDS ? NdsEmulator : GbaEmulator)(canvas.current!, { onStats: value => { if (!disposed) setStats(value); }, onError: failure => { if (!disposed) { setError(failure.message); releaseControls(); stopClock(); } } });
+    const callbacks = { onStats: (value: {fps:number;rewindSeconds:number}) => { if (!disposed) setStats(value); }, onError: (failure: Error) => { if (!disposed) { setError(failure.message); releaseControls(); stopClock(); } } };
+    const core = useNative ? new NativeNdsEmulator(canvas.current!, callbacks, game.id) : new (IS_NDS ? NdsEmulator : GbaEmulator)(canvas.current!, callbacks);
     emulator.current = core;
     void (async () => {
       try {
         const legacyCheckpoints = IS_NDS ? await prepareNdsEngine() : false;
-        if (initialSnapshot && IS_NDS && initialSnapshot.engine !== NDS_ENGINE_ID) throw new Error('This checkpoint uses the earlier DS engine. It is kept in history; start the game from its in-game save.');
-        const [rom, battery, saves] = await Promise.all([getRom(game.id), readBattery(game.id), getSnapshots(game.id)]);
-        const resume = initialSnapshot ?? (!skipAutoResume && currentSettings.current.autoResume ? saves.find(item => item.kind === 'auto' && (!IS_NDS || item.engine === NDS_ENGINE_ID)) : undefined);
+        if (initialSnapshot && IS_NDS && initialSnapshot.engine !== activeEngine) throw new Error('This checkpoint uses the earlier DS engine. It is kept in history; start the game from its in-game save.');
+        const [rom, battery, saves] = await Promise.all([useNative ? Promise.resolve(new Uint8Array()) : getRom(game.id), readBattery(game.id, activeEngine), getSnapshots(game.id)]);
+        const resume = initialSnapshot ?? (!skipAutoResume && currentSettings.current.autoResume ? saves.find(item => item.kind === 'auto' && (!IS_NDS || item.engine === activeEngine)) : undefined);
         const state = resume ? await getSnapshotData(resume.id) : undefined;
         if (disposed) return;
         await core.load(rom, battery ?? undefined, state);
@@ -177,8 +181,8 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     return () => { disposed = true; registerCloseSave(null); if (nativeState) void nativeState.then(listener => listener.remove()).catch(() => undefined); clearInterval(batteryTimer); clearInterval(stateTimer); if (noticeTimer.current) clearTimeout(noticeTimer.current); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('blur', onBlur); stopClock(); core.destroy(); emulator.current = null; };
   // A player instance belongs to exactly one game. Live settings use currentSettings.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.id]);
-  useEffect(()=>{if(emulator.current instanceof NdsEmulator){emulator.current.setLayout(dsLayout,dsSwap);localStorage.setItem('koki-nds-layout',dsLayout);}},[dsLayout,dsSwap,ready]);
+  }, [game.id, activeEngine]);
+  useEffect(()=>{if((emulator.current instanceof NdsEmulator || emulator.current instanceof NativeNdsEmulator)){emulator.current.setLayout(dsLayout,dsSwap);localStorage.setItem('koki-nds-layout',dsLayout);}},[dsLayout,dsSwap,ready]);
   useEffect(() => { if (ready) focusGame(); }, [ready]);
   useEffect(() => { const core = emulator.current; if (!core?.loaded) return; core.setTurbo(settings.turbo); core.setVolume(settings.volume); core.setSpeed(settings.speed); core.setRewindSeconds(settings.rewindSeconds); }, [settings.volume, settings.speed, settings.rewindSeconds, settings.turbo, ready]);
   useEffect(() => {
@@ -289,12 +293,12 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
         <button className={`player-control ${rewinding ? 'active' : ''}`} disabled={!ready || paused || settings.rewindSeconds === 0} onPointerDown={event => rewindHold(true, event)} onPointerUp={event => rewindHold(false, event)} onPointerCancel={event => rewindHold(false, event)} onLostPointerCapture={event => { rewindPointers.current.delete(event.pointerId); syncRewind(); }} aria-label={`Hold to rewind, ${Math.round(stats.rewindSeconds)} seconds available`}><Rewind size={17} />Rewind</button>
         <div className="player-control"><FastForward size={17} /><Select className="player-speed" aria-label="Playback speed" value={settings.speed} onChange={value => onSettings({ speed: Number(value) })} options={[0.5, 1, 1.5, 2, 3, 4].map(speed => ({ value: speed, label: `${speed}×` }))} onClose={reason => { if (reason === 'select' || reason === 'escape' || reason === 'toggle') requestAnimationFrame(focusGame); }} /></div>
         <div className="player-volume"><button className="player-control" onClick={() => { onSettings({ volume: settings.volume === 0 ? 0.7 : 0 }); finishPointerAction(); }} aria-label={settings.volume === 0 ? 'Unmute' : 'Mute'}>{settings.volume === 0 ? <VolumeX size={17} /> : <Volume2 size={17} />}</button><input type="range" min={0} max={1} step={0.05} value={settings.volume} onChange={event => onSettings({ volume: Number(event.target.value) })} onPointerUp={focusGame} aria-label="Volume" /></div>
-        <button className="player-control" disabled={!ready || busy} onClick={() => void job(async () => { await queueSave('backup', 'Before restarting'); releaseControls(); emulator.current?.reset(); emulator.current?.play(); setPaused(false); startClock(); focusGame(); announce('Game restarted; recovery checkpoint saved'); })} aria-label="Restart game with recovery checkpoint"><RotateCcw size={16} /></button>
+        <button className="player-control" disabled={!ready || busy} onClick={() => void job(async () => { await queueSave('backup', 'Before restarting'); releaseControls(); await emulator.current?.reset(); emulator.current?.play(); setPaused(false); startClock(); focusGame(); announce('Game restarted; recovery checkpoint saved'); })} aria-label="Restart game with recovery checkpoint"><RotateCcw size={16} /></button>
       </div>
       <div id="player-keyboard" className="player-keyboard" aria-label="Keyboard controls"><span><kbd>{[settings.controls.up, settings.controls.left, settings.controls.down, settings.controls.right].map(keyLabel).join(' ')}</kbd> Move</span><span><kbd>{keyLabel(settings.controls.a)}</kbd> A</span><span><kbd>{keyLabel(settings.controls.b)}</kbd> B</span><span><kbd>{keyLabel(settings.controls.start)}</kbd> Start</span><span><kbd>{keyLabel(settings.controls.select)}</kbd> Select</span></div>
     </div>
     {((showTouch && settings.touchControls) || editingTouch) && <TouchController settings={settings} pressed={pressed} editing={editingTouch} touchProps={touchProps} onDpad={dpadTouch} onPreview={setPreviewScreen} onSave={saveTouchPreferences} onFinish={finishTouchEditor} />}
-    {showSaves && <Modal title="Checkpoints" onClose={() => setShowSaves(false)} wide>{pendingRestore ? <div className="restore-preview">{pendingRestore.thumbnail && <img src={pendingRestore.thumbnail} alt="Checkpoint preview" />}<h3>{pendingRestore.label}</h3><p>{new Date(pendingRestore.createdAt).toLocaleString()}</p><p>A recovery checkpoint will keep your current progress.</p><div className="button-row"><button className="button" onClick={() => setPendingRestore(null)}>Cancel</button><button className="button button-primary" disabled={busy} onClick={() => void restore(pendingRestore)}>Restore checkpoint</button></div></div> : <><form onSubmit={event => { event.preventDefault(); void job(async () => { await queueSave('manual', label.trim() || 'Named checkpoint'); setLabel(''); setSnapshots(await getSnapshots(game.id)); announce('Checkpoint saved'); }); }}><label className="field"><span className="field-label">New checkpoint</span><input value={label} maxLength={70} onChange={event => setLabel(event.target.value)} placeholder="Checkpoint name" /></label><button className="button button-primary" disabled={busy}><Save size={15} />Save checkpoint</button></form><div className="modal-divider" /><div className="snapshot-list">{snapshots.length ? snapshots.map(snapshot => <div className="snapshot-row" key={snapshot.id}>{snapshot.thumbnail ? <img className="snapshot-thumb" src={snapshot.thumbnail} alt="" /> : <div className="snapshot-thumb"><Gamepad2 size={20} /></div>}<div className="snapshot-info"><strong>{snapshot.label}</strong><span>{new Date(snapshot.createdAt).toLocaleString()} · {snapshot.kind}</span></div><div className="snapshot-actions"><button className="icon-button" aria-label={`Restore ${snapshot.label}`} disabled={busy} onClick={() => setPendingRestore(snapshot)}><RotateCcw size={14} /></button><button className="icon-button" aria-label={`Delete ${snapshot.label}`} disabled={busy} onClick={() => void job(async () => { await deleteSnapshot(snapshot.id); setSnapshots(await getSnapshots(game.id)); })}><Trash2 size={14} /></button></div></div>) : <div className="section-empty">No checkpoints yet</div>}</div></>}</Modal>}
+    {showSaves && <Modal title="Checkpoints" onClose={() => setShowSaves(false)} wide>{pendingRestore ? <div className="restore-preview">{pendingRestore.thumbnail && <img src={pendingRestore.thumbnail} alt="Checkpoint preview" />}<h3>{pendingRestore.label}</h3><p>{new Date(pendingRestore.createdAt).toLocaleString()}</p><p>A recovery checkpoint will keep your current progress.</p><div className="button-row"><button className="button" onClick={() => setPendingRestore(null)}>Cancel</button><button className="button button-primary" disabled={busy} onClick={() => void restore(pendingRestore)}>Restore checkpoint</button></div></div> : <><form onSubmit={event => { event.preventDefault(); void job(async () => { await queueSave('manual', label.trim() || 'Named checkpoint'); setLabel(''); setSnapshots((await getSnapshots(game.id)).filter(s => !IS_NDS || s.engine === activeEngine)); announce('Checkpoint saved'); }); }}><label className="field"><span className="field-label">New checkpoint</span><input value={label} maxLength={70} onChange={event => setLabel(event.target.value)} placeholder="Checkpoint name" /></label><button className="button button-primary" disabled={busy}><Save size={15} />Save checkpoint</button></form><div className="modal-divider" /><div className="snapshot-list">{snapshots.length ? snapshots.map(snapshot => <div className="snapshot-row" key={snapshot.id}>{snapshot.thumbnail ? <img className="snapshot-thumb" src={snapshot.thumbnail} alt="" /> : <div className="snapshot-thumb"><Gamepad2 size={20} /></div>}<div className="snapshot-info"><strong>{snapshot.label}</strong><span>{new Date(snapshot.createdAt).toLocaleString()} · {snapshot.kind}</span></div><div className="snapshot-actions"><button className="icon-button" aria-label={`Restore ${snapshot.label}`} disabled={busy} onClick={() => setPendingRestore(snapshot)}><RotateCcw size={14} /></button><button className="icon-button" aria-label={`Delete ${snapshot.label}`} disabled={busy} onClick={() => void job(async () => { await deleteSnapshot(snapshot.id); setSnapshots((await getSnapshots(game.id)).filter(s => !IS_NDS || s.engine === activeEngine)); })}><Trash2 size={14} /></button></div></div>) : <div className="section-empty">No checkpoints yet</div>}</div></>}</Modal>}
   </div>;
 }
 

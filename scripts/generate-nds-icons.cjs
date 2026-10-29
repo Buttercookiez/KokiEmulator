@@ -9,7 +9,7 @@ const path = require('node:path');
   const icon = await fs.readFile(path.join(appIcons, 'koki-nds.svg'), 'utf8');
   const round = icon.replace('<rect width="64" height="64" rx="16" fill="#161616"/>', '<circle cx="32" cy="32" r="32" fill="#161616"/>');
   const windowsOnly = process.argv.includes('--windows-only');
-  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--disable-gpu'] });
   try {
     const page = await browser.newPage();
     async function render(svg, size) {

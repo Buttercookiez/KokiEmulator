@@ -1,0 +1,7 @@
+Koki NDS native Android backend
+
+Core: https://github.com/rafaelvcaetano/melonDS-android-lib at 431ab4bd0003c4356e25fce89640ae1004579b9b
+GPL-3.0-or-later. Native ARM64 JIT and threaded software rendering.
+Open-source FreeBIOS and generated firmware; no Nintendo BIOS included.
+Full source and build instructions: https://github.com/Buttercookiez/KokiEmulator
+

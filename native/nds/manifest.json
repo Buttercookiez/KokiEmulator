@@ -1,0 +1,16 @@
+{
+  "name": "melonDS native Android / Koki bridge",
+  "repository": "https://github.com/rafaelvcaetano/melonDS-android-lib",
+  "revision": "431ab4bd0003c4356e25fce89640ae1004579b9b",
+  "engineId": "melonds-431ab4b-android-v1",
+  "license": "GPL-3.0-or-later",
+  "ndk": "27.1.12297006",
+  "cmake": "3.22.1",
+  "fastMemory": false,
+  "jit": true,
+  "threadedRenderer": true,
+  "sourceReference": "https://github.com/rafaelvcaetano/melonDS-android/tree/c42995caff0144f37ad9791dc9bc96d82e8a6f65",
+  "boundedMemoryPatch": "bounded-memory-patch.json",
+  "reserveFastMemoryMirrors": false,
+  "boundedMemoryPatchSha256": "47af22a0d45660a484b6955b29aa82830ac9bb1822ee39061705a639bf74a18d"
+}

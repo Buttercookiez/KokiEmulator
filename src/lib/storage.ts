@@ -136,3 +136,10 @@ export async function exportFile(blob: Blob, name: string): Promise<void> {
   const link = document.createElement('a'); link.href = url; link.download = safeName; document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+
+export async function nativeFileUri(path: string): Promise<string> {
+  validPath(path);
+  if (!Capacitor.isNativePlatform()) throw new Error('Native game paths are available only in the Android app.');
+  const result = await Filesystem.getUri({ directory: Directory.Data, path: `library/${IS_NDS ? 'nds/' : ''}${path}` });
+  return result.uri;
+}

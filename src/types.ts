@@ -46,6 +46,7 @@ export interface Settings {
   touchVibration: boolean;
   filter: 'pixel' | 'smooth' | 'lcd';
   controls: Record<GbaButton, string>;
+  dsEngine?: 'native'|'compatibility';
   dsLayout?: 'vertical'|'horizontal'|'bottom';
   dsSwap?: boolean;
   dsControls?: {x:string;y:string};
