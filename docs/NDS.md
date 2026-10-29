@@ -26,6 +26,8 @@ Battery .sav files, screenshot checkpoints, automatic resume, recovery checkpoin
 
 Individual DS ROMs may be up to 512 MB; backup imports and decompressed backup data are limited to 512 MB in total. Large games and states can require considerably more memory than their file size, especially in the Android WebView. Rewind history is capped at 32 MB and may retain fewer seconds than the chosen setting.
 
+Library artwork shows the visible DS screen when the other panel is blank, with matching rounded corners. Original screenshots and checkpoint previews retain both screens. The NDS wordmark label uses a small subscript position.
+
 ## Develop and build
 
 Use Node 22.12+ and npm. Android additionally requires SDK 36, JDK 21+ and the existing Android build tools. Windows packages use Electron x64. Icon generation and integration checks use Playwright with Microsoft Edge installed.

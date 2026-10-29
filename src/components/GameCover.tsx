@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import type { Game } from '../types';
 import { getGameCover } from '../lib/artwork';
+import { useGamePreview } from '../lib/use-game-preview';
 
 export function GameCover({ game }: { game: Game }) {
-  const cover = getGameCover(game);
+  const originalCover = getGameCover(game);
+  const screenshotPreview = useGamePreview(originalCover === game.screenshot ? game.screenshot : undefined);
+  const cover = originalCover === game.screenshot ? screenshotPreview : originalCover;
   const [failedCover, setFailedCover] = useState<string>();
   const artwork = cover && cover !== failedCover ? cover : undefined;
   const artworkClass = artwork ? `has-artwork${artwork.startsWith('./covers/') ? ' bundled-artwork' : ''}` : 'fallback';
