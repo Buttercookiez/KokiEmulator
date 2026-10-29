@@ -1,12 +1,14 @@
-# Koki NDS 0.1.2 experimental preview
+# Koki NDS 0.1.3 experimental preview
 
 Koki NDS shares Koki GBA's library, themes, original logo, splash, settings, saves UI and touch editor. Version 0.1.1 replaces the earlier private preview's binary-only port with a source-built SkyEmu DS engine.
 
 Version 0.1.2 keeps the same engine and checkpoint format as 0.1.1. It aligns the NDS wordmark label and transfers Android files in 256 KB chunks, avoiding whole-ROM base64 copies in the Java heap. Incomplete writes remain separate from completed recovery files. Backup exports use the same bounded transfers.
 
+Version 0.1.3 lowers the small NDS label to the wordmark baseline. The 0.1.2 storage fix and engine/checkpoint format are unchanged.
+
 ## Downloads
 
-The public release is nds-v0.1.2 in https://github.com/Buttercookiez/KokiEmulator/releases. It provides Koki-NDS-0.1.2-Windows.exe, Koki-NDS-0.1.2-Android.apk, checksums, verification notes and Koki-NDS-0.1.2-source.zip. The website provides system-specific download links at /nds/.
+The public release is nds-v0.1.3 in https://github.com/Buttercookiez/KokiEmulator/releases. It provides Koki-NDS-0.1.3-Windows.exe, Koki-NDS-0.1.3-Android.apk, checksums, verification notes and Koki-NDS-0.1.3-source.zip. The website provides system-specific download links at /nds/.
 
 Windows is a portable x64 app. The Android APK requires Android 7+ and a current WebView. This experimental APK uses the existing NDS debug signing key; the Windows app is unsigned. These are direct preview downloads, not a Google Play release. Close a previous Windows NDS instance before starting the updated executable.
 
