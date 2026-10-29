@@ -46,6 +46,10 @@ export function makeNdsDiagnostic() {
     emit(0xe3110001);
     ldr(1, 0x801f801f, 0);
     ldr(1, 0xfc00fc00, 1);
+    ldr(0, 0x02010000); emit(0xe5903000);
+    emit(0xe3130001); ldr(1, 0x83e083e0, 0);
+    emit(0xe3130002); ldr(1, 0xfc1ffc1f, 0);
+    emit(0xe3130040); ldr(1, 0x83ff83ff, 0);
     ldr(0, 0x06800000);
     ldr(2, 24576);
     label('top');
@@ -66,7 +70,8 @@ export function makeNdsDiagnostic() {
         code[i] = ((cond << 28) | 0x059f0000 | (r << 12) | ((start + k - i - 2) * 4)) >>> 0;
     }
     code.forEach((n, i) => v.setUint32(0x200 + i * 4, n, true));
-    v.setUint32(0x400, 0xeafffffe, true);
+    // ARM7 publishes the actual X/Y/pen hardware register into shared RAM.
+    [0xe59f000c,0xe59f200c,0xe1d010b0,0xe5821000,0xeafffffc,0x04000136,0x02010000].forEach((word,i)=>v.setUint32(0x400+i*4,word,true));
     const crc = (a, z) => { let c = 0xffff; for (let i = a; i < z; i++) {
         c ^= b[i];
         for (let n = 0; n < 8; n++)

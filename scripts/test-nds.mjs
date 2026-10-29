@@ -19,6 +19,16 @@ try {
     await page.keyboard.up('x');
     await page.waitForFunction(() => document.querySelector('canvas').getContext('2d').getImageData(120, 96, 1, 1).data[2] > 200);
     results.push('real dual-screen ARM9/ARM7 emulation and keyboard A');
+    await page.keyboard.down('i');
+    await page.waitForFunction(()=>{const d=document.querySelector('canvas').getContext('2d').getImageData(120,96,1,1).data;return d[1]>200&&d[0]<50;});
+    await page.keyboard.up('i');await page.keyboard.down('u');
+    await page.waitForFunction(()=>{const d=document.querySelector('canvas').getContext('2d').getImageData(120,96,1,1).data;return d[0]>200&&d[2]>200;});
+    await page.keyboard.up('u');
+    const pen=await page.locator('canvas').evaluate(c=>{const r=c.getBoundingClientRect(),scale=Math.min(r.width/256,r.height/384);return{x:r.x+r.width/2,y:r.y+(r.height-384*scale)/2+288*scale};});
+    await page.mouse.move(pen.x,pen.y);await page.mouse.down();
+    await page.waitForFunction(()=>{const d=document.querySelector('canvas').getContext('2d').getImageData(120,96,1,1).data;return d[0]>200&&d[1]>200&&d[2]<50;});
+    await page.mouse.up();await page.waitForFunction(()=>document.querySelector('canvas').getContext('2d').getImageData(120,96,1,1).data[2]>200);
+    results.push('actual ARM7 X/Y buttons and touchscreen pen hardware');
     await page.mouse.move(600, 40);
     await page.getByRole('combobox', { name: 'DS screen layout' }).click();
     await page.getByRole('option', { name: 'Side by side', exact: true }).click();
@@ -80,7 +90,7 @@ try {
     await p.getByRole('button', { name: 'Change X key, currently O', exact: true }).waitFor();
     results.push('DS X/Y keyboard remapping survives reload');
     assert.deepEqual(errors, []);
-    await fs.writeFile(out + '/report.json', JSON.stringify({ status: 'passed', core: 'melonDS/Pilas pinned', results, errors, physicalAndroid: 'not tested', commercialGames: 'not tested' }, null, 2));
+    await fs.writeFile(out + '/report.json', JSON.stringify({ status: 'passed', core: 'Source-built SkyEmu DS / Koki', results, errors, physicalAndroid: 'not tested', commercialGames: 'not tested' }, null, 2));
     console.log(JSON.stringify({ status: 'passed', results }));
     await mobile.close();
 }

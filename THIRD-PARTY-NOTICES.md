@@ -9,3 +9,7 @@ The unmodified mGBA artifacts are copied from pinned `@wasm-gaming/mgba-wasm` 0.
 Identified Android runtime notices cover AndroidX, Kotlin/coroutines, Apache Cordova Android and Ionic's native filesystem library. Exact official license/NOTICE files and their source URLs and SHA-256 hashes are retained in `licenses/native/`. This inventory describes those components; it does not replace notices accompanying the platform WebView or the separately distributed Electron runtime. Build tools and test-only dependencies are not represented as shipped app components.
 
 No commercial games or Nintendo BIOS images are included. Four homebrew game screenshots are bundled, with their creators, sources and full license texts in the offline reader and [artwork credits](public/covers/CREDITS.md). The noncommercial uCity Advance screenshot is no longer included. User-provided game files and artwork remain the user's own content.
+
+## NDS preview
+
+Koki NDS 0.1.1 uses SkyEmu DS, built from pinned MIT-licensed source. The open BIOS replacement is BSD-2-Clause; the ROM save database carries its own MIT notice from the melonDS team. Compiler/runtime notices are also included in licenses/nds/. The Koki bridge is MIT-licensed. See [NDS source and build notes](docs/NDS-CORE.md) and the offline license reader. The earlier binary-only port is not bundled in this release.

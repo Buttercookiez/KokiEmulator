@@ -1,4 +1,4 @@
-import { IS_NDS } from '../platform';
+import { IS_NDS, NDS_ENGINE_ID } from '../platform';
 import { NdsEmulator, type DsLayout } from '../lib/nds-emulator';
 import type { EmulatorButton } from '../types';
 import './NdsPlayer.css';
@@ -7,7 +7,7 @@ import { ArrowLeft, Camera, Menu, SlidersHorizontal, X, Expand, FastForward, Gam
 import type { Game, GameProfile, Settings, Snapshot } from '../types';
 import { GbaEmulator } from '../lib/emulator';
 import { resolveKeyboardButton } from '../lib/controls';
-import { createSnapshot, deleteSnapshot, downloadBlob, getRom, getSnapshotData, getSnapshots, readBattery, updateGame, writeBattery } from '../lib/library';
+import { createSnapshot, prepareNdsEngine, deleteSnapshot, downloadBlob, getRom, getSnapshotData, getSnapshots, readBattery, updateGame, writeBattery } from '../lib/library';
 import { Modal } from './Modal';
 import { Select } from './Select';
 import { Capacitor } from '@capacitor/core';
@@ -146,11 +146,14 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     emulator.current = core;
     void (async () => {
       try {
+        const legacyCheckpoints = IS_NDS ? await prepareNdsEngine() : false;
+        if (initialSnapshot && IS_NDS && initialSnapshot.engine !== NDS_ENGINE_ID) throw new Error('This checkpoint uses the earlier DS engine. It is kept in history; start the game from its in-game save.');
         const [rom, battery, saves] = await Promise.all([getRom(game.id), readBattery(game.id), getSnapshots(game.id)]);
-        const resume = initialSnapshot ?? (!skipAutoResume && currentSettings.current.autoResume ? saves.find(item => item.kind === 'auto') : undefined);
+        const resume = initialSnapshot ?? (!skipAutoResume && currentSettings.current.autoResume ? saves.find(item => item.kind === 'auto' && (!IS_NDS || item.engine === NDS_ENGINE_ID)) : undefined);
         const state = resume ? await getSnapshotData(resume.id) : undefined;
         if (disposed) return;
         await core.load(rom, battery ?? undefined, state);
+        if (legacyCheckpoints && !disposed) notify('Earlier DS checkpoints are kept in history. Continuing from the in-game save.');
         if (disposed) { core.destroy(); return; }
         core.setTurbo(currentSettings.current.turbo); core.setSpeed(currentSettings.current.speed); core.setVolume(currentSettings.current.volume); core.setRewindSeconds(currentSettings.current.rewindSeconds);
         core.play(); startClock(); setReady(true); await updateGame(game.id, { lastPlayed: Date.now() });

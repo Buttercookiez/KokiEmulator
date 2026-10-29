@@ -1,14 +1,17 @@
 import { IS_NDS } from '../platform';
 import ndsManifest from '../../engines/nds-manifest.json';
-import mplLicense from '../../licenses/MPL-2.0.txt?raw';
+import skyLicense from '../../licenses/nds/SkyEmu-MIT.txt?raw';
+import biosLicense from '../../licenses/nds/BIOS-replacement-BSD-2-Clause.txt?raw';
+import runtimeLicense from '../../licenses/nds/Runtime-notices.txt?raw';
+import databaseLicense from '../../licenses/nds/ROM-database-MIT.txt?raw';
 import inventory from '../legal/third-party.json';
 
 export function ThirdPartyNotices() {
   const notices = inventory.notices.filter(notice => !IS_NDS || notice.id !== 'artwork').map(notice => IS_NDS && notice.id === 'mgba' ? {
-    ...notice, name: 'melonDS / Pilas web port', version: ndsManifest.revision.slice(0, 12),
+    ...notice, name: 'SkyEmu DS / Koki source bridge', license: 'MIT / BSD-2-Clause', version: ndsManifest.revision.slice(0, 12),
     source: ndsManifest.repository,
-    description: 'Unmodified pinned single-threaded DS core. The downloaded core license and artifact hashes are also bundled under vendor/melonds.',
-    files: [{ ...notice.files[0], name: 'MPL-2.0', origin: 'licenses/MPL-2.0.txt', text: mplLicense }],
+    description: 'Built from pinned, publicly available source. Core, BIOS replacement and ROM database license notices are included below. Build instructions and source provenance are bundled under vendor/nds.',
+    files: [{ ...notice.files[0], name: 'SkyEmu — MIT', origin: 'licenses/nds/SkyEmu-MIT.txt', text: skyLicense }, { ...notice.files[0], name: 'BIOS replacement — BSD-2-Clause', origin: 'licenses/nds/BIOS-replacement-BSD-2-Clause.txt', text: biosLicense }, { ...notice.files[0], name: 'ROM database — MIT', origin: 'licenses/nds/ROM-database-MIT.txt', text: databaseLicense }, { ...notice.files[0], name: 'Compiler runtime notices', origin: 'licenses/nds/Runtime-notices.txt', text: runtimeLicense }],
   } : notice);
   return <article aria-label="Third-party license notices">
     <p className="modal-help">{inventory.summary}</p>

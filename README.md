@@ -6,7 +6,7 @@ The prepared Android Play Store version is 0.4.4 (code 18), with production uplo
 
 ## NDS preview
 
-Koki NDS 0.1.0 reuses this same interface, settings, library, touch editor and native shells with a separate melonDS adapter. It has two-screen layouts, a touchscreen and X/Y controls. Its app identity and local data are separate from GBA. See [NDS setup, downloads and verification](docs/NDS.md). This is an experimental local preview; the public website and GBA Play candidate remain separate.
+Koki NDS 0.1.1 reuses this same interface, settings, library, touch editor and native shells with a source-built SkyEmu DS adapter. It has two-screen layouts, a touchscreen and X/Y controls. Its app identity and local data are separate from GBA. See [NDS setup, downloads and verification](docs/NDS.md). The experimental public preview is a separate release from GBA. Complete engine source, licenses and build instructions accompany it; earlier private-preview checkpoints use a different engine.
 
 ## Use the app
 

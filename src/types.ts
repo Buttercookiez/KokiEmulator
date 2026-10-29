@@ -22,6 +22,7 @@ export interface Game {
   profile?: GameProfile;
 }
 export interface Snapshot {
+  engine?: string;
   id: string;
   gameId: string;
   label: string;

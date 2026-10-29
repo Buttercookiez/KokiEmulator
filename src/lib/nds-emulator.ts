@@ -3,6 +3,7 @@ import type { EmulatorOptions } from './emulator';
 import { EmulatorAudio } from '../emulator/audio';
 import { normalizeTurbo, turboMask, type TurboSettings } from './mobile-play';
 import { inspectNdsRom } from './nds-rom';
+import { packNdsCheckpoint, unpackNdsCheckpoint } from './nds-checkpoint';
 export type DsLayout = 'vertical' | 'horizontal' | 'bottom';
 type Core = {
     HEAPU8: Uint8Array;
@@ -36,6 +37,7 @@ export function dsTouchPoint(x: number, y: number, width: number, height: number
 export class NdsEmulator {
     private core: Core | null = null;
     private instance = 0;
+    private initialized = false;
     private pen: number | null = null;
     private running = false;
     private dead = false;
@@ -61,30 +63,27 @@ export class NdsEmulator {
     private buffer = document.createElement('canvas');
     constructor(private canvas: HTMLCanvasElement, private options: EmulatorOptions = {}) { this.buffer.width = 256; this.buffer.height = 384; canvas.width = 256; canvas.height = 384; canvas.style.touchAction = 'none'; for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'lostpointercapture'] as const)
         canvas.addEventListener(type, this.pointer); window.addEventListener('blur', this.blur); }
-    get loaded() { return !!this.instance && !this.dead && !!this.rom.length; }
+    get loaded() { return this.initialized && !!this.instance && !this.dead && !!this.rom.length; }
     get isRunning() { return this.running; }
     private blur = () => this.releaseButtons();
     private alloc(bytes: Uint8Array) { const c = this.core!; const p = c._malloc(Math.max(1, bytes.length)); if (!p)
         throw Error('Not enough memory for this DS game.'); c.HEAPU8.set(bytes, p); return p; }
-    private error() { return new Error(this.core?.UTF8ToString(this.core._pilas_last_error(this.instance)) || 'The DS core could not perform this operation.'); }
+    private error() { return new Error(this.core?.UTF8ToString(this.core._koki_last_error(this.instance)) || 'The DS core could not perform this operation.'); }
     async load(rom: Uint8Array, save?: Uint8Array | null, state?: Uint8Array | null) {
         inspectNdsRom(rom, 'game.nds');
         this.pause();
         if (this.dead)
             throw Error('The DS player is closed.');
         if (!this.core) {
-            const url = new URL('vendor/melonds/pilas-melonds-core.js', document.baseURI).href;
+            const url = new URL('vendor/nds/koki-nds-core.js', document.baseURI).href;
             const factory = (await import(/* @vite-ignore */ url)).default;
-            const c = await factory({ locateFile: (name: string) => new URL('vendor/melonds/' + name, document.baseURI).href, print: () => { }, printErr: (s: string) => console.warn('[melonDS]', s) }) as Core;
+            const c = await factory({ locateFile: (name: string) => new URL('vendor/nds/' + name, document.baseURI).href, print: () => { }, printErr: (s: string) => console.warn('[SkyEmu]', s) }) as Core;
             if (this.dead)
                 return;
             this.core = c;
-            this.instance = c._pilas_create(48000);
+            this.instance = c._koki_create(48000);
             if (!this.instance)
                 throw Error('The DS core could not start.');
-            c._pilas_set_console_mode(this.instance, 0, 1);
-            c._pilas_set_direct_boot(this.instance, 1);
-            c._pilas_set_wifi_bridge_enabled(this.instance, 0);
             this.audioPtr = c._malloc(4096 * 4);
             try {
                 this.audio = new EmulatorAudio();
@@ -103,27 +102,29 @@ export class NdsEmulator {
         if (state?.length)
             this.loadState(state);
         else {
-            this.core!._pilas_run_frame(this.instance);
+            this.core!._koki_run_frame(this.instance);
             this.render();
         }
         this.options.onStats?.({ fps: 0, rewindSeconds: 0 });
     }
     private loadRom(save?: Uint8Array | null) { const c = this.core!, r = this.alloc(this.rom), s = save?.length ? this.alloc(save) : 0, n = this.alloc(new TextEncoder().encode('game.nds\0')); try {
-        if (!c._pilas_load_rom(this.instance, r, this.rom.length, s, save?.length || 0, n))
+        this.initialized = false;
+        if (!c._koki_load_rom(this.instance, r, this.rom.length, s, save?.length || 0, n))
             throw this.error();
+        this.initialized = true;
     }
     finally {
         c._free(r);
         if (s)
             c._free(s);
         c._free(n);
-    } const now = new Date(); c._pilas_set_rtc(this.instance, now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()); this.history = []; this.releaseButtons(); }
+    } this.history = []; this.releaseButtons(); }
     setLayout(layout: DsLayout, swapped = false) { this.layout = layout; this.swapped = swapped; this.render(); }
     setButton(button: EmulatorButton, down: boolean) { if (down)
         this.audio?.resume(); const bit = KEYS[button]; this.mask = down ? this.mask | (1 << bit) : this.mask & ~(1 << bit); this.pushInput(); }
-    releaseButtons() { this.pen = null; this.mask = 0; this.pushInput(); this.core?._pilas_set_touch(this.instance, 0, 0, 0); }
+    releaseButtons() { this.pen = null; this.mask = 0; this.pushInput(); this.core?._koki_set_touch(this.instance, 0, 0, 0); }
     private pushInput() { if (this.instance)
-        this.core!._pilas_set_key_mask(this.instance, (~turboMask(this.mask, this.turbo, performance.now())) & 4095); }
+        this.core!._koki_set_key_mask(this.instance, (~turboMask(this.mask, this.turbo, performance.now())) & 4095); }
     setTurbo(value: TurboSettings) { this.turbo = normalizeTurbo(value); }
     setSpeed(n: number) { if (Number.isFinite(n))
         this.speed = Math.max(.25, Math.min(4, n)); this.audio?.clear(); }
@@ -136,17 +137,18 @@ export class NdsEmulator {
         return; this.running = true; this.previous = performance.now(); this.lastStats = this.previous; this.accrued = 0; this.audio?.resume(); this.raf = requestAnimationFrame(this.tick); }
     pause() { this.running = false; cancelAnimationFrame(this.raf); this.audio?.suspend(); this.audio?.clear(); this.releaseButtons(); }
     reset() { if (!this.loaded)
-        return; if (!this.core!._pilas_reset(this.instance))
-        throw this.error(); this.history = []; this.core!._pilas_run_frame(this.instance); this.render(); }
+        return; if (!this.core!._koki_reset(this.instance))
+        throw this.error(); this.history = []; this.core!._koki_run_frame(this.instance); this.render(); }
     exportSave() { if (!this.loaded)
-        return null; const c = this.core!, p = c._pilas_get_nds_save_ptr(this.instance), n = c._pilas_get_nds_save_length(this.instance); return p && n ? c.HEAPU8.slice(p, p + n) : null; }
+        return null; const c = this.core!, p = c._koki_get_nds_save_ptr(this.instance), n = c._koki_get_nds_save_length(this.instance); return p && n ? c.HEAPU8.slice(p, p + n) : null; }
     importSave(bytes: Uint8Array) { this.loadRom(bytes); }
-    saveState() { const c = this.core!; if (!this.loaded || !c._pilas_save_state(this.instance))
-        throw this.error(); const p = c._pilas_get_state_ptr(this.instance), n = c._pilas_get_state_length(this.instance); if (!p || !n || n > 64 * 1024 * 1024)
+    saveState() { return packNdsCheckpoint(this.rawState()); }
+    private rawState() { const c = this.core!; if (!this.loaded || !c._koki_save_state(this.instance))
+        throw this.error(); const p = c._koki_get_state_ptr(this.instance), n = c._koki_get_state_length(this.instance); if (!p || !n || n > 64 * 1024 * 1024)
         throw Error('Invalid DS checkpoint.'); return c.HEAPU8.slice(p, p + n); }
-    loadState(bytes: Uint8Array) { if (!bytes.length || bytes.length > 64 * 1024 * 1024)
+    loadState(packed: Uint8Array) { const bytes = unpackNdsCheckpoint(packed); if (!bytes.length || bytes.length > 64 * 1024 * 1024)
         throw Error('Invalid DS checkpoint.'); const c = this.core!, p = this.alloc(bytes); try {
-        if (!c._pilas_load_state(this.instance, p, bytes.length))
+        if (!c._koki_load_state(this.instance, p, bytes.length))
             throw this.error();
     }
     finally {
@@ -158,7 +160,7 @@ export class NdsEmulator {
         if (this.audioPtr)
             this.core._free(this.audioPtr);
         if (this.instance)
-            this.core._pilas_destroy(this.instance);
+            this.core._koki_destroy(this.instance);
     } this.instance = 0; this.core = null; this.history = []; }
     private pointer = (event: PointerEvent) => { if (!this.loaded || !this.running)
         return; const end = ['pointerup', 'pointercancel', 'lostpointercapture'].includes(event.type); if (this.pen !== null && this.pen !== event.pointerId)
@@ -167,11 +169,11 @@ export class NdsEmulator {
         this.canvas.setPointerCapture(event.pointerId);
         this.audio?.resume();
     } if (event.type === 'pointermove' && !this.canvas.hasPointerCapture(event.pointerId))
-        return; const r = this.canvas.getBoundingClientRect(), point = end ? null : dsTouchPoint(event.clientX - r.left, event.clientY - r.top, r.width, r.height, this.layout, this.swapped, /(?:top| 0%)$/.test(getComputedStyle(this.canvas).objectPosition) ? 'top' : /(?:bottom|100%)$/.test(getComputedStyle(this.canvas).objectPosition) ? 'bottom' : 'center'); this.core!._pilas_set_touch(this.instance, point?.[0] || 0, point?.[1] || 0, point ? 1 : 0); if (end)
+        return; const r = this.canvas.getBoundingClientRect(), point = end ? null : dsTouchPoint(event.clientX - r.left, event.clientY - r.top, r.width, r.height, this.layout, this.swapped, /(?:top| 0%)$/.test(getComputedStyle(this.canvas).objectPosition) ? 'top' : /(?:bottom|100%)$/.test(getComputedStyle(this.canvas).objectPosition) ? 'bottom' : 'center'); this.core!._koki_set_touch(this.instance, point?.[0] || 0, point?.[1] || 0, point ? 1 : 0); if (end)
         this.pen = null; if (point)
         event.preventDefault(); };
     private render() { if (!this.loaded)
-        return; const c = this.core!, p = c._pilas_get_framebuffer_ptr(this.instance); if (!p)
+        return; const c = this.core!, p = c._koki_get_framebuffer_ptr(this.instance); if (!p)
         return; const b = this.buffer.getContext('2d')!; this.image ??= b.createImageData(256, 384); this.image.data.set(c.HEAPU8.subarray(p, p + 256 * 384 * 4)); b.putImageData(this.image, 0, 0); const w = this.layout === 'horizontal' ? 512 : 256, h = this.layout === 'vertical' ? 384 : 192; if (this.canvas.width !== w || this.canvas.height !== h) {
         this.canvas.width = w;
         this.canvas.height = h;
@@ -205,7 +207,7 @@ export class NdsEmulator {
                 if ((pad.axes[1] || 0) > .4)
                     mask |= 128;
             }
-            this.core._pilas_set_key_mask(this.instance, (~turboMask(mask, this.turbo, now)) & 4095);
+            this.core._koki_set_key_mask(this.instance, (~turboMask(mask, this.turbo, now)) & 4095);
             const due = Math.min(4, Math.floor(this.accrued));
             this.accrued = Math.min(4, this.accrued - due);
             for (let i = 0; i < due; i++) {
@@ -215,17 +217,17 @@ export class NdsEmulator {
                         this.loadState(s);
                 }
                 else {
-                    this.core._pilas_run_frame(this.instance);
+                    this.core._koki_run_frame(this.instance);
                     this.frame++;
                     if (this.rewind && this.frame % 30 === 0) {
-                        const s = this.saveState();
+                        const s = this.rawState();
                         this.history.push(s);
                         const max = Math.min(this.rewind * 2, Math.floor(32 * 1024 * 1024 / s.length));
                         if (this.history.length > max)
                             this.history.splice(0, this.history.length - max);
                     }
                 }
-                const n = this.core._pilas_pull_audio(this.instance, this.audioPtr, 4096);
+                const n = this.core._koki_pull_audio(this.instance, this.audioPtr, 4096);
                 if (n > 0 && this.audio && !this.rewinding) {
                     this.audio.setRate(48000 * this.speed);
                     this.audio.push(this.core.HEAP16.slice(this.audioPtr >> 1, (this.audioPtr >> 1) + n * 2));

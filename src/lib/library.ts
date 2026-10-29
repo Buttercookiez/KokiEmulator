@@ -1,4 +1,4 @@
-import { IS_NDS, SYSTEM, ROM_EXTENSION, ROM_PATTERN, MAX_STATE_SIZE } from '../platform';
+import { IS_NDS, NDS_ENGINE_ID, SYSTEM, ROM_EXTENSION, ROM_PATTERN, MAX_STATE_SIZE } from '../platform';
 import { unzipSync, zipSync, strFromU8, strToU8 } from 'fflate';
 import { DEFAULT_SETTINGS } from '../types';
 import type { Game, GameProfile, Settings, Snapshot } from '../types';
@@ -10,7 +10,7 @@ import { normalizeGameProfile } from './profiles';
 import { normalizeTouchLayouts } from './touch-layout';
 import { normalizeScreen, normalizeTurbo } from './mobile-play';
 
-interface LibraryIndex { version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
+interface LibraryIndex { ndsEngine?: string; version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
 const MAX_BACKUP = 512 * 1024 * 1024;
 const INDEX = 'library.json';
 const romPath = (id: string) => `roms/${id}.${ROM_EXTENSION}`;
@@ -121,18 +121,45 @@ export async function restoreDefaultCover(gameId: string): Promise<void> {
   });
 }
 export async function deleteGame(id: string): Promise<void> {
-  const paths = await transaction(async index => { const snapshots = index.snapshots.filter(item => item.gameId === id); index.games = index.games.filter(item => item.id !== id); index.snapshots = index.snapshots.filter(item => item.gameId !== id); return [romPath(id), batteryPath(id), `saves/${id}.previous.sav`, ...snapshots.map(item => snapshotPath(item.id))]; });
+  const paths = await transaction(async index => {
+    if (IS_NDS) {
+      const backupPath = 'migrations/pre-0.1.1/library.json';
+      const backup = await readFile(backupPath);
+      if (backup) { const archived = JSON.parse(strFromU8(backup)) as LibraryIndex; archived.games = archived.games.filter(game => game.id !== id); archived.snapshots = archived.snapshots.filter(snapshot => snapshot.gameId !== id); await writeFile(backupPath, strToU8(JSON.stringify(archived))); }
+    }
+    const snapshots = index.snapshots.filter(item => item.gameId === id); index.games = index.games.filter(item => item.id !== id); index.snapshots = index.snapshots.filter(item => item.gameId !== id); return [romPath(id), batteryPath(id), `saves/${id}.previous.sav`, ...(IS_NDS ? [`migrations/pre-0.1.1/${id}.sav`] : []), ...snapshots.map(item => snapshotPath(item.id))]; });
   await Promise.all(paths.map(removeFile));
+}
+export async function prepareNdsEngine(): Promise<boolean> {
+  if (!IS_NDS) return false;
+  return transaction(async index => {
+    if (index.ndsEngine === NDS_ENGINE_ID) return false;
+    const previous = await readFile(INDEX);
+    if (previous && !await readFile('migrations/pre-0.1.1/library.json')) await writeFile('migrations/pre-0.1.1/library.json', previous);
+    for (const game of index.games) {
+      const save = await readFile(batteryPath(game.id));
+      const backup = `migrations/pre-0.1.1/${game.id}.sav`;
+      if (save && !await readFile(backup)) await writeFile(backup, save);
+    }
+    let legacy = false;
+    for (const snapshot of index.snapshots) if (snapshot.engine !== NDS_ENGINE_ID) {
+      snapshot.engine ||= 'pilas-legacy'; snapshot.kind = 'backup';
+      if (!snapshot.label.startsWith('Earlier DS engine: ')) snapshot.label = ('Earlier DS engine: ' + snapshot.label).slice(0, 100);
+      legacy = true;
+    }
+    index.ndsEngine = NDS_ENGINE_ID;
+    return legacy;
+  });
 }
 export async function getSnapshots(gameId?: string): Promise<Snapshot[]> { return clone((await indexForRead()).snapshots.filter(item => !gameId || item.gameId === gameId).sort((a, b) => b.createdAt - a.createdAt)); }
 export async function createSnapshot(gameId: string, bytes: Uint8Array, options: { label: string; kind: Snapshot['kind']; thumbnail?: string }): Promise<Snapshot> {
   if (!bytes.length || bytes.length > MAX_STATE_SIZE) throw new Error('The emulator did not produce a valid snapshot.');
   const result = await transaction(async index => {
     if (!index.games.some(game => game.id === gameId)) throw new Error('The game is no longer in your library.');
-    const snapshot: Snapshot = { id: crypto.randomUUID(), gameId, label: options.label.trim().slice(0, 100) || 'Checkpoint', kind: options.kind, createdAt: Date.now(), thumbnail: options.thumbnail };
+    const snapshot: Snapshot = { id: crypto.randomUUID(), gameId, label: options.label.trim().slice(0, 100) || 'Checkpoint', kind: options.kind, createdAt: Date.now(), thumbnail: options.thumbnail, ...(IS_NDS ? { engine: NDS_ENGINE_ID } : {}) };
     await writeFile(snapshotPath(snapshot.id), bytes); index.snapshots.push(snapshot);
     const limit = options.kind === 'manual' ? 30 : 5;
-    const older = index.snapshots.filter(item => item.gameId === gameId && item.kind === options.kind).sort((a, b) => b.createdAt - a.createdAt).slice(limit);
+    const older = index.snapshots.filter(item => item.gameId === gameId && item.kind === options.kind && (!IS_NDS || item.engine === NDS_ENGINE_ID)).sort((a, b) => b.createdAt - a.createdAt).slice(limit);
     const remove = new Set(older.map(item => item.id)); index.snapshots = index.snapshots.filter(item => !remove.has(item.id));
     return { snapshot: clone(snapshot), stale: older.map(item => snapshotPath(item.id)) };
   });

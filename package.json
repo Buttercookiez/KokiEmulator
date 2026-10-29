@@ -43,7 +43,9 @@
     "test:nds": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds.mjs",
     "nds:diagnostic": "node scripts/make-nds-diagnostic.mjs",
     "test:nds:native": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-native.mjs",
-    "nds:verify": "node scripts/verify-nds-release.mjs"
+    "nds:verify": "node scripts/verify-nds-release.mjs",
+    "nds:core": "node scripts/build-nds-core.mjs",
+    "test:nds:migration": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-migration.mjs"
   },
   "dependencies": {},
   "devDependencies": {

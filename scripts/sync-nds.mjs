@@ -23,11 +23,13 @@ for (const item of manifest.artifacts) {
         await fs.writeFile(file, bytes);
     }
 }
-const staged = path.join(root, '.cache/nds-public');
+const staged = path.join(root, '.cache/nds-public-source');
 await fs.mkdir(staged, { recursive: true });
 await fs.cp(path.join(root, 'public/brand'), path.join(staged, 'brand'), { recursive: true });
-await fs.mkdir(path.join(staged, 'vendor/melonds'), { recursive: true });
+await fs.mkdir(path.join(staged, 'vendor/nds'), { recursive: true });
 for (const item of manifest.artifacts)
-    await fs.copyFile(path.join(target, item.file), path.join(staged, 'vendor/melonds', item.file));
-await fs.copyFile(path.join(root, 'engines/nds-manifest.json'), path.join(staged, 'vendor/melonds/PROVENANCE.json'));
-console.log('Pinned local melonDS core verified; no runtime downloads.');
+    await fs.copyFile(path.join(target, item.file), path.join(staged, 'vendor/nds', item.file));
+await fs.copyFile(path.join(root, 'engines/nds-manifest.json'), path.join(staged, 'vendor/nds/PROVENANCE.json'));
+await fs.copyFile(path.join(root,'engines/nds-source-manifest.json'),path.join(staged,'vendor/nds/SOURCE-MANIFEST.json'));
+await fs.copyFile(path.join(root,'docs/NDS-CORE.md'),path.join(staged,'vendor/nds/BUILDING.md'));
+console.log('Pinned source-built SkyEmu DS core verified; no runtime downloads.');

@@ -1,25 +1,31 @@
 {
-  "repository": "https://github.com/josepilas/pilas-melonds",
-  "revision": "4aee467df214df7f2f346bcba2219dd7bfafc4b2",
-  "license": "MPL-2.0",
+  "name": "SkyEmu DS / Koki source bridge",
+  "engineId": "skyemu-f4d3238b-koki1",
+  "repository": "https://github.com/skylersaleh/SkyEmu",
+  "revision": "f4d3238bf42da483ed1b7cc35649398b2110e4b4",
+  "license": "MIT / BSD-2-Clause",
+  "builtFromSource": true,
+  "bridgeSha256": "78ab7589fc60be4f231b7d19c68027c4441f4090c17070b68df1f2412c87bd9f",
+  "sourceManifest": "engines/nds-source-manifest.json",
+  "buildScript": "scripts/build-nds-core.mjs",
   "artifacts": [
     {
-      "file": "pilas-melonds-core.js",
-      "sha256": "5569cc9f4d0689fe6893445c2d53adfb82adb2d8a5e05e7b0e23c4c804367519",
-      "bytes": 78390,
-      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/pilas-melonds-core.js"
+      "file": "koki-nds-core.js",
+      "bytes": 62049,
+      "sha256": "fc65f54f25532418bebf4c41de18411fe30d366fa559ce5cb862ae9b4c785085",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.1.1/koki-nds-core.js"
     },
     {
-      "file": "pilas-melonds-core.wasm",
-      "sha256": "741152f2547f2e936441efda4a6e3b96f6c29d0d88aace6c08952a033c444ce6",
-      "bytes": 1424129,
-      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/pilas-melonds-core.wasm"
+      "file": "koki-nds-core.wasm",
+      "bytes": 329552,
+      "sha256": "69da44fc70e77c5c3e9c1a43c423abb5cb15144dd67cda69dbb02b1c85ae7648",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.1.1/koki-nds-core.wasm"
     },
     {
       "file": "LICENSE.txt",
-      "sha256": "9221c2f936159b8446d329249fb4c0f25be510f447383a0f13336ac7985668a3",
-      "bytes": 17099,
-      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/LICENSE"
+      "bytes": 33747,
+      "sha256": "f07aaf00ec5a503875c3d9158562d7de3b4b103c22e60ee5f45432ddd1bcd770",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.1.1/LICENSE.txt"
     }
   ]
 }

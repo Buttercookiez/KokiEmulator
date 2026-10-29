@@ -10,6 +10,13 @@
   "summary": "Your games and progress stay on your device. Koki does not require an account, collect analytics, show ads, or offer in-app purchases.",
   "sections": [
     {
+      "id": "scope",
+      "title": "Apps covered by this policy",
+      "paragraphs": [
+        "This policy applies to Koki GBA and Koki NDS for Windows and Android. Both apps use local storage and the same offline approach described below."
+      ]
+    },
+    {
       "id": "local-data",
       "title": "Data on your device",
       "paragraphs": [

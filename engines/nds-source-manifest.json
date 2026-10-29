@@ -1,0 +1,77 @@
+{
+  "repository": "https://github.com/skylersaleh/SkyEmu",
+  "revision": "f4d3238bf42da483ed1b7cc35649398b2110e4b4",
+  "license": "MIT",
+  "biosLicense": "BSD-2-Clause",
+  "compiler": {
+    "emscripten": "4.0.23",
+    "sdkRevision": "aaa43392544d695232b70eda706d751f18980c2a"
+  },
+  "files": [
+    {
+      "file": "LICENSE",
+      "bytes": 1075,
+      "sha256": "1f91405749a4baea5d57b812f4c995949c5008d77a6804d956be82c40b5c5e00"
+    },
+    {
+      "file": "src/nds.h",
+      "bytes": 349191,
+      "sha256": "27066f7f7ebb90efcd35295e7478658e4813582094b6b3cc446e72f3df9ad513"
+    },
+    {
+      "file": "src/arm7.h",
+      "bytes": 88322,
+      "sha256": "ca91de27c5d84e2c6804a2ae33534fc2a9a2bf29f359073d533576f0b1050b86"
+    },
+    {
+      "file": "src/sb_types.h",
+      "bytes": 10193,
+      "sha256": "21a36a16b96301ff5be084baaa19e67cc87588b9202b322c140c8bc7b05662bb"
+    },
+    {
+      "file": "src/shared.h",
+      "bytes": 907,
+      "sha256": "838ee2915a7630ec3daffbd01ac10c1ae2d91d12223667551be6134ccb6f345a"
+    },
+    {
+      "file": "src/nds_rom_database.h",
+      "bytes": 266340,
+      "sha256": "a6bdcb9f3253cba2e08ea20c537a5369c81f8706ef7fc2804c5cc2e40b4a6943"
+    },
+    {
+      "file": "src/freebios/drastic_bios_arm7.h",
+      "bytes": 101128,
+      "sha256": "ddff9b40351b602f87c84162516ee1073022207247e213e4d3f3660d713559aa"
+    },
+    {
+      "file": "src/freebios/drastic_bios_arm9.h",
+      "bytes": 25351,
+      "sha256": "2ab945799d133d197ae8af527cb48db33e17c6c286fe343cfce6fa470c35851c"
+    },
+    {
+      "file": "src/freebios/drastic_bios_readme.txt",
+      "bytes": 1794,
+      "sha256": "ae30cfa598415a01657dcc7c49d639eb76ab1cf175f2de85457e49d26d25865a"
+    },
+    {
+      "file": "src/freebios/bios_common.S",
+      "bytes": 35813,
+      "sha256": "516ad3571662127095503180839e754185bd41a5c69e1b028345eedbfef29d3e"
+    },
+    {
+      "file": "src/freebios/Makefile",
+      "bytes": 623,
+      "sha256": "014d5f90cd79e471ad43cf159221414f4cb0269254810c0f74e01914463b5b55"
+    },
+    {
+      "file": "src/sb_instr_impl.h",
+      "bytes": 20882,
+      "sha256": "5c5cddfc400c41bca21419e0453b5f968d5bc6d6f1b462945198299e87bcfe16"
+    },
+    {
+      "file": "src/sb_instr_tables.h",
+      "bytes": 40863,
+      "sha256": "857e2e27b59a942363d10aa2252604c87ad70149bea4bcb2df7340a3cbab3d5f"
+    }
+  ]
+}
