@@ -1,0 +1,19 @@
+diff --git a/engines/nds-core/koki-nds.c b/engines/nds-core/koki-nds.c
+index c5e1ac4..ce54d9a 100644
+--- a/engines/nds-core/koki-nds.c
++++ b/engines/nds-core/koki-nds.c
+@@ -41,6 +41,14 @@ API int koki_load_rom(Koki* k,const uint8_t* rom,uint32_t length,const uint8_t*
+  clear_logs(&k->scratch);nds_ptrs_init(&k->ds,&k->scratch,copy,length);k->rom_hash=hash_bytes(copy,length);k->loaded=true;k->error[0]=0;picture(k);return 1;
+ }
+ API int koki_run_frame(Koki* k){if(!k||!k->loaded)return 0;nds_tick(&k->emu,&k->ds,&k->scratch);k->emu.prev_frame_joy=k->emu.joy;picture(k);return 1;}
++/* Optional presentation skip. Both CPUs, DMA, audio, 3D and display capture
++ * still run. No state structures, identity or checkpoint fields are changed. */
++API int koki_run_frame_mode(Koki* k,int render){
++ if(render)return koki_run_frame(k);
++ if(!k||!k->loaded)return 0;
++ k->emu.render_frame=false;nds_tick(&k->emu,&k->ds,&k->scratch);
++ k->emu.prev_frame_joy=k->emu.joy;k->emu.render_frame=true;return 1;
++}
+ API uint8_t* koki_get_framebuffer_ptr(Koki* k){return k?k->rgba:NULL;}
+ API void koki_set_key_mask(Koki* k,unsigned mask){if(!k)return;const int keys[12]={SE_KEY_A,SE_KEY_B,SE_KEY_SELECT,SE_KEY_START,SE_KEY_RIGHT,SE_KEY_LEFT,SE_KEY_UP,SE_KEY_DOWN,SE_KEY_R,SE_KEY_L,SE_KEY_X,SE_KEY_Y};for(int i=0;i<12;i++)k->emu.joy.inputs[keys[i]]=(mask&(1u<<i))?0:1;}
+ API void koki_set_touch(Koki* k,int x,int y,int down){if(!k)return;k->emu.joy.inputs[SE_KEY_PEN_DOWN]=!!down;k->emu.joy.touch_pos[0]=fminf(255,fmaxf(0,x))/256.0f;k->emu.joy.touch_pos[1]=fminf(191,fmaxf(0,y))/192.0f;}

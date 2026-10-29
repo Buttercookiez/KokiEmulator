@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "compatibility": [
+    "0.1.4 checkpoint loads into extended core",
+    "New checkpoint loads back into unmodified 0.1.4 core",
+    "State length, magic, engine identity unchanged",
+    "ARM9/ARM7 continue when presentation is skipped"
+  ],
+  "benchmark": {
+    "fixture": "One existing 32 MB imported game, read only; no game or save file writes",
+    "timingsMsPerFrame": {
+      "oldFull": 13.961919444444442,
+      "newFull": 13.85743111111111,
+      "newSkipped": 11.194362222222228,
+      "newAlternating": 12.76101055555556
+    },
+    "alternatingReductionPercent": 8.601316557278471
+  },
+  "limitations": [
+    "Desktop core measurement; not a Redmi or Zelda performance claim"
+  ]
+}
