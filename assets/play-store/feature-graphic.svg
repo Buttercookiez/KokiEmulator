@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500" role="img" aria-labelledby="title desc">
+  <title id="title">Koki GBA Emulator</title>
+  <desc id="desc">The original white Split K and Koki lettering on a dark background.</desc>
+  <defs><linearGradient id="background" x2="1" y2="1"><stop stop-color="#191919"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient></defs>
+  <rect width="1024" height="500" fill="url(#background)"/>
+  <g transform="translate(72 76) scale(6.4)" fill="#f5f5f2"><rect x="12" y="12" width="9" height="40" rx="2"/><path d="M27 24L39 12H52L34 30H27Z"/><path d="M27 34H34L52 52H39L27 40Z"/></g>
+  <g transform="translate(310 152) scale(2.3)" fill="#f5f5f2">    <rect x="81" y="9" width="7" height="43" rx="1.5"/>
+    <path d="M93 29L106 16H116L100 33L118 52H108L93 36Z"/>
+    <path fill-rule="evenodd" d="M139 16A18 18 0 1 1 139 52A18 18 0 1 1 139 16ZM139 23A11 11 0 1 0 139 45A11 11 0 1 0 139 23Z"/>
+    <rect x="165" y="9" width="7" height="43" rx="1.5"/>
+    <path d="M177 29L190 16H200L184 33L202 52H192L177 36Z"/>
+    <rect x="211" y="19" width="7" height="33" rx="1.5"/>
+    <rect x="211" y="7" width="7" height="7" rx="2"/>
+</g>
+  <text x="497" y="322" fill="#eeeeeb" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="450" letter-spacing="-1">GBA Emulator</text>
+  <text x="499" y="363" fill="#92928f" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="400">Your games, your pace</text>
+</svg>

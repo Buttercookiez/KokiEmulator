@@ -1,0 +1,22 @@
+[
+  {
+    "file": "01-library.png",
+    "alt": "Koki game library with local imported homebrew games and search controls.",
+    "purpose": "Local game library"
+  },
+  {
+    "file": "02-controls.png",
+    "alt": "Koki touch control editor with movable buttons and control size options.",
+    "purpose": "Customizable touch controls"
+  },
+  {
+    "file": "03-colors.png",
+    "alt": "Koki Colors page with light and dark appearance and palette choices.",
+    "purpose": "Personal colors"
+  },
+  {
+    "file": "04-saves.png",
+    "alt": "Koki save history grouped by game with local checkpoints.",
+    "purpose": "Local save history"
+  }
+]

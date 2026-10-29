@@ -1,0 +1,68 @@
+{
+  "applicationName": "Koki GBA",
+  "alternateName": "Koki’s Emulator",
+  "developerName": "John Francis Marabe",
+  "supportEmail": "johnfrancismarabe040905@gmail.com",
+  "supportUrl": "https://github.com/Buttercookiez/KokiEmulator/issues",
+  "policyUrl": "https://koki-emulator.vercel.app/privacy/",
+  "supportPageUrl": "https://koki-emulator.vercel.app/support/",
+  "effectiveDate": "2026-10-29",
+  "summary": "Your games and progress stay on your device. Koki does not require an account, collect analytics, show ads, or offer in-app purchases.",
+  "sections": [
+    {
+      "id": "local-data",
+      "title": "Data on your device",
+      "paragraphs": [
+        "Koki stores the game files you import, their filenames and titles, in-game saves, checkpoints, screenshots, custom covers, favorites, play history, control layouts, and settings in local app storage. File hashes are used locally to identify duplicate games.",
+        "These files are used to run your games, remember preferences, and restore your progress. Koki does not upload your library or send this information to the developer. The emulator core, fonts, and interface assets are bundled for offline use."
+      ]
+    },
+    {
+      "id": "collection",
+      "title": "Collection and sharing",
+      "paragraphs": [
+        "The app has no account system, advertising SDK, analytics service, or developer-operated cloud save service. Koki does not collect or sell your personal data, game files, saves, device identifiers, or usage history.",
+        "If you export a save, screenshot, or full library backup, Koki creates a file on your device. On Android, export files are temporarily placed in the app cache and the system share sheet lets you choose where to save or send them. A destination app or service you choose handles that copy under its own privacy terms."
+      ]
+    },
+    {
+      "id": "access",
+      "title": "Files and device access",
+      "paragraphs": [
+        "You choose which games, covers, saves, and backups to import using the system file picker. Koki copies imported game files into its own library; it does not alter your original imported files. Koki does not request access to your contacts, camera, microphone, or location.",
+        "The Android package declares Internet access for its WebView environment, but the app’s emulation and library features work offline and contain no telemetry endpoint. Opening a website, sending a support email, or sharing an export uses the external app or service you select."
+      ]
+    },
+    {
+      "id": "retention",
+      "title": "Keeping and deleting data",
+      "paragraphs": [
+        "Local data remains on your device until you remove it. In Game details, Remove game deletes that imported copy and its local progress from Koki. You can delete individual checkpoints in Save history. Original source files and backups you exported elsewhere are not deleted by removing a game from Koki.",
+        "On Android, Clear storage or uninstalling Koki removes its private library and preferences. Android automatic app backup is disabled for this release. Export a full backup before reinstalling or moving devices. On Windows, app data is kept separately from the portable executable; Settings → Open data folder shows its location. Browser preview data can be removed by clearing that site’s storage.",
+        "Exported files or copies you shared remain under your control. Delete those copies from their saved locations or ask the destination service to remove them. Because the developer does not receive your local library, there is no server-side library or account for the developer to delete."
+      ]
+    },
+    {
+      "id": "website",
+      "title": "Website and support",
+      "paragraphs": [
+        "The Koki website is hosted on Vercel and does not use advertising or analytics scripts. Like other website hosts, the hosting provider may process ordinary connection information, such as IP addresses and request logs, to deliver and secure the website. This is separate from the offline emulator library.",
+        "If you contact support by email or open a GitHub issue, the message and information you choose to include are handled by the email provider or GitHub and the developer to respond to your request. Avoid attaching game files or private backups. External websites, Google Play, email providers, and sharing destinations have their own privacy policies."
+      ]
+    },
+    {
+      "id": "children",
+      "title": "Children’s privacy",
+      "paragraphs": [
+        "Koki has no accounts, advertising, or in-app data collection and does not knowingly collect personal information from children. A parent or guardian can contact the developer about a privacy concern. Game content comes from files selected by the user; no commercial games are included."
+      ]
+    },
+    {
+      "id": "changes",
+      "title": "Changes to this policy",
+      "paragraphs": [
+        "If Koki’s data practices change, this policy and its effective date will be updated. Any future feature that sends information off your device will need an accurate disclosure before release. This policy describes the current offline release."
+      ]
+    }
+  ]
+}

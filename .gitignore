@@ -25,3 +25,10 @@ public/vendor/mgba/
 .env*
 
 dist-vercel/
+
+*.p12
+*.pfx
+*.kokikey
+*.dpapi
+key.properties
+keystore.properties

@@ -11,12 +11,12 @@ export function Modal({ title, description, children, onClose, wide, className =
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    ref.current?.querySelector<HTMLElement>('button, input, select, textarea, a[href]')?.focus();
+    ref.current?.querySelector<HTMLElement>('button, summary, input, select, textarea, a[href]')?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && event.target instanceof HTMLElement && event.target.closest('[role="combobox"][aria-expanded="true"]')) return;
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close.current(); }
       if (event.key !== 'Tab') return;
-      const nodes = [...(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]') ?? [])].filter(node => node.getClientRects().length);
+      const nodes = [...(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), summary, input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]') ?? [])].filter(node => node.getClientRects().length);
       const first = nodes[0]; const last = nodes[nodes.length - 1];
       if (!first) { event.preventDefault(); return; }
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }

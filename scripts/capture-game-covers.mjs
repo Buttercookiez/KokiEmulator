@@ -16,7 +16,6 @@ const recipes = [
   { title: 'Minicraft', file: 'minicraft', speed: 1, boot: 3000, buttons: ['a', 'a', 'a'], delay: 1800, hold: 200 },
   { title: 'Skyland', file: 'skyland', speed: 1, boot: 3000, buttons: ['a', 'a', 'a', 'a'], delay: 1800, hold: 200 },
   { title: 'Tigermoth', file: 'tigermoth', speed: 1, boot: 3000, buttons: [], delay: 0, hold: 0 },
-  { title: 'uCity Advance', file: 'ucity-advance', speed: 4, boot: 1200, buttons: [], delay: 0, hold: 0 },
 ];
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, channel: process.env.KOKI_BROWSER_CHANNEL || 'msedge' });

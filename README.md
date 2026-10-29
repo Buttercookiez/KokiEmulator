@@ -2,7 +2,7 @@
 
 A playable, offline Game Boy Advance emulator for Windows and Android, built around mGBA. The interface uses the original Split K identity, locally bundled Inter typography, neutral colors, and light, dark, and system appearances.
 
-Version 0.4.3 adds an assembling K startup splash on Windows and Android, with saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
+The prepared Android Play Store version is 0.4.4 (code 18), with production upload signing, offline privacy/support and submission materials. The existing public Windows and Android debug previews remain 0.4.3. See [Play Store handoff](docs/play-store/START-HERE.md). The app retains its assembling K startup splash, saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
 
 ## Use the app
 
@@ -17,7 +17,7 @@ There is no required account, server, analytics, CDN, or runtime download. No co
 - Collapsible sidebar with a remembered size, a sticky top bar, fewer labels, and improved Resume hover contrast.
 - Fullscreen gameplay with floating controls revealed by mouse movement, touch, or keyboard navigation; desktop overlays hide after two idle seconds; mobile touch controls and the game-menu button stay available.
 - Searchable library, favorites, grid/list views, sorting, custom local covers, cover removal/default restoration, and renamed titles.
-- Offline screenshot artwork for the five homebrew sample games, with credits; other games use their latest screenshot.
+- Offline screenshot artwork for four homebrew sample games, with credits; other games use their latest screenshot.
 - Consistent light/dark dropdowns with keyboard and touch selection, plus a clean search focus state.
 - Save history grouped into collapsible game sections, with checkpoint counts and newest saves first.
 - Ordinary `.sav` import/export, automatic resume, screenshot checkpoints, named checkpoints, and recovery before restoring or restarting.
@@ -34,7 +34,7 @@ Choose a game cover to open **Game details**, then turn on **Play profile**. Cha
 
 The Windows download is about 102.83 MB (previously 113.76 MB); the extracted app is about 325 MB (previously 418 MB). Its application archive is about 1.65 MB, down from 43.76 MB. The optimized, debug-signed Android APK is 1.39 MB, down from 5.50 MB. Sizes use decimal MB. Windows retains its offline Electron runtime and GPU fallbacks.
 
-Frontend packages are development/build dependencies because Vite bundles them. Production apps omit duplicate node_modules, source maps, and unused font subsets. Windows keeps the English runtime locale. Android defaults to the code/resource-shrunk compact variant, signed with the same debug key as earlier APKs. Use --debug with the build script for an ordinary debug build; --release remains unsigned until production signing is configured. Local ROMs, battery saves and checkpoints are unchanged.
+Frontend packages are development/build dependencies because Vite bundles them. Production apps omit duplicate node_modules, source maps, and unused font subsets. Windows keeps the English runtime locale. Android defaults to the code/resource-shrunk compact variant, signed with the same debug key as earlier APKs. Use --debug for an ordinary debug build. The separate --play build requires production upload signing and writes an AAB plus a verification APK to release/play-store/. Local ROMs, battery saves and checkpoints are unchanged.
 
 ## Develop
 
@@ -57,7 +57,7 @@ npm run desktop:build
 npm run android:build
 ```
 
-`desktop:build` creates a portable Windows executable in `release/`. `android:build` builds a debug-signed APK, copies it into `release/`, and retains the Android Studio project in `android/`. A production Android release needs a separately configured signing key.
+`desktop:build` creates a portable Windows executable in `release/`. `android:build` builds a debug-signed APK, copies it into `release/`, and retains the Android Studio project in `android/`. For the separately signed Play Store bundle, follow docs/ANDROID-SIGNING.md and run npm run android:play. Existing preview downloads remain separate.
 
 ## Controls
 
@@ -152,3 +152,16 @@ npm run build:landing
 ```
 
 This build needs no Electron install or local `release/` files. Download buttons use the GitHub preview release described in `website/koki-showcase/releases/current.json`. The emulator’s existing `npm run build` remains the app build. Set `SITE_URL` for a custom canonical domain; otherwise Vercel’s production URL is used.
+
+## Play Store preparation
+
+Version 0.4.4 (Android code 18) prepares a free release without ads, purchases, accounts or analytics. It adds an offline privacy policy, public policy and support pages, and backup guidance for moving from the debug preview to Google Play. The bundled uCity default screenshot has been removed; user game files and local screenshots are unchanged.
+
+- Start with [the submission kit](docs/play-store/START-HERE.md).
+- [Signing and key backup](docs/ANDROID-SIGNING.md) explains the separate upload key, protected outside this checkout.
+- `npm run android:play` builds and verifies the signed AAB and a local testing APK.
+- `npm run play:kit` exports the listing, graphics and actual phone screenshots into `release/play-store/listing/`.
+- Public privacy policy: https://koki-emulator.vercel.app/privacy/
+- Public support and preview migration: https://koki-emulator.vercel.app/support/
+
+The owner still needs a verified Play Console account and must complete its owner declarations before starting closed testing. A signed bundle is not Google approval or proof of physical-device testing. Existing debug preview users must export a full library backup before uninstalling the preview to install the differently signed Play version.

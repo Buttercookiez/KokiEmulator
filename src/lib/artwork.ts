@@ -5,7 +5,6 @@ const byHash: Record<string, string> = {
   '173c893f23f12f2db767fd80cf111aabde56ee6652a9b390c2f4e2aee7a4fd01': 'minicraft',
   '73050b14462c461423d5ff994fc42519784ef903fbd8a7512ab91376a37c129e': 'skyland',
   '0c4f898315b9147522ccdb1d1c234d7b43c65d40bfe21be4eedcf722e45f3e7f': 'tigermoth',
-  '069230a67939896c15cba86f0bffe31d12655597e2ac4cfed5b832e216b57bff': 'ucity-advance',
 };
 const byTitle: Record<string, string> = {
   auntflorasmansion: 'aunt-floras-mansion',
@@ -13,7 +12,6 @@ const byTitle: Record<string, string> = {
   minicraftgba: 'minicraft',
   skyland: 'skyland',
   tigermoth: 'tigermoth',
-  ucityadvance: 'ucity-advance',
 };
 const normalizeTitle = (value: string) => value.replace(/\.(gba|bin|zip)$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 

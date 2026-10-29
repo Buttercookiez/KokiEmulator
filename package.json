@@ -1,6 +1,6 @@
 {
   "name": "kokis-emulator",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": true,
   "description": "An offline GBA emulator with a quiet monochrome library for Windows and Android.",
   "type": "module",
@@ -31,7 +31,11 @@
     "test:mobile-controls": "node scripts/test-mobile-controls.mjs",
     "test:mobile-play": "node scripts/test-mobile-play.mjs",
     "test:motion": "node scripts/test-motion.mjs",
-    "build:landing": "npm run build:vercel --prefix website/koki-showcase"
+    "build:landing": "npm run build:vercel --prefix website/koki-showcase",
+    "android:play": "pwsh -NoProfile -File scripts/android-signing.ps1 -Action Build",
+    "android:signing": "pwsh -NoProfile -File scripts/android-signing.ps1 -Action Status",
+    "play:kit": "node scripts/export-play-store-kit.mjs --require-screenshots",
+    "play:verify": "node scripts/verify-play-release.mjs"
   },
   "dependencies": {},
   "devDependencies": {

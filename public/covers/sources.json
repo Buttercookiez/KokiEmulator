@@ -38,15 +38,5 @@
     "release": "https://gbajam21.github.io/entries/tigermoth/tigermoth-20210617-beta2.gba",
     "romSha256": "0c4f898315b9147522ccdb1d1c234d7b43c65d40bfe21be4eedcf722e45f3e7f",
     "capture": "Unmodified 240x160 mGBA frame"
-  },
-  {
-    "title": "uCity Advance",
-    "screenshot": "ucity-advance.png",
-    "developer": "Antonio Niño Díaz / SkyLyrac",
-    "source": "https://github.com/AntonioND/ucity-advance",
-    "license": "GPL-3.0 code; CC-BY-NC-SA-4.0 art and original audio; other music under Mod Archive Distribution License",
-    "release": "https://github.com/AntonioND/ucity-advance/releases/download/v1.0.3/ucity-advance-v1.0.3.gba",
-    "romSha256": "069230a67939896c15cba86f0bffe31d12655597e2ac4cfed5b832e216b57bff",
-    "capture": "Unmodified 240x160 mGBA frame"
   }
 ]

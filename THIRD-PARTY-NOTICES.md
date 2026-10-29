@@ -1,9 +1,11 @@
 # Third-party notices
 
-Koki's Emulator bundles the mGBA emulator through `@wasm-gaming/mgba-wasm`, distributed under the Mozilla Public License 2.0. The unmodified core is copied from the pinned package during installation/build. See [core integration and source links](docs/EMULATOR-CORE.md).
+Koki bundles license and copyright texts for its listed frontend, emulator and Android runtime components. Open **About Koki → Open-source licenses** to read them entirely offline. The complete texts are compiled into the app once, without a separate runtime download or redundant public copies.
 
-The user interface uses React (MIT), Lucide (ISC), Inter (SIL Open Font License 1.1), idb (ISC), and fflate (MIT). Electron and Capacitor carry their respective licenses and bundled notices. Dependency packages retain their license files in the installed source distribution.
+`scripts/sync-assets.mjs` reproducibly collects the exact installed LICENSE files for React, React DOM, Scheduler, Lucide React, idb, fflate, Inter/Fontsource, and Capacitor Core, Android, App, Filesystem and Share. The generated, tracked UI inventory is `src/legal/third-party.json`; it records installed package versions, complete license texts, source references and content hashes. Missing package licenses fail the synchronization step.
 
-No commercial games or Nintendo BIOS images are included.
+The unmodified mGBA artifacts are copied from pinned `@wasm-gaming/mgba-wasm` 0.1.1 under MPL-2.0. Its full license and [core integration/source notice](docs/EMULATOR-CORE.md) are bundled beside the core and included in the offline license reader.
 
-The library includes five homebrew game screenshots. Their creators, source links, and artwork licenses are listed in [bundled artwork credits](public/covers/CREDITS.md) (available as covers/CREDITS.md in the built app). User-provided custom art retains priority.
+Identified Android runtime notices cover AndroidX, Kotlin/coroutines, Apache Cordova Android and Ionic's native filesystem library. Exact official license/NOTICE files and their source URLs and SHA-256 hashes are retained in `licenses/native/`. This inventory describes those components; it does not replace notices accompanying the platform WebView or the separately distributed Electron runtime. Build tools and test-only dependencies are not represented as shipped app components.
+
+No commercial games or Nintendo BIOS images are included. Four homebrew game screenshots are bundled, with their creators, sources and full license texts in the offline reader and [artwork credits](public/covers/CREDITS.md). The noncommercial uCity Advance screenshot is no longer included. User-provided game files and artwork remain the user's own content.

@@ -1,0 +1,27 @@
+[
+  {
+    "file": "AndroidX-Apache-2.0.txt",
+    "source": "https://raw.githubusercontent.com/androidx/androidx/androidx-main/LICENSE.txt",
+    "sha256": "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"
+  },
+  {
+    "file": "Kotlin-Apache-2.0.txt",
+    "source": "https://raw.githubusercontent.com/JetBrains/kotlin/master/license/LICENSE.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "file": "Cordova-Apache-2.0.txt",
+    "source": "https://raw.githubusercontent.com/apache/cordova-android/rel/14.0.1/LICENSE",
+    "sha256": "401f08372facabc78d6d408a32de4f617fd9552c95e01797838c9d60a938b4da"
+  },
+  {
+    "file": "Cordova-NOTICE.txt",
+    "source": "https://raw.githubusercontent.com/apache/cordova-android/rel/14.0.1/NOTICE",
+    "sha256": "e94707080ab2781d5ba4ceac999f31db2539d2477783287969c52580b9fa84b0"
+  },
+  {
+    "file": "Ionic-IonFilesystem-MIT.txt",
+    "source": "https://raw.githubusercontent.com/ionic-team/ion-android-filesystem/main/LICENSE",
+    "sha256": "de884404585ed20280150b0768082b6004d3548aaa0d6e596d6bfa0538ab331d"
+  }
+]

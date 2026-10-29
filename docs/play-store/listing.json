@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "preparedForVersion": "0.4.4",
+  "locale": "en-US",
+  "appName": "Koki GBA Emulator",
+  "shortDescription": "An offline GBA emulator with customizable controls, saves and a quiet library.",
+  "fullDescription": "Play your own Game Boy Advance games in a clean, personal library. Koki is an offline GBA emulator with local saves, adjustable touch controls and a minimalist interface.\n\nMake the controls yours\nMove and resize the on-screen buttons, choose a control preset, and keep separate portrait and landscape layouts. Save a different setup for each game. Compatible keyboards and standard gamepads are also supported.\n\nKeep your progress\nUse in-game saves, named checkpoints and automatic resume. Preview a checkpoint before restoring it, keep recovery history, and import or export standard .sav files. Export a full library backup before moving devices or reinstalling.\n\nPlay at your pace\nPause, rewind, fast-forward or slow down. Adjust volume, display filters and the game picture position. Optional turbo buttons and touch vibration let you tailor the controls to your device.\n\nA library that feels like yours\nSearch and sort your games, mark favorites, switch between grid and list, and choose your own covers. Use light, dark or system appearance with saved color choices and reduced-motion support.\n\nLocal by design\nKoki has no required account, advertisements, in-app purchases or analytics. Imported games, progress, artwork and settings stay on your device. You choose when to export or share a backup.\n\nBring your own games\nImport your own supported .gba, .bin or .zip files. No games or Nintendo BIOS are included. Use only files you have the right to use. Compatibility and performance can vary by game and device.\n\nKoki is an independent emulator and is not affiliated with or endorsed by Nintendo.\n\nSupport: johnfrancismarabe040905@gmail.com\nPrivacy: https://koki-emulator.vercel.app/privacy/",
+  "releaseNotes": "Closed testing release of Koki GBA Emulator.\n- Offline game imports, local saves and library backups.\n- Adjustable touch controls and per-game play settings.\n- Light and dark colors, reduced motion and assembling K startup.\n- Privacy, support and preview-to-Play backup guidance.",
+  "developerName": "John Francis Marabe",
+  "supportEmail": "johnfrancismarabe040905@gmail.com",
+  "website": "https://koki-emulator.vercel.app/",
+  "privacyPolicyUrl": "https://koki-emulator.vercel.app/privacy/",
+  "packageName": "com.koki.emulator",
+  "pricing": "Free",
+  "containsAds": false,
+  "inAppPurchases": false,
+  "accountRequired": false,
+  "suggestedAppType": "App",
+  "suggestedCategory": "Tools",
+  "targetAudience": {
+    "minimumAge": 13,
+    "label": "Teens and adults (13+)",
+    "playConsoleAgeGroups": [
+      "13-15",
+      "16-17",
+      "18 and over"
+    ],
+    "directedToChildrenUnder13": false,
+    "ownerConfirmed": true,
+    "consoleDeclarationCompleted": false
+  },
+  "contentRating": null,
+  "audienceAndRatingNote": "Owner confirmed teens and adults 13+. Select 13-15, 16-17 and 18 and over in Play Console; the actual Console declaration remains pending. Complete the actual IARC questionnaire; no content rating is preassigned."
+}

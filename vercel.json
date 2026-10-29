@@ -5,5 +5,20 @@
   "buildCommand": "npm run build:landing",
   "outputDirectory": "website/koki-showcase/dist-vercel",
   "cleanUrls": true,
-  "trailingSlash": true
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/reviewer/koki-diagnostic.gba",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/octet-stream"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"koki-diagnostic.gba\""
+        }
+      ]
+    }
+  ]
 }

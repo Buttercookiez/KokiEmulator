@@ -1,0 +1,2 @@
+# Preserve exact upstream license bytes used by the provenance checks.
+licenses/native/*.txt text eol=lf whitespace=-blank-at-eof
