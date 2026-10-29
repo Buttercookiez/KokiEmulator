@@ -4,7 +4,7 @@ Prepared for 0.4.4 by the project workflow. Public developer: John Francis Marab
 
 ## What is prepared
 
-Upload release/play-store/Koki-GBA-0.4.4-PlayStore.aab to Google Play. Keep release/play-store/Koki-GBA-0.4.4-verification.apk for local installation and QA only; it is not the new-app Play upload file. Build metadata, hashes and validation results are alongside them. The listing upload folder is release/play-store/listing/: copy-ready text, original 512 x 512 store icon, 1024 x 500 feature graphic, actual app screenshots when captured, alt text and ASSET-VALIDATION.json. Signing keys/passwords must not be in that listing folder. The in-app privacy/support and public privacy page describe the current offline app.
+Upload release/play-store/Koki-GBA-0.4.4-PlayStore.aab to Google Play. Keep release/play-store/Koki-GBA-0.4.4-verification.apk for local installation and QA only; it is not the new-app Play upload file. Build metadata, hashes and validation results are alongside them. The listing upload folder is release/play-store/listing/: copy-ready text, original 512 x 512 store icon, 1024 x 500 feature graphic, four actual Android app screenshots, alt text and ASSET-VALIDATION.json. Signing keys/passwords must not be in that listing folder. The in-app privacy/support and public privacy page describe the current offline app.
 
 ## Your Google Play account is still required
 
