@@ -19,8 +19,10 @@ assert(!files.some(n => n.includes('/mgba/')));
 const meta = JSON.parse(extractFile(asar, 'package.json').toString());
 assert.equal(meta.kokiSystem, 'nds');
 assert.equal(meta.version, '0.1.0');
+const windowsArtifact = process.argv[2] || 'Koki-NDS-0.1.0-Windows.exe';
+assert(path.basename(windowsArtifact) === windowsArtifact && windowsArtifact.endsWith('.exe'), 'Choose a Windows filename inside release-nds');
 const artifacts = [];
-for (const file of ['Koki-NDS-0.1.0-Windows.exe', 'Koki-NDS-0.1.0-Android.apk']) {
+for (const file of [windowsArtifact, 'Koki-NDS-0.1.0-Android.apk']) {
     const b = await fs.readFile('release-nds/' + file);
     artifacts.push({ file, bytes: b.length, sha256: createHash('sha256').update(b).digest('hex') });
 }
