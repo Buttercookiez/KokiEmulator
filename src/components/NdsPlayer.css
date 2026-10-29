@@ -6,6 +6,6 @@
 .sidebar-header .nds-brand{flex:1;min-width:0;width:auto}
 .sidebar-header .nds-brand img{flex-shrink:1;min-width:0}
 .sidebar-collapsed .sidebar-header .nds-brand{flex:none}
-.nds-brand-label{margin-left:-10px;flex-shrink:0;font-size:8px;line-height:1;letter-spacing:.06em;color:var(--muted);font-weight:550;align-self:flex-end}
+.nds-brand-label{margin-left:-10px;flex-shrink:0;font-size:9px;line-height:1;letter-spacing:.06em;color:var(--muted);font-weight:550;align-self:center}
 
 .player-shell .piece-x button,.player-shell .piece-y button{width:58px;height:58px;border-radius:50%;font-size:20px}

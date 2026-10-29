@@ -35,7 +35,7 @@ async function adjust(folder) { for (const e of await fs.readdir(folder, { withF
         let s = await fs.readFile(p, 'utf8');
         s = s.replaceAll('com.koki.emulator', 'com.koki.nds').replaceAll("Koki\\'s Emulator", 'Koki NDS').replaceAll("Koki's Emulator", 'Koki NDS');
         if (e.name === 'build.gradle' && folder.endsWith(path.sep + 'app'))
-            s = s.replace(/versionCode \d+/, 'versionCode 2').replace(/versionName "[^"]+"/, 'versionName "0.1.1"');
+            s = s.replace(/versionCode \d+/, 'versionCode 3').replace(/versionName "[^"]+"/, 'versionName "0.1.2"');
         await fs.writeFile(p, s);
     }
 } }
@@ -44,5 +44,5 @@ await run(process.execPath, ['scripts/generate-nds-icons.cjs']);
 await run(process.execPath, ['node_modules/@capacitor/cli/bin/capacitor', 'sync', 'android']);
 await run(env.ComSpec || 'cmd.exe', ['/d', '/c', 'gradlew.bat', 'assembleCompact', '--no-daemon', '--console=plain'], destination);
 await fs.mkdir(path.join(root, 'release-nds'), { recursive: true });
-await fs.copyFile(path.join(env.KOKI_ANDROID_BUILD_ROOT, 'app/outputs/apk/compact/app-compact.apk'), path.join(root, 'release-nds/Koki-NDS-0.1.1-Android.apk'));
+await fs.copyFile(path.join(env.KOKI_ANDROID_BUILD_ROOT, 'app/outputs/apk/compact/app-compact.apk'), path.join(root, 'release-nds/Koki-NDS-0.1.2-Android.apk'));
 console.log('Separate NDS preview APK ready; GBA app/downloads unchanged.');
