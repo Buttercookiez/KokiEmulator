@@ -1,3 +1,4 @@
+import { IS_NDS } from '../platform';
 import type { Game } from '../types';
 
 const byHash: Record<string, string> = {
@@ -19,6 +20,7 @@ const normalizeTitle = (value: string) => value.replace(/\.(gba|bin|zip)$/i, '')
 export function getGameCover(game: Game): string | undefined {
   if (game.coverHidden === true) return undefined;
   if (game.cover) return game.cover;
+  if (IS_NDS) return game.screenshot;
   const bundled = byHash[game.hash.toLowerCase()] || byTitle[normalizeTitle(game.title)] || byTitle[normalizeTitle(game.fileName)];
   return bundled ? `./covers/${bundled}.png` : game.screenshot;
 }

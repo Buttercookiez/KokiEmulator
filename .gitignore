@@ -6,6 +6,8 @@ test-results/
 playwright-report/
 *.log
 *.gba
+*.nds
+*.srl
 *.gbc
 *.gb
 *.sav
@@ -32,3 +34,8 @@ dist-vercel/
 *.dpapi
 key.properties
 keystore.properties
+
+engines/nds/
+dist-nds/
+release-nds/
+android-nds/

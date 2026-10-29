@@ -1,8 +1,10 @@
+import { IS_NDS } from './platform';
 import { normalizeScreen, normalizeTurbo, type GameScreen, type TurboSettings } from './lib/mobile-play';
 import { normalizeTouchLayouts, type TouchLayouts } from './lib/touch-layout';
 import { DEFAULT_CONTROLS } from './lib/controls';
 
 export type GbaButton = 'a' | 'b' | 'select' | 'start' | 'right' | 'left' | 'up' | 'down' | 'r' | 'l';
+export type EmulatorButton = GbaButton | 'x' | 'y';
 export interface Game {
   id: string;
   title: string;
@@ -43,12 +45,15 @@ export interface Settings {
   touchVibration: boolean;
   filter: 'pixel' | 'smooth' | 'lcd';
   controls: Record<GbaButton, string>;
+  dsLayout?: 'vertical'|'horizontal'|'bottom';
+  dsSwap?: boolean;
+  dsControls?: {x:string;y:string};
   touchControls: boolean;
 }
-export type GameProfile = Partial<Pick<Settings, 'speed' | 'filter' | 'controls' | 'touchLayouts' | 'touchOpacity' | 'gameScreen' | 'turbo' | 'touchVibration'>>;
+export type GameProfile = Partial<Pick<Settings, 'speed' | 'filter' | 'controls' | 'dsControls' | 'touchLayouts' | 'touchOpacity' | 'gameScreen' | 'turbo' | 'touchVibration'>>;
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system', lightColor: 'monochrome', darkColor: 'monochrome', artworkColor: true, volume: 0.7, speed: 1,
-  autoResume: true, rewindSeconds: 10, touchOpacity: 0.75, touchLayouts: normalizeTouchLayouts(undefined), gameScreen: normalizeScreen(undefined), turbo: normalizeTurbo(undefined), touchVibration: false, filter: 'pixel', touchControls: true,
+  autoResume: true, rewindSeconds: 10, touchOpacity: 0.75, touchLayouts: normalizeTouchLayouts(undefined), gameScreen: normalizeScreen(IS_NDS ? {scale:.7,position:'top'} : undefined), turbo: normalizeTurbo(undefined), touchVibration: false, filter: 'pixel', touchControls: true,
   controls: { ...DEFAULT_CONTROLS },
 };
 export interface NativeStorage {

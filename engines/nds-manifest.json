@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/josepilas/pilas-melonds",
+  "revision": "4aee467df214df7f2f346bcba2219dd7bfafc4b2",
+  "license": "MPL-2.0",
+  "artifacts": [
+    {
+      "file": "pilas-melonds-core.js",
+      "sha256": "5569cc9f4d0689fe6893445c2d53adfb82adb2d8a5e05e7b0e23c4c804367519",
+      "bytes": 78390,
+      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/pilas-melonds-core.js"
+    },
+    {
+      "file": "pilas-melonds-core.wasm",
+      "sha256": "741152f2547f2e936441efda4a6e3b96f6c29d0d88aace6c08952a033c444ce6",
+      "bytes": 1424129,
+      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/pilas-melonds-core.wasm"
+    },
+    {
+      "file": "LICENSE.txt",
+      "sha256": "9221c2f936159b8446d329249fb4c0f25be510f447383a0f13336ac7985668a3",
+      "bytes": 17099,
+      "url": "https://raw.githubusercontent.com/josepilas/pilas-melonds/4aee467df214df7f2f346bcba2219dd7bfafc4b2/LICENSE"
+    }
+  ]
+}

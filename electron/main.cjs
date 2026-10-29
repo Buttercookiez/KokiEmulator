@@ -5,7 +5,9 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { createLocalStorage, validBytes } = require('./storage.cjs');
 
-app.setName("Koki's Emulator");
+const isNds = process.env.KOKI_SYSTEM === 'nds' || require('../package.json').kokiSystem === 'nds';
+app.setName(isNds ? 'Koki NDS' : "Koki's Emulator");
+if (isNds) app.setPath('userData', path.join(app.getPath('appData'), 'Koki NDS'));
 const testMode = !app.isPackaged && process.env.KOKI_TEST_MODE === '1';
 if (testMode && process.env.KOKI_TEST_DATA_DIR) {
   if (!path.isAbsolute(process.env.KOKI_TEST_DATA_DIR)) throw new Error('The test data directory must be absolute.');
@@ -64,7 +66,7 @@ function registerIpc() {
   });
   ipcMain.handle('koki:export', async (event, name, bytes) => {
     authorize(event);
-    validBytes(bytes);
+    validBytes(bytes, isNds ? 512 * 1024 * 1024 : undefined);
     if (typeof name !== 'string' || !name || name.length > 160 || name !== path.basename(name) || /[\\/\x00-\x1f<>:"|?*]/.test(name) || /[. ]$/.test(name)) throw new Error('Invalid export filename.');
     const result = await dialog.showSaveDialog(window, { defaultPath: path.join(app.getPath('downloads'), name), title: 'Export from Koki', buttonLabel: 'Export', properties: ['showOverwriteConfirmation', 'createDirectory'] });
     if (result.canceled || !result.filePath) return false;
@@ -74,7 +76,7 @@ function registerIpc() {
 }
 
 function registerBundleProtocol() {
-  const bundle = path.join(app.getAppPath(), 'dist');
+  const bundle = path.join(app.getAppPath(), isNds ? 'dist-nds' : 'dist');
   const mime = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.mjs': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.wasm': 'application/wasm', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf' };
   protocol.handle('app', async (request) => {
     try {
@@ -103,8 +105,8 @@ function createWindow() {
   pendingCloseToken = null;
   window = new BrowserWindow({
     width: 1340, height: 900, minWidth: 720, minHeight: 560,
-    title: "Koki's Emulator", backgroundColor: startupBackground,
-    icon: app.isPackaged ? path.join(process.resourcesPath, 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', 'koki-gba.png'),
+    title: isNds ? "Koki NDS" : "Koki's Emulator", backgroundColor: startupBackground,
+    icon: app.isPackaged ? path.join(process.resourcesPath, isNds ? 'koki-nds.png' : 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', isNds ? 'koki-nds.png' : 'koki-gba.png'),
     autoHideMenuBar: true, show: false,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, backgroundThrottling: !testMode },
   });
@@ -125,10 +127,10 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   if (!ownsInstance) return;
-  library = createLocalStorage(path.join(app.getPath('userData'), 'library'));
+  library = createLocalStorage(path.join(app.getPath('userData'), 'library'), isNds ? 512 * 1024 * 1024 : undefined);
   await library.prepare();
   try {
-    const saved = await library.read('library.json');
+    const saved = await library.read(isNds ? 'nds/library.json' : 'library.json');
     const theme = saved ? JSON.parse(Buffer.from(saved).toString('utf8'))?.settings?.theme : 'system';
     const dark = theme === 'dark' || theme !== 'light' && nativeTheme.shouldUseDarkColors;
     startupBackground = dark ? '#0e0e0e' : '#f7f7f7';

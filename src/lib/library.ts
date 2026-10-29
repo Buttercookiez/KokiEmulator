@@ -1,3 +1,4 @@
+import { IS_NDS, SYSTEM, ROM_EXTENSION, ROM_PATTERN, MAX_STATE_SIZE } from '../platform';
 import { unzipSync, zipSync, strFromU8, strToU8 } from 'fflate';
 import { DEFAULT_SETTINGS } from '../types';
 import type { Game, GameProfile, Settings, Snapshot } from '../types';
@@ -12,7 +13,7 @@ import { normalizeScreen, normalizeTurbo } from './mobile-play';
 interface LibraryIndex { version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
 const MAX_BACKUP = 512 * 1024 * 1024;
 const INDEX = 'library.json';
-const romPath = (id: string) => `roms/${id}.gba`;
+const romPath = (id: string) => `roms/${id}.${ROM_EXTENSION}`;
 const batteryPath = (id: string) => `saves/${id}.sav`;
 const snapshotPath = (id: string) => `states/${id}.state`;
 let pending: Promise<unknown> = Promise.resolve();
@@ -40,8 +41,9 @@ function normalizeSettings(value: Partial<Settings> = {}): Settings {
     volume: number(value.volume, defaults.volume, 0, 1), speed: number(value.speed, 1, 0.5, 4),
     rewindSeconds: number(value.rewindSeconds, 10, 0, 20), touchOpacity: number(value.touchOpacity, 0.75, 0.2, 1),
     controls: normalizeControls(value.controls),
+    ...(IS_NDS ? {dsLayout: ['vertical','horizontal','bottom'].includes(value.dsLayout ?? '') ? value.dsLayout : 'vertical', dsSwap:value.dsSwap===true, dsControls:{x:typeof value.dsControls?.x === 'string' ? value.dsControls.x.slice(0,40) : 'KeyI',y:typeof value.dsControls?.y === 'string' ? value.dsControls.y.slice(0,40) : 'KeyU'}} : {}),
     touchLayouts: normalizeTouchLayouts(value.touchLayouts),
-    gameScreen: normalizeScreen(value.gameScreen), turbo: normalizeTurbo(value.turbo), touchVibration: value.touchVibration === true,
+    gameScreen: normalizeScreen(value.gameScreen ?? defaults.gameScreen), turbo: normalizeTurbo(value.turbo), touchVibration: value.touchVibration === true,
     autoResume: typeof value.autoResume === 'boolean' ? value.autoResume : true,
     touchControls: typeof value.touchControls === 'boolean' ? value.touchControls : true,
     artworkColor: typeof value.artworkColor === 'boolean' ? value.artworkColor : true,
@@ -59,16 +61,16 @@ export async function importGames(files: File[]): Promise<{ imported: Game[]; er
   const imported: Game[] = [], errors: string[] = [];
   for (const file of files) {
     try {
-      if (file.size > 64 * 1024 * 1024) throw new Error(`${file.name}: this import exceeds the 64 MB file limit.`);
+      if (file.size > (IS_NDS ? 512 : 64) * 1024 * 1024) throw new Error(`${file.name}: this import exceeds the ${IS_NDS ? 512 : 64} MB file limit.`);
       let candidates: Array<[string, Uint8Array]> = [];
       const raw = new Uint8Array(await file.arrayBuffer());
       if (/\.zip$/i.test(file.name)) {
         let extracted = 0;
-        const archive = unzipSync(raw, { filter(entry) { const include = /\.(gba|bin)$/i.test(entry.name) && entry.originalSize <= MAX_ROM_SIZE; if (include) extracted += entry.originalSize; if (extracted > 128 * 1024 * 1024) throw new Error('This ZIP contains too much game data. Import games in smaller batches.'); return include; } });
+        const archive = unzipSync(raw, { filter(entry) { const include = ROM_PATTERN.test(entry.name) && entry.originalSize <= MAX_ROM_SIZE; if (include) extracted += entry.originalSize; if (extracted > (IS_NDS ? 512 : 128) * 1024 * 1024) throw new Error('This ZIP contains too much game data. Import games in smaller batches.'); return include; } });
         candidates = Object.entries(archive).map(([name, bytes]) => [name.split(/[\\/]/).pop()!, bytes]);
-        if (!candidates.length) throw new Error(`${file.name}: no GBA games were found in this ZIP.`);
-      } else if (/\.(gba|bin)$/i.test(file.name)) candidates = [[file.name, raw]];
-      else throw new Error(`${file.name}: choose a .gba, .bin or .zip file.`);
+        if (!candidates.length) throw new Error(`${file.name}: no ${SYSTEM} games were found in this ZIP.`);
+      } else if (ROM_PATTERN.test(file.name)) candidates = [[file.name, raw]];
+      else throw new Error(`${file.name}: choose a ${SYSTEM} game or ZIP file.`);
       for (const [name, bytes] of candidates) {
         try {
           const metadata = inspectRom(bytes, name), hash = await romHash(bytes);
@@ -124,7 +126,7 @@ export async function deleteGame(id: string): Promise<void> {
 }
 export async function getSnapshots(gameId?: string): Promise<Snapshot[]> { return clone((await indexForRead()).snapshots.filter(item => !gameId || item.gameId === gameId).sort((a, b) => b.createdAt - a.createdAt)); }
 export async function createSnapshot(gameId: string, bytes: Uint8Array, options: { label: string; kind: Snapshot['kind']; thumbnail?: string }): Promise<Snapshot> {
-  if (!bytes.length || bytes.length > 2 * 1024 * 1024) throw new Error('The emulator did not produce a valid snapshot.');
+  if (!bytes.length || bytes.length > MAX_STATE_SIZE) throw new Error('The emulator did not produce a valid snapshot.');
   const result = await transaction(async index => {
     if (!index.games.some(game => game.id === gameId)) throw new Error('The game is no longer in your library.');
     const snapshot: Snapshot = { id: crypto.randomUUID(), gameId, label: options.label.trim().slice(0, 100) || 'Checkpoint', kind: options.kind, createdAt: Date.now(), thumbnail: options.thumbnail };
@@ -143,12 +145,12 @@ export async function getSnapshotData(id: string): Promise<Uint8Array> {
 export async function deleteSnapshot(id: string): Promise<void> { await transaction(async index => { index.snapshots = index.snapshots.filter(item => item.id !== id); }); await removeFile(snapshotPath(id)); }
 export async function readBattery(gameId: string): Promise<Uint8Array | null> { await pending; return readFile(batteryPath(gameId)); }
 export async function writeBattery(gameId: string, bytes: Uint8Array): Promise<void> {
-  if (!bytes.length || bytes.length > 1024 * 1024) throw new Error('Invalid game save data.');
+  if (!bytes.length || bytes.length > (IS_NDS ? 8 : 1) * 1024 * 1024) throw new Error('Invalid game save data.');
   await transaction(async index => { if (!index.games.some(game => game.id === gameId)) throw new Error('Game not found.'); const previous = await readFile(batteryPath(gameId)); if (previous) await writeFile(`saves/${gameId}.previous.sav`, previous); await writeFile(batteryPath(gameId), bytes); });
 }
 export async function exportBattery(gameId: string): Promise<Blob | null> { const bytes = await readBattery(gameId); return bytes ? new Blob([bytes.slice().buffer], { type: 'application/octet-stream' }) : null; }
 export async function importBattery(gameId: string, file: File): Promise<void> {
-  if (file.size < 512 || file.size > 1024 * 1024) throw new Error('Choose an ordinary .sav game save between 512 bytes and 1 MB.');
+  if (file.size < 512 || file.size > (IS_NDS ? 8 : 1) * 1024 * 1024) throw new Error('Choose an ordinary .sav game save between 512 bytes and 1 MB.');
   if (!/\.sav$/i.test(file.name)) throw new Error('Choose a .sav game save. My Boy! save states are not interchangeable.');
   await writeBattery(gameId, new Uint8Array(await file.arrayBuffer()));
   await transaction(async index => { for (const snapshot of index.snapshots) if (snapshot.gameId === gameId && snapshot.kind === 'auto') { snapshot.kind = 'backup'; snapshot.label = `Before save import: ${snapshot.label}`.slice(0, 100); } });
@@ -160,7 +162,7 @@ export async function saveCover(gameId: string, file: File): Promise<void> {
   finally { image.close(); }
 }
 export async function exportLibrary(): Promise<Blob> {
-  const index = clone(await indexForRead()); const entries: Record<string, Uint8Array> = { 'koki-library.json': strToU8(JSON.stringify({ format: 'koki-library', ...index })) };
+  const index = clone(await indexForRead()); const entries: Record<string, Uint8Array> = { 'koki-library.json': strToU8(JSON.stringify({ format: (IS_NDS ? 'koki-nds-library' : 'koki-library'), ...index })) };
   let total = 0;
   for (const game of index.games) for (const path of [romPath(game.id), batteryPath(game.id)]) { const bytes = await readFile(path); if (!bytes && path === romPath(game.id)) throw new Error(`The game file for ${game.title} is missing. Import it again before backing up.`); if (bytes) { total += bytes.length; if (total > MAX_BACKUP) throw new Error('This collection exceeds the 512 MB backup limit. Export game saves separately.'); entries[`data/${path}`] = bytes; } }
   for (const snapshot of index.snapshots) { const bytes = await readFile(snapshotPath(snapshot.id)); if (!bytes) throw new Error(`Checkpoint ${snapshot.label} is missing. Remove that checkpoint before backing up.`); total += bytes.length; if (total > MAX_BACKUP) throw new Error('This backup exceeds 512 MB.'); entries[`data/${snapshotPath(snapshot.id)}`] = bytes; }
@@ -173,11 +175,11 @@ export async function importLibrary(file: File): Promise<void> {
   if (!archive['koki-library.json']) throw new Error('This ZIP is not a Koki library backup.');
   let incoming: LibraryIndex & { format: string };
   try { incoming = JSON.parse(strFromU8(archive['koki-library.json'])); } catch { throw new Error('The backup manifest is damaged.'); }
-  if (incoming.format !== 'koki-library' || incoming.version !== 1 || !Array.isArray(incoming.games) || !Array.isArray(incoming.snapshots) || incoming.games.length > 3000 || incoming.snapshots.length > 15000) throw new Error('This backup format is not supported.');
+  if (incoming.format !== (IS_NDS ? 'koki-nds-library' : 'koki-library') || incoming.version !== 1 || !Array.isArray(incoming.games) || !Array.isArray(incoming.snapshots) || incoming.games.length > 3000 || incoming.snapshots.length > 15000) throw new Error('This backup format is not supported.');
   for (const game of incoming.games) {
     if (!/^[a-f0-9]{64}$/.test(game.id) || game.id !== game.hash || typeof game.title !== 'string') throw new Error('The backup contains invalid game metadata.');
-    const bytes = archive[`data/${romPath(game.id)}`]; if (!bytes) throw new Error(`The backup is missing ${game.title}.`); const metadata = inspectRom(bytes, game.fileName || 'backup.gba'); if (await romHash(bytes) !== game.hash) throw new Error(`The backup game ${game.title} failed its integrity check.`);
-    game.title = game.title.slice(0, 150); game.fileName = typeof game.fileName === 'string' ? game.fileName.split(/[\\/]/).pop()!.slice(0, 160) : `${game.title}.gba`; game.size = bytes.length; game.code = metadata.code;
+    const bytes = archive[`data/${romPath(game.id)}`]; if (!bytes) throw new Error(`The backup is missing ${game.title}.`); const metadata = inspectRom(bytes, game.fileName || `backup.${ROM_EXTENSION}`); if (await romHash(bytes) !== game.hash) throw new Error(`The backup game ${game.title} failed its integrity check.`);
+    game.title = game.title.slice(0, 150); game.fileName = typeof game.fileName === 'string' ? game.fileName.split(/[\\/]/).pop()!.slice(0, 160) : `${game.title}.${ROM_EXTENSION}`; game.size = bytes.length; game.code = metadata.code;
     normalizeCoverPreference(game);
     game.favorite = game.favorite === true; game.addedAt = Number.isFinite(game.addedAt) ? game.addedAt : Date.now(); game.playTime = Number.isFinite(game.playTime) ? Math.max(0, game.playTime) : 0;
     if (!Number.isFinite(game.lastPlayed)) delete game.lastPlayed;
@@ -187,7 +189,7 @@ export async function importLibrary(file: File): Promise<void> {
   const gameIds = new Set(incoming.games.map(game => game.id));
   for (const snapshot of incoming.snapshots) {
     const state = archive[`data/${snapshotPath(snapshot.id)}`];
-    if (!/^[a-f0-9-]{36}$/.test(snapshot.id) || !gameIds.has(snapshot.gameId) || !state || state.length > 2 * 1024 * 1024 || !['manual', 'auto', 'backup'].includes(snapshot.kind) || typeof snapshot.label !== 'string' || !Number.isFinite(snapshot.createdAt)) throw new Error('The backup contains invalid checkpoints.');
+    if (!/^[a-f0-9-]{36}$/.test(snapshot.id) || !gameIds.has(snapshot.gameId) || !state || state.length > MAX_STATE_SIZE || !['manual', 'auto', 'backup'].includes(snapshot.kind) || typeof snapshot.label !== 'string' || !Number.isFinite(snapshot.createdAt)) throw new Error('The backup contains invalid checkpoints.');
     snapshot.label = snapshot.label.slice(0, 100); if (typeof snapshot.thumbnail !== 'string' || !/^data:image\/(png|jpeg|webp);base64,/.test(snapshot.thumbnail) || snapshot.thumbnail.length > 2 * 1024 * 1024) delete snapshot.thumbnail;
   }
   const settings = normalizeSettings(incoming.settings ?? {});

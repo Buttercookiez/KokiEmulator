@@ -1,10 +1,19 @@
+import { IS_NDS } from '../platform';
+import ndsManifest from '../../engines/nds-manifest.json';
+import mplLicense from '../../licenses/MPL-2.0.txt?raw';
 import inventory from '../legal/third-party.json';
 
 export function ThirdPartyNotices() {
+  const notices = inventory.notices.filter(notice => !IS_NDS || notice.id !== 'artwork').map(notice => IS_NDS && notice.id === 'mgba' ? {
+    ...notice, name: 'melonDS / Pilas web port', version: ndsManifest.revision.slice(0, 12),
+    source: ndsManifest.repository,
+    description: 'Unmodified pinned single-threaded DS core. The downloaded core license and artifact hashes are also bundled under vendor/melonds.',
+    files: [{ ...notice.files[0], name: 'MPL-2.0', origin: 'licenses/MPL-2.0.txt', text: mplLicense }],
+  } : notice);
   return <article aria-label="Third-party license notices">
     <p className="modal-help">{inventory.summary}</p>
     <div style={{ display: 'grid', gap: 8, marginTop: 18 }}>
-      {inventory.notices.map(notice => <details key={notice.id} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
+      {notices.map(notice => <details key={notice.id} style={{ borderBottom: '1px solid var(--border)', padding: '10px 0' }}>
         <summary style={{ cursor: 'pointer', lineHeight: 1.5, fontSize: 13, overflowWrap: 'anywhere' }}>
           <strong>{notice.name}</strong>
           <span style={{ display: 'block', color: 'var(--muted)', fontSize: 11, marginTop: 3 }}>{notice.version} · {notice.license}</span>

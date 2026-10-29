@@ -1,10 +1,11 @@
+import { IS_NDS } from '../platform';
 import policy from '../legal/privacy.json';
 import './Privacy.css';
 
 export function PrivacyPolicy() {
   return <article className="privacy-copy" aria-label="Koki privacy policy">
     <p className="privacy-summary">{policy.summary}</p>
-    <p className="privacy-meta">{policy.applicationName} ({policy.alternateName}) · Effective {policy.effectiveDate}</p>
+    <p className="privacy-meta">{IS_NDS ? 'Koki NDS' : policy.applicationName} ({policy.alternateName}) · Effective {policy.effectiveDate}</p>
     <section><h3>Developer and contact</h3><p>{policy.developerName}</p><p className="privacy-contact">{policy.supportEmail}</p><p className="privacy-contact">{policy.policyUrl}</p><p>Contact the developer with privacy questions or support requests. You can also use the project’s public GitHub issue tracker.</p></section>
     {policy.sections.map(section => <section key={section.id}><h3>{section.title}</h3>{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</section>)}
   </article>;

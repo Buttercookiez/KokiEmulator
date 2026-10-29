@@ -1,0 +1,44 @@
+{
+  "appId": "com.koki.nds",
+  "productName": "Koki NDS",
+  "directories": {
+    "output": "release-nds"
+  },
+  "files": [
+    "dist-nds/**/*",
+    "electron/main.cjs",
+    "electron/preload.cjs",
+    "electron/storage.cjs",
+    "package.json",
+    "licenses/**/*",
+    "docs/EMULATOR-CORE.md",
+    "THIRD-PARTY-NOTICES.md",
+    "!node_modules{,/**/*}",
+    "!**/*.map",
+    "docs/NDS.md",
+    "engines/nds-manifest.json"
+  ],
+  "win": {
+    "target": [
+      "portable"
+    ],
+    "icon": "assets/app-icons/koki-nds.ico"
+  },
+  "portable": {
+    "artifactName": "Koki-NDS-0.1.0-Windows.exe"
+  },
+  "electronLanguages": [
+    "en-US"
+  ],
+  "compression": "maximum",
+  "extraResources": [
+    {
+      "from": "assets/app-icons/koki-nds.png",
+      "to": "koki-nds.png"
+    }
+  ],
+  "extraMetadata": {
+    "kokiSystem": "nds",
+    "version": "0.1.0"
+  }
+}

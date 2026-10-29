@@ -1,8 +1,9 @@
+import { IS_NDS } from '../platform';
 import { openDB } from 'idb';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 
-const db = () => openDB('koki-library-v1', 1, { upgrade(database) { database.createObjectStore('files'); } });
+const db = () => openDB(IS_NDS ? 'koki-nds-library-v1' : 'koki-library-v1', 1, { upgrade(database) { database.createObjectStore('files'); } });
 const validPath = (path: string) => {
   if (!/^[a-zA-Z0-9_./-]+$/.test(path) || path.split('/').some(part => !part || part === '.' || part === '..') || path.startsWith('/')) throw new Error('Invalid library path.');
   return path;
@@ -15,7 +16,7 @@ function toBase64(bytes: Uint8Array): string {
 function fromBase64(value: string): Uint8Array { return Uint8Array.from(atob(value), char => char.charCodeAt(0)); }
 const bridge = () => typeof window !== 'undefined' ? window.kokiNative : undefined;
 export async function readFile(path: string): Promise<Uint8Array | null> {
-  validPath(path);
+  validPath(path); if (IS_NDS) path = `nds/${path}`;
   if (bridge()) { const bytes = await bridge()!.read(path); return bytes ? new Uint8Array(bytes) : null; }
   if (Capacitor.isNativePlatform()) {
     try { const result = await Filesystem.readFile({ directory: Directory.Data, path: `library/${path}` }); return typeof result.data === 'string' ? fromBase64(result.data) : new Uint8Array(await result.data.arrayBuffer()); }
@@ -34,7 +35,7 @@ export async function readFile(path: string): Promise<Uint8Array | null> {
   return value ? new Uint8Array(value) : null;
 }
 export async function writeFile(path: string, bytes: Uint8Array): Promise<void> {
-  validPath(path);
+  validPath(path); if (IS_NDS) path = `nds/${path}`;
   if (bridge()) return bridge()!.write(path, bytes);
   if (Capacitor.isNativePlatform()) {
     const temporary = `library/${path}.pending`;
@@ -45,7 +46,7 @@ export async function writeFile(path: string, bytes: Uint8Array): Promise<void> 
   await (await db()).put('files', bytes.slice().buffer, path);
 }
 export async function removeFile(path: string): Promise<void> {
-  validPath(path);
+  validPath(path); if (IS_NDS) path = `nds/${path}`;
   if (bridge()) return bridge()!.remove(path);
   if (Capacitor.isNativePlatform()) {
     try { await Filesystem.deleteFile({ directory: Directory.Data, path: `library/${path}` }); }

@@ -4,6 +4,10 @@ A playable, offline Game Boy Advance emulator for Windows and Android, built aro
 
 The prepared Android Play Store version is 0.4.4 (code 18), with production upload signing, offline privacy/support and submission materials. The existing public Windows and Android debug previews remain 0.4.3. See [Play Store handoff](docs/play-store/START-HERE.md). The app retains its assembling K startup splash, saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
 
+## NDS preview
+
+Koki NDS 0.1.0 reuses this same interface, settings, library, touch editor and native shells with a separate melonDS adapter. It has two-screen layouts, a touchscreen and X/Y controls. Its app identity and local data are separate from GBA. See [NDS setup, downloads and verification](docs/NDS.md). This is an experimental local preview; the public website and GBA Play candidate remain separate.
+
 ## Use the app
 
 Open the Windows portable executable in `release/`, or install the Android debug APK from the same folder. Choose **Add games** and import your own `.gba`, `.bin`, or `.zip` files. Games are copied into the app's local library; original files stay where they are.

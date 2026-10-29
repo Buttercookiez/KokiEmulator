@@ -1,5 +1,5 @@
 import { normalizeTurbo, turboMask, type TurboSettings } from './mobile-play';
-import type { GbaButton } from '../types';
+import type { GbaButton, EmulatorButton } from '../types';
 import { EmulatorAudio } from '../emulator/audio';
 export type { GbaButton } from '../types';
 
@@ -238,8 +238,8 @@ export class GbaEmulator {
     this.render();
   }
 
-  setButton(button: GbaButton, pressed: boolean): void {
-    const bit = KEY[button];
+  setButton(button: EmulatorButton, pressed: boolean): void {
+    const bit = KEY[button as GbaButton];
     if (bit === undefined) return;
     this.inputMask = pressed ? this.inputMask | (1 << bit) : this.inputMask & ~(1 << bit);
     this.pushInput();

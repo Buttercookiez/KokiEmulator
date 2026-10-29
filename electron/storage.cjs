@@ -17,9 +17,9 @@ function relativeSegments(relative) {
   return segments;
 }
 
-function validBytes(value) {
-  if (!(value instanceof Uint8Array) || value.byteLength > MAX_FILE_BYTES) {
-    throw new Error('Expected a byte array no larger than 128 MB.');
+function validBytes(value, maxBytes = MAX_FILE_BYTES) {
+  if (!(value instanceof Uint8Array) || value.byteLength > maxBytes) {
+    throw new Error('Expected a byte array no larger than ' + (maxBytes / 1024 / 1024) + ' MB.');
   }
   return value;
 }
@@ -56,7 +56,7 @@ function packageRoamingBackingRoot(directory, realEntry, relative = 'library.jso
   return win.join(candidate, ...segments).toLowerCase() === physical.toLowerCase() ? candidate : null;
 }
 
-function createLocalStorage(directory) {
+function createLocalStorage(directory, maxFileBytes = MAX_FILE_BYTES) {
   const requestedRoot = path.resolve(directory);
   const pending = new Map();
   let root = requestedRoot;
@@ -173,12 +173,12 @@ function createLocalStorage(directory) {
       const entry = await inspect(segments);
       if (!entry.exists) return null;
       const info = await fs.stat(entry.target);
-      if (info.size > MAX_FILE_BYTES) throw new Error('Library file exceeds the supported size.');
+      if (info.size > maxFileBytes) throw new Error('Library file exceeds the supported size.');
       return new Uint8Array(await fs.readFile(entry.target));
     },
     write(relative, input) {
       const { segments, key } = resolve(relative);
-      const bytes = Buffer.from(validBytes(input));
+      const bytes = Buffer.from(validBytes(input, maxFileBytes));
       return serialize(key, async () => {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           const { target } = await inspect(segments, true);

@@ -1,0 +1,7 @@
+export const IS_NDS = import.meta.env.MODE === 'nds';
+export const SYSTEM = IS_NDS ? 'NDS' : 'GBA';
+export const ROM_EXTENSION = IS_NDS ? 'nds' : 'gba';
+export const ROM_ACCEPT = IS_NDS ? '.nds,.srl,.zip' : '.gba,.bin,.zip';
+export const ROM_PATTERN = IS_NDS ? /\.(nds|srl)$/i : /\.(gba|bin)$/i;
+export const IMPORT_PATTERN = IS_NDS ? /\.(nds|srl|zip)$/i : /\.(gba|bin|zip)$/i;
+export const MAX_STATE_SIZE = (IS_NDS ? 64 : 2) * 1024 * 1024;

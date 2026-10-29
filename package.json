@@ -2,7 +2,7 @@
   "name": "kokis-emulator",
   "version": "0.4.4",
   "private": true,
-  "description": "An offline GBA emulator with a quiet monochrome library for Windows and Android.",
+  "description": "Offline GBA and experimental NDS emulators sharing a monochrome interface for Windows and Android.",
   "type": "module",
   "main": "electron/main.cjs",
   "author": "Koki",
@@ -35,7 +35,15 @@
     "android:play": "pwsh -NoProfile -File scripts/android-signing.ps1 -Action Build",
     "android:signing": "pwsh -NoProfile -File scripts/android-signing.ps1 -Action Status",
     "play:kit": "node scripts/export-play-store-kit.mjs --require-screenshots",
-    "play:verify": "node scripts/verify-play-release.mjs"
+    "play:verify": "node scripts/verify-play-release.mjs",
+    "nds:dev": "node scripts/nds.mjs dev",
+    "nds:build": "node scripts/nds.mjs build",
+    "nds:desktop": "node scripts/nds.mjs desktop",
+    "nds:android": "node scripts/build-nds-android.mjs",
+    "test:nds": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds.mjs",
+    "nds:diagnostic": "node scripts/make-nds-diagnostic.mjs",
+    "test:nds:native": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-native.mjs",
+    "nds:verify": "node scripts/verify-nds-release.mjs"
   },
   "dependencies": {},
   "devDependencies": {

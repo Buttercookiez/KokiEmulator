@@ -1,13 +1,14 @@
-export const TOUCH_GROUPS = ['dpad', 'a', 'b', 'l', 'r', 'select', 'start'] as const;
-export type TouchGroup = typeof TOUCH_GROUPS[number];
+import { IS_NDS } from '../platform';
+export type TouchGroup = 'dpad'|'a'|'b'|'l'|'r'|'select'|'start'|'x'|'y';
+export const TOUCH_GROUPS: readonly TouchGroup[] = IS_NDS ? ['dpad','a','b','x','y','l','r','select','start'] : ['dpad','a','b','l','r','select','start'];
 export type TouchPosition = { x: number; y: number; scale: number };
 export type TouchLayout = Record<TouchGroup, TouchPosition>;
 export type TouchLayouts = { portrait: TouchLayout; landscape: TouchLayout };
-export const TOUCH_NAMES: Record<TouchGroup, string> = { dpad: 'D-pad', a: 'A', b: 'B', l: 'L', r: 'R', select: 'Select', start: 'Start' };
-export const TOUCH_SIZE: Record<TouchGroup, [number, number]> = { dpad: [132, 132], a: [58, 58], b: [58, 58], l: [84, 44], r: [84, 44], select: [64, 44], start: [64, 44] };
+export const TOUCH_NAMES: Record<TouchGroup, string> = { x:'X', y:'Y', dpad: 'D-pad', a: 'A', b: 'B', l: 'L', r: 'R', select: 'Select', start: 'Start' };
+export const TOUCH_SIZE: Record<TouchGroup, [number, number]> = { x:[58,58], y:[58,58], dpad: [132, 132], a: [58, 58], b: [58, 58], l: [84, 44], r: [84, 44], select: [64, 44], start: [64, 44] };
 export function defaultTouchLayout(landscape = false): TouchLayout {
   const p = (x: number, y: number): TouchPosition => ({ x, y, scale: 1 });
-  return { dpad: p(0, .88), a: p(1, .78), b: p(landscape ? .87 : .75, .89), l: p(0, landscape ? .38 : .60), r: p(1, landscape ? .38 : .60), select: p(.32, 1), start: p(.68, 1) };
+  return { x:p(landscape ? .86 : .75,landscape ? .64 : .70), y:p(landscape?.75:.5,.77), dpad: p(0, .88), a: p(1, .78), b: p(landscape ? .87 : .75, .89), l: p(0, landscape ? .38 : IS_NDS ? .56 : .60), r: p(1, landscape ? .38 : IS_NDS ? .56 : .60), select: p(.32, 1), start: p(.68, 1) };
 }
 export function normalizeTouchLayouts(value: unknown): TouchLayouts {
   const source = value && typeof value === 'object' ? value as Record<string, unknown> : {};

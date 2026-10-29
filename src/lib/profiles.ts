@@ -10,6 +10,8 @@ export function normalizeGameProfile(value: unknown): GameProfile | undefined {
   if (typeof input.speed === 'number' && Number.isFinite(input.speed)) profile.speed = Math.max(.5, Math.min(4, input.speed));
   if (input.filter === 'pixel' || input.filter === 'smooth' || input.filter === 'lcd') profile.filter = input.filter;
   if (input.controls && typeof input.controls === 'object' && !Array.isArray(input.controls)) profile.controls = normalizeControls(input.controls);
+  const ds = input.dsControls as Record<string,unknown>|undefined;
+  if(ds && typeof ds.x==='string' && ds.x.trim() && typeof ds.y==='string' && ds.y.trim()) profile.dsControls={x:ds.x.slice(0,40),y:ds.y.slice(0,40)};
   if (input.touchLayouts && typeof input.touchLayouts === 'object' && !Array.isArray(input.touchLayouts)) profile.touchLayouts = normalizeTouchLayouts(input.touchLayouts);
   if (input.gameScreen && typeof input.gameScreen === 'object' && !Array.isArray(input.gameScreen)) profile.gameScreen = normalizeScreen(input.gameScreen);
   if (input.turbo && typeof input.turbo === 'object' && !Array.isArray(input.turbo)) profile.turbo = normalizeTurbo(input.turbo);

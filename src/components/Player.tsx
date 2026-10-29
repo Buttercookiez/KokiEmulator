@@ -1,7 +1,11 @@
+import { IS_NDS } from '../platform';
+import { NdsEmulator, type DsLayout } from '../lib/nds-emulator';
+import type { EmulatorButton } from '../types';
+import './NdsPlayer.css';
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { ArrowLeft, Camera, Menu, SlidersHorizontal, X, Expand, FastForward, Gamepad2, History, LoaderCircle, Pause, Play, Rewind, RotateCcw, Save, Trash2, Volume2, VolumeX } from 'lucide-react';
 import type { Game, GameProfile, Settings, Snapshot } from '../types';
-import { GbaEmulator, type GbaButton } from '../lib/emulator';
+import { GbaEmulator } from '../lib/emulator';
 import { resolveKeyboardButton } from '../lib/controls';
 import { createSnapshot, deleteSnapshot, downloadBlob, getRom, getSnapshotData, getSnapshots, readBattery, updateGame, writeBattery } from '../lib/library';
 import { Modal } from './Modal';
@@ -28,13 +32,15 @@ function isEditingControl(event: KeyboardEvent) {
 }
 
 export function Player({ game, settings, initialSnapshot, skipAutoResume = false, registerCloseSave, onSettings, onProfileSettings, onClose, notify }: Props) {
+  const [dsLayout,setDsLayout] = useState<DsLayout>(()=> { const x=settings.dsLayout ?? localStorage.getItem('koki-nds-layout'); return x==='horizontal'||x==='bottom'?x:'vertical'; });
+  const [dsSwap,setDsSwap] = useState(settings.dsSwap === true);
   const shell = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const heldKeys = useRef(new Map<string, GbaButton>());
-  const touchButtons = useRef(new Map<number, GbaButton[]>());
+  const heldKeys = useRef(new Map<string, EmulatorButton>());
+  const touchButtons = useRef(new Map<number, EmulatorButton[]>());
   const rewindPointers = useRef(new Set<number>());
   const rewindKey = useRef(false);
-  const emulator = useRef<GbaEmulator | null>(null);
+  const emulator = useRef<GbaEmulator | NdsEmulator | null>(null);
   const currentSettings = useRef(settings); currentSettings.current = settings;
   const [ready, setReady] = useState(false); const [error, setError] = useState(''); const [paused, setPaused] = useState(false);
   const [busy, setBusy] = useState(false); const [closing, setClosing] = useState(false); const [stats, setStats] = useState({ fps: 0, rewindSeconds: 0 });
@@ -46,7 +52,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   const [menuOpen, setMenuOpen] = useState(false); const [editingTouch, setEditingTouch] = useState(false);
   const editorWasRunning = useRef(false);
   const [showTouch, setShowTouch] = useState(() => settings.touchControls && window.matchMedia('(max-width:650px), (pointer:coarse)').matches);
-  const [pressed, setPressed] = useState<Set<GbaButton>>(new Set()); const [rewinding, setRewinding] = useState(false); const [playerNotice, setPlayerNotice] = useState('');
+  const [pressed, setPressed] = useState<Set<EmulatorButton>>(new Set()); const [rewinding, setRewinding] = useState(false); const [playerNotice, setPlayerNotice] = useState('');
   const [controlsVisible, setControlsVisible] = useState(true); const [controlFocused, setControlFocused] = useState(false); const [touchCount, setTouchCount] = useState(0);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null); const idlePinned = useRef(true); const lastActivity = useRef(performance.now());
   const keyboardNavigation = useRef(false); const fullscreenExitAt = useRef(-Infinity);
@@ -68,7 +74,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   function revealControls() { lastActivity.current = performance.now(); setControlsVisible(true); scheduleHide(); }
   function focusGame() { canvas.current?.focus({ preventScroll: true }); }
   function finishPointerAction() { if (!keyboardNavigation.current) focusGame(); }
-  function syncButton(button: GbaButton) {
+  function syncButton(button: EmulatorButton) {
     const down = [...heldKeys.current.values(), ...[...touchButtons.current.values()].flat()].includes(button);
     emulator.current?.setButton(button, down);
     setPressed(previous => { const next = new Set(previous); down ? next.add(button) : next.delete(button); return next; });
@@ -136,7 +142,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   }, []);
   useEffect(() => {
     let disposed = false;
-    const core = new GbaEmulator(canvas.current!, { onStats: value => { if (!disposed) setStats(value); }, onError: failure => { if (!disposed) { setError(failure.message); releaseControls(); stopClock(); } } });
+    const core = new (IS_NDS ? NdsEmulator : GbaEmulator)(canvas.current!, { onStats: value => { if (!disposed) setStats(value); }, onError: failure => { if (!disposed) { setError(failure.message); releaseControls(); stopClock(); } } });
     emulator.current = core;
     void (async () => {
       try {
@@ -169,6 +175,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   // A player instance belongs to exactly one game. Live settings use currentSettings.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.id]);
+  useEffect(()=>{if(emulator.current instanceof NdsEmulator){emulator.current.setLayout(dsLayout,dsSwap);localStorage.setItem('koki-nds-layout',dsLayout);}},[dsLayout,dsSwap,ready]);
   useEffect(() => { if (ready) focusGame(); }, [ready]);
   useEffect(() => { const core = emulator.current; if (!core?.loaded) return; core.setTurbo(settings.turbo); core.setVolume(settings.volume); core.setSpeed(settings.speed); core.setRewindSeconds(settings.rewindSeconds); }, [settings.volume, settings.speed, settings.rewindSeconds, settings.turbo, ready]);
   useEffect(() => {
@@ -188,7 +195,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
       const target = event.target instanceof HTMLElement ? event.target : null;
       // Space and Enter activate a focused toolbar button through its native click behavior.
       if (target?.closest('button') && (event.code === 'Space' || event.code === 'Enter')) return;
-      const button = resolveKeyboardButton(event.code, currentSettings.current.controls);
+      const button = (IS_NDS ? (event.code === (currentSettings.current.dsControls?.x ?? 'KeyI') ? 'x' : event.code === (currentSettings.current.dsControls?.y ?? 'KeyU') ? 'y' : undefined) : undefined) ?? resolveKeyboardButton(event.code, currentSettings.current.controls);
       if (button) { if (!core.isRunning) return; event.preventDefault(); heldKeys.current.set(event.code, button); syncButton(button); return; }
       if (event.code === 'Space') { event.preventDefault(); if (!event.repeat) togglePause(); }
       if (event.code === 'ShiftLeft' && core.isRunning) { event.preventDefault(); core.setSpeed(4); }
@@ -208,13 +215,13 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     return () => { document.removeEventListener('keydown', onDown); document.removeEventListener('keyup', onUp); };
   });
 
-  function touch(button: GbaButton, down: boolean, event: PointerEvent<HTMLButtonElement>) {
+  function touch(button: EmulatorButton, down: boolean, event: PointerEvent<HTMLButtonElement>) {
     event.preventDefault(); revealControls();
     if (down) { if (!ready || paused) return; event.currentTarget.setPointerCapture(event.pointerId); touchButtons.current.set(event.pointerId, [button]); if (currentSettings.current.touchVibration) touchFeedback(); }
     else { const previous = touchButtons.current.get(event.pointerId); touchButtons.current.delete(event.pointerId); if (previous) previous.forEach(syncButton); }
     setTouchCount(touchButtons.current.size); syncButton(button);
   }
-  function touchProps(button: GbaButton) {
+  function touchProps(button: EmulatorButton) {
     return {
       onPointerDown: (event: PointerEvent<HTMLButtonElement>) => touch(button, true, event),
       onPointerUp: (event: PointerEvent<HTMLButtonElement>) => touch(button, false, event),
@@ -228,7 +235,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     else rewindPointers.current.delete(event.pointerId);
     syncRewind();
   }
-  function dpadTouch(buttons: GbaButton[], pointer: number) {
+  function dpadTouch(buttons: EmulatorButton[], pointer: number) {
     const previous = touchButtons.current.get(pointer) ?? [];
     const next = ready && !paused ? buttons : [];
     if (next.length) touchButtons.current.set(pointer, next); else touchButtons.current.delete(pointer);
@@ -243,6 +250,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   }
   function updateControlFocus() { setControlFocused(Boolean(document.activeElement instanceof HTMLElement && document.activeElement.closest('[data-player-chrome]'))); }
 
+  const dsOptions = IS_NDS && <div className="nds-screen-options"><Select aria-label="DS screen layout" value={dsLayout} onChange={v=>{setDsLayout(v as DsLayout);onSettings({dsLayout:v as DsLayout});}} options={[{value:"vertical",label:"Stacked screens"},{value:"horizontal",label:"Side by side"},{value:"bottom",label:"Touchscreen only"}]} /><button className="player-control" onClick={()=>{setDsSwap(v=>!v);onSettings({dsSwap:!dsSwap});}} aria-pressed={dsSwap}>Swap screens</button><span>X/Y keys in Settings · Touch the lower screen</span></div>;
   return <div ref={shell} className="player-shell immersive-player" style={{'--game-screen-scale': ((previewScreen ?? settings.gameScreen).scale * 100) + '%', '--game-screen-position': (previewScreen ?? settings.gameScreen).position === 'top' ? 'top' : (previewScreen ?? settings.gameScreen).position === 'bottom' ? 'bottom' : 'center', '--game-screen-align': (previewScreen ?? settings.gameScreen).position === 'top' ? 'flex-start' : (previewScreen ?? settings.gameScreen).position === 'bottom' ? 'flex-end' : 'center'} as CSSProperties} data-mobile={mobile} data-controls-visible={controlsVisible} data-player-state={error ? 'error' : !ready ? 'loading' : paused ? 'paused' : 'running'} role="dialog" aria-modal="true" aria-label={`${game.title} player`}
     onPointerMove={revealControls} onPointerDownCapture={() => { keyboardNavigation.current = false; revealControls(); }}
     onFocusCapture={() => { updateControlFocus(); revealControls(); }} onBlurCapture={() => { queueMicrotask(updateControlFocus); }}>
@@ -250,7 +258,8 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
       <div className="player-heading"><button className="icon-button" onClick={() => void closePlayer()} disabled={closing} aria-label="Save and return to library">{closing ? <LoaderCircle size={17} className="spinner" /> : <ArrowLeft size={18} />}</button><div><h2>{game.title}</h2></div></div>
       <div className="player-header-actions"><div className="player-secondary-tools"><button className={`icon-button ${showTouch ? 'active' : ''}`} onClick={() => { setShowTouch(value => !value); finishPointerAction(); }} aria-label="Toggle on-screen controls" aria-pressed={showTouch}><Gamepad2 size={18} /></button><button className="icon-button" disabled={!ready || busy} onClick={() => void job(async () => { const blob = await emulator.current!.screenshot(); await downloadBlob(blob, `${game.title}-screenshot.png`); announce('Screenshot exported'); }).finally(finishPointerAction)} aria-label="Export screenshot"><Camera size={18} /></button></div><button className="icon-button" onClick={() => void toggleFullscreen()} aria-label="Toggle fullscreen"><Expand size={17} /></button></div>
     </header>
-    <div className="player-screen-area"><div className={`player-screen-wrap filter-${settings.filter}`}><canvas ref={canvas} width={240} height={160} tabIndex={0} onPointerDown={focusGame} aria-label={`${game.title} game screen`} aria-describedby="player-keyboard" /></div>
+    {!mobile && dsOptions}
+    <div className="player-screen-area"><div className={`player-screen-wrap filter-${settings.filter}`}><canvas ref={canvas} width={240} height={160} tabIndex={0} onPointerDown={focusGame} data-system={IS_NDS ? "nds" : "gba"} aria-label={`${game.title} game screen`} aria-describedby="player-keyboard" /></div>
       {!ready && !error && <div className="player-message"><LoaderCircle className="spinner" size={26} /><h3>Loading game</h3></div>}
       {error && <div className="player-message"><Gamepad2 size={28} /><h3>Couldn’t start this game</h3><p>{error}</p><div className="player-error-actions"><button className="button" onClick={() => void closePlayer()}>Return to library</button></div></div>}
       {ready && paused && !showSaves && !editingTouch && <div className="player-message"><Pause size={25} /><h3>Paused</h3><button className="button" onClick={togglePause}><Play size={15} />Keep playing</button></div>}
@@ -260,6 +269,7 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
     {mobile && !editingTouch && <button className="mobile-game-menu-toggle" data-player-chrome aria-label={menuOpen ? 'Close game menu' : 'Open game menu'} aria-expanded={menuOpen} aria-controls="mobile-game-menu" onClick={() => { releaseControls(); setMenuOpen(value => !value); revealControls(); }}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>}
     {mobile && menuOpen && <button className="mobile-game-menu-dismiss" aria-label="Dismiss game menu" onClick={() => { setMenuOpen(false); focusGame(); }} />}
     <div id="mobile-game-menu" className="player-bottom-chrome" data-menu-open={menuOpen} data-player-chrome inert={mobile ? !menuOpen : !controlsVisible} aria-hidden={mobile ? !menuOpen : !controlsVisible}>
+      {mobile && dsOptions}
       {mobile && <div className="mobile-game-menu-heading"><strong>{game.title}</strong><span>{busy ? 'Saving…' : savedAt ? 'Saved on this device' : 'Game menu'}</span></div>}
       {mobile && <div className="mobile-game-tools">
         <button className="player-control" disabled={closing} onClick={() => void closePlayer()} aria-label="Save and return to library"><ArrowLeft size={18} />Library</button>
