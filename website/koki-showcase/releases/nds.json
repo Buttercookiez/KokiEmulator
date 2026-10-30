@@ -1,21 +1,21 @@
 {
-  "version": "0.2.1",
+  "version": "0.2.2",
   "application": "Koki NDS",
   "channel": "experimental-preview",
-  "releaseUrl": "https://github.com/Buttercookiez/KokiEmulator/releases/tag/nds-v0.2.1",
-  "sourceUrl": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.1/Koki-NDS-0.2.1-source.zip",
+  "releaseUrl": "https://github.com/Buttercookiez/KokiEmulator/releases/tag/nds-v0.2.2",
+  "sourceUrl": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.2/Koki-NDS-0.2.2-source.zip",
   "artifacts": [
     {
-      "file": "Koki-NDS-0.2.1-Windows.exe",
-      "bytes": 102700041,
-      "sha256": "275340a1dd74d57da2d3e20a0679ba0ca0e76910bb6757fb625bed7924ad66bb",
-      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.1/Koki-NDS-0.2.1-Windows.exe"
+      "file": "Koki-NDS-0.2.2-Windows.exe",
+      "bytes": 102698757,
+      "sha256": "9f03451c0995d8bb8d42822e87f9972973eb4393e57ab0c8ceb0efa1dea233f9",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.2/Koki-NDS-0.2.2-Windows.exe"
     },
     {
-      "file": "Koki-NDS-0.2.1-Android.apk",
-      "bytes": 5678362,
-      "sha256": "4a95b66e507eb0231585e75a596ccf61deff734fa855e5bdfefee4323cc5acf3",
-      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.1/Koki-NDS-0.2.1-Android.apk"
+      "file": "Koki-NDS-0.2.2-Android.apk",
+      "bytes": 5678530,
+      "sha256": "b459cd39d2833cd969ee66a11d483b46c778efdcce74d8c7f49fbddeaa21a382",
+      "url": "https://github.com/Buttercookiez/KokiEmulator/releases/download/nds-v0.2.2/Koki-NDS-0.2.2-Android.apk"
     }
   ]
 }
