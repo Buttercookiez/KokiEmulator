@@ -251,8 +251,8 @@ export function Player({ game, settings, initialSnapshot, skipAutoResume = false
   }
   function saveTouchPreferences(patch: Partial<Settings>, scope: 'game' | 'global') {
     if (scope === 'game') { onProfileSettings(patch); if (!settings.touchControls) onSettings({touchControls:true}); }
-    else { onSettings(patch); onProfileSettings({touchLayouts:undefined,touchOpacity:undefined,gameScreen:undefined,turbo:undefined,touchVibration:undefined}); }
-    announce(scope === 'game' ? 'Controls saved for this game' : 'Default controls updated');
+    else onSettings(patch);
+    announce(scope === 'game' ? 'Controls saved for this game' : 'Controls saved for all games');
   }
   function updateControlFocus() { setControlFocused(Boolean(document.activeElement instanceof HTMLElement && document.activeElement.closest('[data-player-chrome]'))); }
 

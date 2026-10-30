@@ -32,7 +32,7 @@
     "icon": "assets/app-icons/koki-nds.ico"
   },
   "portable": {
-    "artifactName": "Koki-NDS-0.2.1-Windows.exe"
+    "artifactName": "Koki-NDS-0.2.2-Windows.exe"
   },
   "electronLanguages": [
     "en-US"
@@ -46,7 +46,7 @@
   ],
   "extraMetadata": {
     "kokiSystem": "nds",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "license": "GPL-3.0-or-later"
   }
 }

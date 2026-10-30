@@ -1,11 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { strFromU8 } from 'fflate';
+import { strFromU8, strToU8 } from 'fflate';
 import { DEFAULT_SETTINGS } from '../types';
 import { defaultTouchLayout, normalizeTouchLayouts, touchRect, TOUCH_GROUPS } from './touch-layout';
 const memory = vi.hoisted(() => new Map<string, Uint8Array>());
 vi.mock('./storage', () => ({ readFile: async (name: string) => memory.get(name)?.slice() ?? null, writeFile: async (name: string, bytes: Uint8Array) => { memory.set(name, bytes.slice()); }, removeFile: async (name: string) => { memory.delete(name); }, exportFile: async () => undefined }));
 beforeEach(() => { memory.clear(); vi.resetModules(); });
 describe('touch layouts', () => {
+  it('applies shared controls to every game, clears old overrides and keeps other profile settings after reload', async () => {
+    const oldLayouts = normalizeTouchLayouts(undefined);
+    oldLayouts.landscape.a.x = .2;
+    memory.set('library.json', strToU8(JSON.stringify({version:1, settings:DEFAULT_SETTINGS, snapshots:[], games:[
+      {id:'first', profile:{touchLayouts:oldLayouts, touchOpacity:.3, speed:2}},
+      {id:'second', profile:{touchLayouts:oldLayouts, gameScreen:{scale:.7,position:'top'}, turbo:{a:true}, touchVibration:true, filter:'smooth'}},
+    ]})));
+    let lib = await import('./library');
+    const shared = normalizeTouchLayouts(undefined);
+    shared.portrait.a = {x:.4,y:.6,scale:1.3}; shared.landscape.dpad.x = .15;
+    await lib.saveSettings({...DEFAULT_SETTINGS,touchLayouts:shared,touchOpacity:.65}, true);
+    vi.resetModules(); lib = await import('./library');
+    const {gameSettings} = await import('./profiles');
+    const settings = await lib.getSettings(), games = await lib.getGames();
+    expect(games[0].profile).toEqual({speed:2}); expect(games[1].profile).toEqual({filter:'smooth'});
+    for (const game of games) { expect(gameSettings(settings,game.profile).touchLayouts).toEqual(shared); expect(gameSettings(settings,game.profile).touchOpacity).toBe(.65); }
+  });
   it('migrates missing layouts and rejects malformed or non-finite coordinates', () => {
     expect(normalizeTouchLayouts(undefined).portrait).toEqual(defaultTouchLayout());
     const layouts = normalizeTouchLayouts({ portrait: { a: { x: -1, y: Infinity, scale: 99 }, l: null }, landscape: 'bad' });

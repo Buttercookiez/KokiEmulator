@@ -7,7 +7,7 @@ import { readFile, writeFile, removeFile, exportFile } from './storage';
 import { inspectRom, MAX_ROM_SIZE, romHash } from './rom';
 import { normalizeThemeColor } from './themes';
 import { normalizeControls } from './controls';
-import { normalizeGameProfile } from './profiles';
+import { normalizeGameProfile, withoutTouchOverrides } from './profiles';
 import { normalizeTouchLayouts } from './touch-layout';
 import { normalizeScreen, normalizeTurbo } from './mobile-play';
 import { upgradeNdsPlayerDefaults, upgradeNdsLandscapeDefaults } from './nds-player-defaults';
@@ -54,7 +54,15 @@ function normalizeSettings(value: Partial<Settings> = {}): Settings {
 async function indexForRead() { await pending; return loadIndex(); }
 export async function getGames(): Promise<Game[]> { return clone((await indexForRead()).games); }
 export async function getSettings(): Promise<Settings> { return clone((await indexForRead()).settings); }
-export async function saveSettings(settings: Settings): Promise<void> { await transaction(async index => { index.settings = normalizeSettings(settings); }); }
+export async function saveSettings(settings: Settings, sharedTouch = false): Promise<void> {
+  await transaction(async index => {
+    index.settings = normalizeSettings(settings);
+    if (sharedTouch) for (const game of index.games) {
+      const profile = withoutTouchOverrides(game.profile);
+      if (profile) game.profile = profile; else delete game.profile;
+    }
+  });
+}
 export async function getRom(id: string): Promise<Uint8Array> {
   const index = await indexForRead(); if (!index.games.some(game => game.id === id)) throw new Error('This game is no longer in your library.');
   const bytes = await readFile(romPath(id)); if (!bytes) throw new Error('This game file is missing. Import it again to reconnect your saves.'); return bytes;

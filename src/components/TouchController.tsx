@@ -19,7 +19,7 @@ export function TouchController({ settings, pressed, editing, touchProps, onDpad
   const area = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState({ width: 0, height: 0 });
   const [draft, setDraft] = useState(() => normalizeTouchLayouts(settings.touchLayouts));
-  const [scope, setScope] = useState<'game' | 'global'>('game');
+  const [scope, setScope] = useState<'game' | 'global'>('global');
   const [preset, setPreset] = useState('custom');
   const [screen, setScreen] = useState(settings.gameScreen);
   const [turbo, setTurbo] = useState(settings.turbo);
@@ -35,7 +35,7 @@ export function TouchController({ settings, pressed, editing, touchProps, onDpad
     const observer = new ResizeObserver(entries => { const box = entries[0].contentRect; drag.current = null; setBounds({ width: box.width, height: box.height }); });
     observer.observe(area.current!); return () => observer.disconnect();
   }, []);
-  useLayoutEffect(() => { if (editing) { setDraft(normalizeTouchLayouts(settings.touchLayouts)); setOpacity(settings.touchOpacity); setScreen(settings.gameScreen); setTurbo(settings.turbo); setVibration(settings.touchVibration); setPreset('custom'); } }, [editing]);
+  useLayoutEffect(() => { if (editing) { setDraft(normalizeTouchLayouts(settings.touchLayouts)); setOpacity(settings.touchOpacity); setScreen(settings.gameScreen); setTurbo(settings.turbo); setVibration(settings.touchVibration); setPreset('custom'); setScope('global'); } }, [editing]);
   function move(group: TouchGroup, patch: Partial<{ x: number; y: number; scale: number }>) {
     setPreset('custom'); setDraft(previous => ({ ...previous, [mode]: { ...previous[mode], [group]: { ...previous[mode][group], ...patch } } }));
   }

@@ -24,3 +24,10 @@ export function gameSettings(settings: Settings, profile?: GameProfile): Setting
   const custom = normalizeGameProfile(profile);
   return structuredClone({ ...settings, ...custom, controls: { ...(custom?.controls ?? settings.controls) } });
 }
+
+// A shared touch save must remove earlier game overrides as well as set defaults.
+export function withoutTouchOverrides(profile?: GameProfile): GameProfile | undefined {
+  if (!profile) return undefined;
+  const { touchLayouts, touchOpacity, gameScreen, turbo, touchVibration, ...rest } = profile;
+  return normalizeGameProfile(rest);
+}

@@ -44,6 +44,11 @@
 /* Compact library chrome */
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .sidebar-header .sidebar-brand{padding:0;margin:0;min-width:0}
+.brand.system-brand{gap:4px}
+.sidebar-header .system-brand{flex:1;min-width:0;width:auto}
+.sidebar-header .system-brand img{flex-shrink:1;min-width:0}
+.sidebar-collapsed .sidebar-header .system-brand{flex:none}
+.system-brand-label{margin-left:-10px;flex-shrink:0;font-size:9px;line-height:1;letter-spacing:.06em;color:var(--muted);font-weight:550;align-self:flex-end;margin-bottom:4px}
 .sidebar-header .sidebar-brand img{width:132px;max-width:100%}
 .sidebar-toggle{flex-shrink:0;width:30px;height:32px;color:var(--muted);background:transparent;border-color:transparent}
 .sidebar-toggle:hover{color:var(--ink)}

@@ -1,6 +1,6 @@
 {
   "name": "kokis-emulator",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": true,
   "description": "Offline GBA and experimental NDS emulators sharing a monochrome interface for Windows and Android.",
   "type": "module",

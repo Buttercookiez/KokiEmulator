@@ -24,7 +24,8 @@ try{
  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:pad.x+pad.width*.1,y:pad.y+pad.height*.9,id:1}]});await dpad('left',true);await dpad('down',true);await dpad('right',false);await dpad('up',false);
  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:pad.x+pad.width*.5,y:pad.y+pad.height*.5,id:1}]});await dpad('left',false);await dpad('down',false);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  await menu();await page.getByRole('button',{name:'Edit controls',exact:true}).click();
- assert.equal(await page.getByRole('combobox',{name:'Save controls for'}).textContent(),'This game');
+ assert.equal(await page.getByRole('combobox',{name:'Save controls for'}).textContent(),'All games');
+ await select('Save controls for','This game');
  await select('Control preset','Left-handed');assert((await page.locator('[data-touch-group="dpad"]').boundingBox()).x>200);
  await page.locator('.touch-editor-advanced summary').click();await select('Game screen position','Top');
  const screenSize=page.getByRole('slider',{name:'Game screen size'});await screenSize.focus();await page.keyboard.press('Home');for(let i=0;i<4;i++)await page.keyboard.press('ArrowRight');

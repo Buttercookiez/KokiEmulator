@@ -14,8 +14,8 @@ android {
         applicationId "com.koki.emulator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "0.4.4"
+        versionCode 19
+        versionName "0.4.5"
         resourceConfigurations += ["en"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
