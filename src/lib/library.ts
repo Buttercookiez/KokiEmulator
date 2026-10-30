@@ -10,7 +10,7 @@ import { normalizeControls } from './controls';
 import { normalizeGameProfile } from './profiles';
 import { normalizeTouchLayouts } from './touch-layout';
 import { normalizeScreen, normalizeTurbo } from './mobile-play';
-import { upgradeNdsPlayerDefaults } from './nds-player-defaults';
+import { upgradeNdsPlayerDefaults, upgradeNdsLandscapeDefaults } from './nds-player-defaults';
 
 interface LibraryIndex { ndsPlayerDefaults?: number; ndsEngine?: string; version: 1; games: Game[]; snapshots: Snapshot[]; settings: Settings }
 const MAX_BACKUP = 512 * 1024 * 1024;
@@ -29,8 +29,8 @@ function normalizeCoverPreference(game: Game) { if (game.coverHidden !== true) d
 async function loadIndex(): Promise<LibraryIndex> {
   if (cached) return cached;
   const bytes = await readFile(INDEX);
-  if (!bytes) return cached = { ...(IS_NDS ? {ndsPlayerDefaults:2} : {}), version: 1, games: [], snapshots: [], settings: clone(DEFAULT_SETTINGS) };
-  try { const data = JSON.parse(strFromU8(bytes)) as LibraryIndex; if (data.version !== 1 || !Array.isArray(data.games) || !Array.isArray(data.snapshots)) throw new Error(); data.settings = normalizeSettings(data.settings); if (IS_NDS && data.ndsPlayerDefaults !== 2) { data.settings = upgradeNdsPlayerDefaults(data.settings); data.ndsPlayerDefaults = 2; } data.games.forEach(normalizeCoverPreference); return cached = data; }
+  if (!bytes) return cached = { ...(IS_NDS ? {ndsPlayerDefaults:3} : {}), version: 1, games: [], snapshots: [], settings: clone(DEFAULT_SETTINGS) };
+  try { const data = JSON.parse(strFromU8(bytes)) as LibraryIndex; if (data.version !== 1 || !Array.isArray(data.games) || !Array.isArray(data.snapshots)) throw new Error(); data.settings = normalizeSettings(data.settings); if (IS_NDS && data.ndsPlayerDefaults !== 3) { if(data.ndsPlayerDefaults!==2)data.settings=upgradeNdsPlayerDefaults(data.settings);data.settings=upgradeNdsLandscapeDefaults(data.settings);data.ndsPlayerDefaults=3; } data.games.forEach(normalizeCoverPreference); return cached = data; }
   catch { throw new Error('Your library index could not be read. Restore a Koki backup to recover it; your game files have not been removed.'); }
 }
 function normalizeSettings(value: Partial<Settings> = {}): Settings {

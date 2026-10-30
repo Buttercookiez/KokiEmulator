@@ -1,4 +1,4 @@
-# Koki NDS native Android 0.2.0
+# Koki NDS native Android 0.2.1
 
 Android ARM64 uses melonDS-android-lib at 431ab4bd0003c4356e25fce89640ae1004579b9b, https://github.com/rafaelvcaetano/melonDS-android-lib. The complete pinned source is included in the release source archive under upstream/melonds. It contains vendored teakra, FatFs, FreeBIOS and JIT sources. Koki bridge source is native/nds/ (C++, Java, manifest and CMake). The owner approved GPL-3.0-or-later distribution of Koki NDS; see LICENSE-NDS.txt and bundled notices. Third-party license grants remain intact.
 
@@ -19,3 +19,7 @@ Native checkpoints restore their own cartridge save memory; an unrelated fallbac
 ## Test scope
 
 This is an experimental performance candidate, not a full-speed guarantee. Generated dual-screen homebrew tests on an isolated API 36 x86_64 Android emulator verify the bridge and native JIT path. An ARM64 APK is cross-compiled and inspected. Physical Redmi Note 10 Pro / Zelda gameplay, sustained thermals, external gamepads and Bluetooth latency need device testing. Results are recorded with the release verification file. Windows/SkyEmu compatibility checks remain separate from native Android tests.
+
+## Audio and mobile update 0.2.1
+
+AudioTrack receives complete blocking PCM writes and starts after a bounded 40–50 ms preroll. Pause, resume, rewind and restore re-prime that buffer. Native mixing uses 16-bit output and cubic interpolation, including when restoring older native states. The untouched landscape preset migrates once to a compact diamond and separated outer Start/Select controls; customized positions/sizes are retained. Mobile side-by-side view uses narrower gutters.

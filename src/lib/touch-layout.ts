@@ -9,7 +9,7 @@ export const TOUCH_SIZE: Record<TouchGroup, [number, number]> = { x:[58,58], y:[
 export function defaultTouchLayout(landscape = false): TouchLayout {
   const p = (x: number, y: number): TouchPosition => ({ x, y, scale: 1 });
   if (IS_NDS) return landscape
-    ? { dpad:p(0,.65), x:p(.955,.26), y:p(.91,.53), a:p(1,.53), b:p(.955,.80), l:p(0,.02), r:p(1,.02), select:p(.43,1), start:p(.57,1) }
+    ? { dpad:{x:0,y:.54,scale:.85}, x:{x:.945,y:.29,scale:.9}, y:{x:.89,y:.54,scale:.9}, a:{x:1,y:.54,scale:.9}, b:{x:.945,y:.79,scale:.9}, l:{x:0,y:.04,scale:.9}, r:{x:1,y:.04,scale:.9}, select:{x:0,y:1,scale:.9}, start:{x:1,y:1,scale:.9} }
     : { dpad:p(0,.92), x:p(.78,.70), y:p(.59,.84), a:p(1,.84), b:p(.78,.98), l:p(0,.56), r:p(1,.56), select:p(.18,1), start:p(.48,1) };
   return { x:p(landscape ? .86 : .75,landscape ? .64 : .70), y:p(landscape?.75:.5,.77), dpad: p(0, .88), a: p(1, .78), b: p(landscape ? .87 : .75, .89), l: p(0, landscape ? .38 : IS_NDS ? .56 : .60), r: p(1, landscape ? .38 : IS_NDS ? .56 : .60), select: p(.32, 1), start: p(.68, 1) };
 }
@@ -22,7 +22,7 @@ export function normalizeTouchLayouts(value: unknown): TouchLayouts {
     for (const group of TOUCH_GROUPS) {
       const raw = layout[group] && typeof layout[group] === 'object' ? layout[group] as Record<string, unknown> : {};
       const fallback = result[mode][group];
-      result[mode][group] = { x: clamp(raw.x, fallback.x, 0, 1), y: clamp(raw.y, fallback.y, 0, 1), scale: clamp(raw.scale, 1, .8, 1.8) };
+      result[mode][group] = { x: clamp(raw.x, fallback.x, 0, 1), y: clamp(raw.y, fallback.y, 0, 1), scale: clamp(raw.scale, fallback.scale, .8, 1.8) };
     }
   }
   return result;

@@ -35,3 +35,11 @@ html[data-native-nds="true"] .app>.sidebar,html[data-native-nds="true"] .app>.ma
 html[data-native-nds="true"] .player-shell.immersive-player,html[data-native-nds="true"] .player-screen-area,html[data-native-nds="true"] .player-screen-wrap,html[data-native-nds="true"] .player-screen-wrap canvas{background:transparent!important}
 
 html[data-native-nds="true"] .mobile-nav{visibility:hidden}
+
+/* Keep the two-screen view larger, with compact controls outside the picture. */
+@media(orientation:landscape){
+ .player-shell.immersive-player[data-system="nds"][data-mobile="true"][data-touch-controls="true"][data-ds-layout="horizontal"] .player-screen-area{left:max(128px,calc(env(safe-area-inset-left) + 116px));right:max(132px,calc(11vw + 64px),calc(env(safe-area-inset-right) + 120px))}
+}
+@media(orientation:portrait){
+ .player-shell.immersive-player[data-system="nds"][data-mobile="true"][data-ds-layout="horizontal"] .player-screen-area{left:max(4px,env(safe-area-inset-left));right:max(4px,env(safe-area-inset-right))}
+}
