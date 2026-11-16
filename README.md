@@ -2,7 +2,7 @@
 
 A playable, offline Game Boy Advance emulator for Windows and Android, built around mGBA. The interface uses the original Split K identity, locally bundled Inter typography, neutral colors, and light, dark, and system appearances.
 
-The prepared Android Play Store version is 0.4.4 (code 18), with production upload signing, offline privacy/support and submission materials. The existing public Windows and Android debug previews remain 0.4.3. See [Play Store handoff](docs/play-store/START-HERE.md). The app retains its assembling K startup splash, saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
+Koki GBA is available as a Windows preview. The Android edition is coming to Google Play. See [Play Store handoff](docs/play-store/START-HERE.md). The app retains its assembling K startup splash, saved colors and reduced-motion support. It includes control presets, eight-direction thumb gestures, per-game touch/screen profiles, adjustable picture placement, turbo A/B, optional touch haptics, checkpoint restore previews and backup reminders. Android gameplay requests immersive system bars.
 
 ## NDS preview
 
@@ -142,7 +142,7 @@ The collection website source is in `website/koki-showcase/`. It includes the em
 
 Live website: https://koki-emulators.almondpin2.chatgpt.site/
 
-Install its dependencies with `npm ci` from that directory. The website build reads the parent project’s `release/BUILD-INFO.json` and verified Windows/Android artifacts, so prepare those app releases before running its `npm run build`. Then run `npm run dev` to preview it.
+Install its dependencies with `npm ci` from that directory. The website build reads the parent project’s `release/BUILD-INFO.json` and verified Windows artifact, so prepare that release before running its `npm run build`. Then run `npm run dev` to preview it.
 
 Generated releases, build output, dependencies, local game ROMs and saves are excluded from Git. Homebrew provenance, artwork credits and third-party licenses remain with the source.
 

@@ -1,14 +1,14 @@
 # Koki showcase website
 
-A standalone static website for Koki's Emulator, with GSAP 3.15.0 animations, responsive home and GBA product pages, original SVG artwork, future-emulator previews and current Windows/Android downloads.
+A standalone static website for Koki's Emulator, with GSAP 3.15.0 animations, responsive home and GBA product pages, original SVG artwork, future-emulator previews and a Windows download for Koki GBA and an experimental NDS preview.
 
 ## Local preview
 
-Run npm install, npm run build, then npm run dev. The default local address is http://127.0.0.1:5190. The build reads ../../release/BUILD-INFO.json and verifies the source Windows and Android artifacts before preparing downloads. The emulator application itself is unchanged.
+Run npm install, npm run build, then npm run dev. The default local address is http://127.0.0.1:5190. The build reads ../../release/BUILD-INFO.json and verifies the source Windows artifact before preparing the download. The emulator application itself is unchanged.
 
 ## Updating app downloads
 
-Build and verify the emulator's next release first, then run this site's build. Version, sizes and SHA-256 values are generated from the verified release metadata. Windows is served as verified 16 MiB static parts and assembled into the original portable executable by the browser; this keeps individual assets inside the host's limit. Android is a direct APK download. Do not manually rename a future emulator as available.
+Build and verify the emulator's next release first, then run this site's build. Version, sizes and SHA-256 values are generated from the verified release metadata. Windows is served as verified 16 MiB static parts and assembled into the original portable executable by the browser; this keeps individual assets inside the host's limit. Koki GBA for Android is listed as coming soon on Google Play.
 
 The Sites project identity lives in .openai/hosting.json. New Sites are private by default. Preserve that audience unless the owner requests a change. Source credentials must never be written to this repository. The Site helpers handle authenticated source synchronization and deployment archives.
 
@@ -32,4 +32,4 @@ Headings omit trailing periods. The loading screen assembles the three original 
 
 ## Vercel / public Git builds
 
-`npm run build:vercel` writes `dist-vercel/` using committed release metadata and direct GitHub release downloads. It works from a fresh Git checkout with only this package’s dependencies installed. `npm run build` retains the existing bundled-download build and requires the parent local release artifacts. Vercel is configured from the repository-root `vercel.json`; do not deploy the repository-root Vite app as the landing page.
+`npm run build:vercel` writes `dist-vercel/` using committed release metadata and direct GitHub release downloads for GBA on Windows and the NDS preview. It works from a fresh Git checkout with only this package’s dependencies installed. `npm run build` retains the existing bundled-download build and requires the parent local release artifacts. Vercel is configured from the repository-root `vercel.json`; do not deploy the repository-root Vite app as the landing page.
