@@ -73,4 +73,6 @@ try {
   if(page)console.log('Android page',await page.locator('body').innerText().catch(()=>''));
   console.log('Android log',String(await device.shell('logcat -d -s KokiPSP:E AndroidRuntime:E Capacitor/Console:E')).slice(-8000));
   throw error;
-} finally { if(page)await page.evaluate(()=>window.kokiPsp.stop()).catch(()=>{}); await device.close(); }
+} finally { await device.shell('am force-stop com.koki.psp'); await device.close(); }
+// End this CLI after the Android driver closes its test connection.
+process.exit(0);
