@@ -1,0 +1,53 @@
+{
+  "appId": "com.koki.psp",
+  "productName": "Koki PSP",
+  "directories": {
+    "output": "release-psp"
+  },
+  "files": [
+    "dist-psp/**/*",
+    "electron/main.cjs",
+    "electron/preload.cjs",
+    "electron/storage.cjs",
+    "electron/psp.cjs",
+    "package.json",
+    "!node_modules{,/**/*}",
+    "licenses/psp/**/*",
+    "docs/PSP.md"
+  ],
+  "extraMetadata": {
+    "kokiSystem": "psp",
+    "version": "0.2.0"
+  },
+  "extraResources": [
+    {
+      "from": "native/psp/host.py",
+      "to": "psp-host.py"
+    },
+    {
+      "from": "${env.KOKI_PSP_RUNTIME}",
+      "to": "psp-runtime"
+    },
+    {
+      "from": "assets/app-icons/koki-psp.png",
+      "to": "koki-psp.png"
+    },
+    {
+      "from": "native/psp/import_zip.py",
+      "to": "psp-import-zip.py"
+    }
+  ],
+  "electronLanguages": [
+    "en-US"
+  ],
+  "win": {
+    "target": [
+      "portable"
+    ],
+    "icon": "assets/app-icons/koki-psp.ico",
+    "signExecutable": false
+  },
+  "portable": {
+    "artifactName": "Koki-PSP-0.2.0-Windows.exe"
+  }
+}

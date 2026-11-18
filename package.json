@@ -36,6 +36,7 @@
     "android:signing": "pwsh -NoProfile -File scripts/android-signing.ps1 -Action Status",
     "play:kit": "node scripts/export-play-store-kit.mjs --require-screenshots",
     "play:verify": "node scripts/verify-play-release.mjs",
+    "psp:desktop": "node scripts/build-psp.mjs",
     "nds:dev": "node scripts/nds.mjs dev",
     "nds:build": "node scripts/nds.mjs build",
     "nds:desktop": "node scripts/nds.mjs desktop",
@@ -45,7 +46,10 @@
     "test:nds:native": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-native.mjs",
     "nds:verify": "node scripts/verify-nds-release.mjs",
     "nds:core": "node scripts/build-nds-core.mjs",
-    "test:nds:migration": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-migration.mjs"
+    "test:nds:migration": "node scripts/make-nds-diagnostic.mjs && node scripts/test-nds-migration.mjs",
+    "psp:build": "node scripts/build-psp.mjs --renderer-only",
+    "psp:android": "node scripts/build-psp-android.mjs",
+    "test:psp": "node scripts/test-psp.mjs"
   },
   "dependencies": {},
   "devDependencies": {

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(koki_psp LANGUAGES CXX)
+add_library(koki_psp SHARED koki_psp.cpp)
+target_compile_features(koki_psp PRIVATE cxx_std_17)
+target_compile_options(koki_psp PRIVATE -Wall -Wextra -Werror=return-type)
+target_link_libraries(koki_psp PRIVATE android log EGL GLESv3 dl z)
+target_link_options(koki_psp PRIVATE "-Wl,-z,max-page-size=16384")

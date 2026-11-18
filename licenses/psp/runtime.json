@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "purpose": "Local device testing",
+  "source": "https://github.com/hrydgard/ppsspp",
+  "sourceArchivePrepared": false,
+  "runtimeFiles": [
+    {
+      "upstream": "https://buildbot.libretro.com/nightly/windows/x86_64/latest/ppsspp_libretro.dll.zip",
+      "sha256": "8110d9bec740dd9dd3626927bec655c007a9fe225cfef4d2b07abe8c97c02055",
+      "name": "Windows PPSSPP"
+    },
+    {
+      "upstream": "https://buildbot.libretro.com/nightly/android/latest/arm64-v8a/ppsspp_libretro_android.so.zip",
+      "sha256": "6bb43884150bd3d197c1f57bffd04a09e8a85d5360f024abff52b4da8f499ae3",
+      "name": "Android arm64 PPSSPP"
+    },
+    {
+      "upstream": "https://buildbot.libretro.com/nightly/android/latest/x86_64/ppsspp_libretro_android.so.zip",
+      "sha256": "8a292bfc546f7a0a10ce9e17a5aeefbbf86b2f07334d81aa81502c678ef41c37",
+      "name": "Android x86_64 PPSSPP test"
+    },
+    {
+      "upstream": "https://github.com/hrydgard/ppsspp/tree/master/assets",
+      "sha256": "4d0610614f0e153246f964a291f412295d689ca9231e909858ec6c80b6bf6b8d",
+      "name": "PPSSPP system compatibility data"
+    }
+  ]
+}

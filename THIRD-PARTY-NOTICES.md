@@ -17,3 +17,16 @@ Koki NDS 0.1.1 uses SkyEmu DS, built from pinned MIT-licensed source. The open B
 ## NDS 0.2.0 native Android
 
 Koki NDS is distributed under GPL-3.0-or-later; see LICENSE-NDS.txt. Android uses the pinned melonDS-android-lib core at 431ab4bd0003c4356e25fce89640ae1004579b9b, with JIT and threaded software rendering. FreeBIOS and generated firmware are used. Full corresponding source, bridge, build scripts and dependency manifests accompany the release. See docs/NDS-NATIVE.md. Native core GPL, teakra MIT and FatFs notices are retained in licenses/nds-native/ and in the offline license reader. SkyEmu compatibility and Windows components retain the licenses listed above.
+
+## Koki PSP
+
+Koki PSP uses PPSSPP by Henrik Rydgard and contributors under GPL-2.0-or-later.
+The Koki PSP interface, native integration and shared native audio code are
+provided together under GPL-3.0-or-later. See licenses/psp for license texts,
+third-party copyright notices and runtime identities. Windows additionally
+uses the Python embeddable runtime under the Python Software Foundation license.
+The libretro API header retains its MIT license notice.
+
+The PSP installers are prepared for local testing. Before publicly distributing
+the bundled engine, provide its exact corresponding source, submodules and
+build instructions. Build and test details are in docs/PSP.md.

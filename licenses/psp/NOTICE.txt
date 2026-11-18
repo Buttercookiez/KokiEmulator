@@ -1,0 +1,20 @@
+Koki PSP 0.2.0
+Developer: john francis marabe
+Support: johnfrancismarabe040905@gmail.com
+
+PPSSPP is copyright Henrik Rydgard and contributors, licensed under
+GNU GPL version 2 or later. https://github.com/hrydgard/ppsspp
+
+The native Koki PSP host, Android integration, and shared native audio pump
+are distributed together under GNU GPL version 3 or later.
+See GPL-3.0.txt. The libretro public API header carries its own MIT license.
+
+The bundled engine and system assets come from the official Libretro PPSSPP
+builds and the existing Koki PSP runtime. These builds are for local testing.
+Source information and SHA-256 engine identities are recorded in runtime.json.
+Corresponding PPSSPP engine source, all submodules, build instructions, and
+third-party notices must accompany any public release.
+
+Python is copyright Python Software Foundation and contributors.
+The Windows runtime includes Python under the PSF license in PYTHON-LICENSE.txt.
+No PSP game ROMs are included.

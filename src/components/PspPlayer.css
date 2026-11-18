@@ -1,0 +1,113 @@
+.psp-stage {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  background: #090909;
+  color: #eee;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  --ink: #eee;
+  --line: #3a3a3a;
+  --surface: #191919;
+  --muted: #b5b5b5;
+  --accent: #eee;
+  --accent-ink: #111;
+}
+.psp-stage-bar { display: flex; align-items: center; gap: 9px; padding: 10px max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left)); }
+.psp-stage-bar h1 { flex: 1; margin: 0; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.psp-stage .button,.psp-stage .icon-button { color: #eee; background: #1b1b1b; border-color: #3a3a3a; }
+.psp-stage .button:hover,.psp-stage .icon-button:hover { background: #2c2c2c; }
+.psp-actions { justify-content: center; padding-bottom: max(10px,env(safe-area-inset-bottom)); }
+.psp-play-area { position: relative; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.psp-screen { position: relative; width: min(100%, calc((100dvh - 128px) * 480 / 272)); aspect-ratio: 480/272; overflow: hidden; border-radius: 12px; }
+.psp-screen canvas { display: block; width: 100%; height: 100%; object-fit: contain; outline-offset: -3px; }
+.psp-notice { position: absolute; z-index: 5; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 12px; max-width: calc(100% - 32px); width: max-content; background: #1b1b1bf2; border: 1px solid #414141; border-radius: 10px; font-size: 12px; }
+.psp-player-menu { position: absolute; z-index: 8; top: 8px; right: max(12px,env(safe-area-inset-right)); width: min(310px,calc(100% - 24px)); max-height: calc(100% - 16px); overflow-y: auto; padding: 16px; display: grid; gap: 9px; background: #181818f5; border: 1px solid #393939; border-radius: 18px; box-shadow: 0 20px 60px #0008; }
+.psp-player-menu .button { justify-content: flex-start; }
+.psp-player-menu .button-row { justify-content: space-between; margin-bottom: 7px; }
+.psp-touch-controls { position: absolute; inset: 0; z-index: 3; pointer-events: none; touch-action: none; user-select: none; -webkit-user-select: none; }
+.psp-touch-piece { position: absolute; transform: translate(-50%,-50%) scale(var(--psp-control-scale)); pointer-events: auto; touch-action: none; width: 54px; height: 54px; display: grid; place-items: center; border: 1px solid #ffffff55; color: #fff; background: #161b22aa; border-radius: 50%; font-size: 12px; font-weight: 550; opacity: var(--psp-control-opacity); }
+.psp-touch-piece:active { background: #81818199; opacity: 1; }
+.psp-touch-controls.editing .psp-touch-piece { outline: 1px dashed #fff9; cursor: move; opacity: 1; }
+.psp-touch-dpad { width: 112px; height: 112px; border: 0; border-radius: 0; background: transparent; }
+.psp-touch-dpad::before,.psp-touch-dpad::after { content: ''; position: absolute; background: #161b22aa; border: 1px solid #ffffff55; border-radius: 9px; z-index: -1; }
+.psp-touch-dpad::before { inset: 0 37px; }
+.psp-touch-dpad::after { inset: 37px 0; }
+.psp-touch-dpad svg { position: absolute; width: 21px; height: 21px; }
+.psp-touch-dpad .up { top: 8px; }.psp-touch-dpad .down { bottom: 8px; }.psp-touch-dpad .left { left: 8px; }.psp-touch-dpad .right { right: 8px; }
+.psp-touch-stick { width: 78px; height: 78px; background: #11172288; }
+.psp-touch-stick span { width: 45px; height: 45px; border: 1px solid #ffffff66; border-radius: 50%; background: #7777; box-shadow: 0 4px 10px #0006; }
+.psp-touch-l,.psp-touch-r { width: 76px; height: 36px; border-radius: 12px; }
+.psp-touch-select,.psp-touch-start { width: 62px; height: 30px; border-radius: 20px; font-size: 10px; letter-spacing: .05em; }
+.psp-control-editor { position: absolute; z-index: 9; left: 50%; top: 10px; transform: translateX(-50%); width: min(340px,calc(100% - 24px)); padding: 15px; background: #191919f5; color: #eee; border: 1px solid #555; border-radius: 14px; box-shadow: 0 12px 40px #0008; }
+.psp-control-editor .button-row { justify-content: space-between; }
+.psp-control-editor p { font-size: 11px; color: #bbb; line-height: 1.6; margin: 9px 0; }
+.psp-control-editor label { display: flex; justify-content: space-between; gap: 16px; font-size: 12px; margin-block: 12px; }
+.psp-control-editor input { width: 150px; accent-color: #eee; }
+.psp-native-playing,.psp-native-playing body,.psp-native-playing #root,.psp-stage.psp-native { background: transparent !important; }
+.psp-stage.psp-native .psp-screen { border-radius: 0; }
+.psp-games { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(170px,100%),1fr)); gap: 22px 18px; }
+.psp-game { min-width: 0; }
+.psp-game-launch { display: block; width: 100%; padding: 0; border: 0; color: inherit; text-align: left; background: transparent; cursor: pointer; border-radius: 12px; }
+.psp-game-launch .game-cover { width: 100%; aspect-ratio: 4/5; min-height: 0; }
+.psp-game-launch:hover .game-cover { filter: brightness(1.1); }
+.psp-game-art { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.psp-game:has(.psp-game-art) .cover-title { color: #fff; text-shadow: 0 1px 8px #000; background: linear-gradient(transparent,#000b); padding: 40px 14px 14px; inset: auto 0 0; }
+.psp-game-actions { display: flex; align-items: center; gap: 4px; padding-top: 8px; }
+.psp-game-actions span { flex: 1; font-size: .75rem; color: var(--muted); }
+.psp-game-actions .icon-button { width: 34px; height: 34px; }
+.psp-library-error { white-space: pre-line; margin: 0 0 18px; padding: 12px 15px; color: var(--danger); border: 1px solid currentColor; border-radius: 10px; line-height: 1.6; }
+.psp-library-heading { margin-bottom: 16px; }
+.psp-library-heading h2 { font-size: 15px; font-weight: 550; display: flex; align-items: center; gap: 10px; }
+.psp-view-switch { display: flex; gap: 5px; margin-left: auto; }
+.psp-app .library-toolbar { gap: 12px; }
+.psp-app .search-field { flex: 1; }
+.psp-app .library-toolbar>.custom-select { min-width: 150px; }
+.psp-view-list { display: flex; flex-direction: column; gap: 12px; }
+.psp-view-list .psp-game { display: flex; align-items: center; gap: 18px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.psp-view-list .psp-game-launch { flex: 1; }
+.psp-view-list .game-cover { aspect-ratio: auto; height: 72px; border-radius: 9px; }
+.psp-view-list .cover-logo { width: 30px; height: 30px; top: 20px; left: 15px; }
+.psp-view-list .cover-title { inset: 24px 10px auto 66px; font-size: 14px; }
+.psp-view-list .psp-game-actions { width: 130px; padding: 0; }
+.psp-resume { position: relative; overflow: hidden; margin-bottom: 30px; background: #181818; color: #fff; border-radius: 18px; min-height: 230px; isolation: isolate; }
+.psp-resume>img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.psp-resume::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg,#000e,#0003); z-index: -1; }
+.psp-resume .eyebrow,.psp-resume p { color: #ccc; }
+.psp-resume h2 { max-width: 550px; }
+.psp-resume .button-primary { background: #f4f4f4; color: #111; border-color: #f4f4f4; }
+.psp-checkpoint-row { display: flex; gap: 10px; align-items: center; padding: 14px 20px; border-top: 1px solid var(--line); }
+.psp-checkpoint-row>span { flex: 1; font-size: 12px; }.psp-checkpoint-row small { display: block; color: var(--muted); margin-top: 5px; }
+.psp-settings h2 { margin-top: 30px; margin-bottom: 14px; font-size: 16px; }
+.psp-settings .settings-note { max-width: 620px; line-height: 1.8; margin-bottom: 15px; }
+.psp-settings .setting-row p { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.psp-color-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(130px,1fr)); gap: 10px; }
+.psp-color-grid button { padding: 18px 12px; text-align: left; display: flex; gap: 9px; align-items: center; font-size: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; }
+.psp-color-grid button span { height: 13px; width: 13px; border-radius: 50%; }.psp-color-grid .selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.psp-app .mobile-nav { position: fixed; }
+@media(max-width:650px) {
+ .psp-games { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 14px; }
+ .psp-app .content { padding-bottom: 130px; }
+ .psp-app .library-toolbar { flex-wrap: wrap; }.psp-app .search-field { flex-basis: 100%; }
+ .psp-app .library-toolbar>.custom-select { flex: 1; }
+ .psp-resume .resume-copy { padding: 25px; }.psp-resume h2 { font-size: 26px; }
+ .psp-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+ .psp-color-grid button { font-size: 10px; padding: 15px 8px; gap: 6px; }
+ .psp-stage-bar { padding: 7px 12px; }.psp-stage-bar h1 { font-size: 11px; }
+}
+@media(orientation:portrait) and (max-width:700px) {
+ .psp-mobile .psp-screen { align-self: start; width: 100%; margin-top: 24px; border-radius: 0; }
+ .psp-mobile .psp-actions { padding-bottom: max(8px,env(safe-area-inset-bottom)); }
+ .psp-mobile .psp-actions .button { min-height: 34px; padding: 6px 16px; }
+}
+@media(orientation:landscape) and (max-height:650px) {
+ .psp-mobile .psp-screen { width: min(calc(100% - 212px),calc((100dvh - 62px) * 480 / 272)); }
+ .psp-mobile .psp-actions { display: none; }
+ .psp-control-editor { top: 5px; width: 300px; padding: 10px 13px; }
+ .psp-control-editor p { margin: 4px 0; }
+ .psp-control-editor label { margin-block: 7px; }
+ .psp-mobile .psp-stage-bar { padding-block: 5px; }
+}
+
+.psp-license { margin-top: 20px; font-size: 12px; }
+.psp-license pre { max-height: 420px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; background: var(--subtle); padding: 16px; border-radius: 10px; margin-top: 12px; }

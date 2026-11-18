@@ -106,7 +106,8 @@ if (splash) {
     }));
   } catch { /* Default/system CSS still renders a usable splash. */ }
   motionQuery.addEventListener('change', () => { if (ready && reducedMotion()) dismiss('ready', true); });
-  void import('./main').catch(error => {
+  const main = import.meta.env.MODE === 'psp' ? import('./psp-main') : import('./main');
+  void main.catch(error => {
     dismiss('error', true);
     recovery('Koki could not start. Reload to try again.', false);
     console.error('Koki startup failed.', error);

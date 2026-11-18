@@ -30,3 +30,20 @@ contextBridge.exposeInMainWorld('kokiNative', Object.freeze({
     return () => beforeCloseHandlers.delete(handler);
   },
 }));
+
+if (process.argv.includes('--koki-psp')) {
+  contextBridge.exposeInMainWorld('kokiPsp', Object.freeze({
+    games: () => ipcRenderer.invoke('koki:psp:games'),
+    choose: () => ipcRenderer.invoke('koki:psp:choose'),
+    favorite: id => ipcRenderer.invoke('koki:psp:favorite', id),
+    remove: id => ipcRenderer.invoke('koki:psp:remove', id),
+    saves: () => ipcRenderer.invoke('koki:psp:saves'),
+    start: id => ipcRenderer.invoke('koki:psp:start', id),
+    frame: async (buttons, x, y) => new Uint8Array(await ipcRenderer.invoke('koki:psp:frame', buttons, x, y)),
+    checkpoint: (restore, id) => ipcRenderer.invoke('koki:psp:checkpoint', restore, id),
+    checkpoints: () => ipcRenderer.invoke('koki:psp:checkpoints'),
+    deleteCheckpoint: id => ipcRenderer.invoke('koki:psp:delete-checkpoint', id),
+    screenshot: data => ipcRenderer.invoke('koki:psp:screenshot', data),
+    stop: () => ipcRenderer.invoke('koki:psp:stop'),
+  }));
+}

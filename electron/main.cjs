@@ -5,9 +5,12 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { createLocalStorage, validBytes } = require('./storage.cjs');
 
-const isNds = process.env.KOKI_SYSTEM === 'nds' || require('../package.json').kokiSystem === 'nds';
-app.setName(isNds ? 'Koki NDS' : "Koki's Emulator");
-if (isNds) app.setPath('userData', path.join(app.getPath('appData'), 'Koki NDS'));
+const system = require('../package.json').kokiSystem || (!app.isPackaged && process.env.KOKI_SYSTEM);
+const isNds = system === 'nds';
+const isPsp = system === 'psp';
+const appName = isPsp ? 'Koki PSP' : isNds ? 'Koki NDS' : "Koki's Emulator";
+app.setName(appName);
+if (isNds || isPsp) app.setPath('userData', path.join(app.getPath('appData'), appName));
 const testMode = !app.isPackaged && process.env.KOKI_TEST_MODE === '1';
 if (testMode && process.env.KOKI_TEST_DATA_DIR) {
   if (!path.isAbsolute(process.env.KOKI_TEST_DATA_DIR)) throw new Error('The test data directory must be absolute.');
@@ -76,7 +79,7 @@ function registerIpc() {
 }
 
 function registerBundleProtocol() {
-  const bundle = path.join(app.getAppPath(), isNds ? 'dist-nds' : 'dist');
+  const bundle = path.join(app.getAppPath(), isPsp ? 'dist-psp' : isNds ? 'dist-nds' : 'dist');
   const mime = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.mjs': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.wasm': 'application/wasm', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf' };
   protocol.handle('app', async (request) => {
     try {
@@ -105,10 +108,10 @@ function createWindow() {
   pendingCloseToken = null;
   window = new BrowserWindow({
     width: 1340, height: 900, minWidth: 720, minHeight: 560,
-    title: isNds ? "Koki NDS" : "Koki's Emulator", backgroundColor: startupBackground,
-    icon: app.isPackaged ? path.join(process.resourcesPath, isNds ? 'koki-nds.png' : 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', isNds ? 'koki-nds.png' : 'koki-gba.png'),
+    title: appName, backgroundColor: startupBackground,
+    icon: isPsp ? (app.isPackaged ? path.join(process.resourcesPath, 'koki-psp.png') : path.join(app.getAppPath(), 'assets', 'app-icons', 'koki-psp.png')) : app.isPackaged ? path.join(process.resourcesPath, isNds ? 'koki-nds.png' : 'koki-gba.png') : path.join(app.getAppPath(), 'assets', 'app-icons', isNds ? 'koki-nds.png' : 'koki-gba.png'),
     autoHideMenuBar: true, show: false,
-    webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, backgroundThrottling: !testMode },
+    webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, backgroundThrottling: !testMode, additionalArguments: isPsp ? ['--koki-psp'] : [] },
   });
   window.once('ready-to-show', () => { if (!testMode) window?.show(); });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -137,6 +140,7 @@ app.whenReady().then(async () => {
   } catch { /* The renderer reports library errors and offers recovery. */ }
   registerBundleProtocol();
   registerIpc();
+  if (isPsp) require('./psp.cjs').registerPsp({ app, ipcMain, authorize, windowFor: () => window, dialog, storage: library, shell });
   session.defaultSession.setPermissionRequestHandler((_contents, permission, callback) => callback(permission === 'fullscreen'));
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const allowed = isAppUrl(details.url) || details.url.startsWith('blob:') || details.url.startsWith('data:') || Boolean(developmentUrl && details.url.startsWith(developmentUrl.replace(/^http:/, 'ws:')));

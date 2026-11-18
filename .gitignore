@@ -39,3 +39,15 @@ engines/nds/
 dist-nds/
 release-nds/
 android-nds/
+
+dist-psp/
+release-psp/
+__pycache__/
+
+android-psp/
+*.iso
+*.cso
+*.chd
+*.pbp
+*.elf
+*.prx
