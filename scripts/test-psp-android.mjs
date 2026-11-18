@@ -13,10 +13,13 @@ try {
   await device.push(archive,'/sdcard/Download/Koki-test.zip');
   page=await (await device.webView({pkg:'com.koki.psp'})).page();
   page.setDefaultTimeout(30000);
+  await page.waitForFunction(()=>!!window.kokiPsp);
   await page.evaluate(()=>window.kokiPsp.stop());
   await device.shell('settings put system accelerometer_rotation 0');
   await device.shell('settings put system user_rotation 0');
   await page.reload();
+  await page.waitForFunction(()=>!!window.kokiPsp);
+  await page.getByRole('heading',{name:'Your library',exact:true}).waitFor();
   const originalStates=await page.evaluate(()=>window.kokiPsp.checkpoints());
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   if (!(await page.evaluate(()=>window.kokiPsp.games())).length) {
