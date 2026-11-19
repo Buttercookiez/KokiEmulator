@@ -40,9 +40,12 @@ try {
   await page.getByRole('button',{name:'Return to library',exact:true}).click();
   await page.getByRole('heading',{name:'Your library',exact:true}).waitFor();
   await page.getByRole('button',{name:'Colors',exact:true}).click();
-  await page.getByRole('button',{name:'Ocean',exact:true}).click();
+  await page.getByRole('radio',{name:'Ocean',exact:true}).click();
   assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('koki-psp-settings')).lightColor==='#2563eb'||JSON.parse(localStorage.getItem('koki-psp-settings')).darkColor==='#2563eb'));
-  await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.setMinimumSize(320,320);window.setContentSize(412,915);});
+  await page.getByRole('textbox',{name:'Custom color hex'}).fill('#8844aa');
+  await page.getByRole('button',{name:'Apply',exact:true}).click();
+  assert.ok(await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('koki-psp-settings'))).includes('#8844aa')));
+  await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.setMinimumSize(320,320);window.setContentSize(915,412);});
   await page.addInitScript(()=>{const original=window.matchMedia.bind(window);window.matchMedia=query=>query==='(pointer: coarse)'?Object.defineProperty(original(query),'matches',{value:true}):original(query);});
   await page.reload();
   await page.getByRole('heading',{name:'Your library',exact:true}).waitFor();
@@ -57,8 +60,8 @@ try {
   await page.mouse.move(box.x+box.width/2-25,box.y+box.height/2-20,{steps:5});
   await page.mouse.up();
   await page.getByRole('button',{name:'Save for all games',exact:true}).click();
-  const layout=await page.evaluate(()=>JSON.parse(localStorage.getItem('koki-psp-settings')).layout.portrait);
-  assert.ok(layout&&layout.cross.x<78);
+  const layout=await page.evaluate(()=>JSON.parse(localStorage.getItem('koki-psp-settings')).layout.landscape);
+  assert.ok(layout&&layout.cross.x<87);
   await page.getByRole('button',{name:'Return to library',exact:true}).click();
   await page.getByRole('heading',{name:'Your library',exact:true}).waitFor();
   await page.getByRole('button',{name:'Play '+games[0].title,exact:true}).click();

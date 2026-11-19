@@ -31,9 +31,10 @@ void fail(JNIEnv* env, const std::exception& error) {
     env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), error.what());
 }
 void logMessage(enum retro_log_level level, const char* format, ...) {
+    if (level < RETRO_LOG_WARN) return;
     va_list args;
     va_start(args, format);
-    __android_log_vprint(level >= RETRO_LOG_ERROR ? ANDROID_LOG_ERROR : ANDROID_LOG_INFO, "KokiPSP", format, args);
+    __android_log_vprint(level >= RETRO_LOG_ERROR ? ANDROID_LOG_ERROR : ANDROID_LOG_WARN, "KokiPSP", format, args);
     va_end(args);
 }
 struct Core {
@@ -51,6 +52,7 @@ struct Core {
     std::unordered_map<std::string, std::string> options;
     std::vector<int16_t> pcm;
     int buttons = 0, stickX = 0, stickY = 0;
+    bool needsPresent = true;
     unsigned width = 480, height = 272;
     decltype(&retro_init) initialize = nullptr;
     decltype(&retro_deinit) deinitialize = nullptr;
@@ -68,6 +70,7 @@ struct Core {
     }
     void current() {
         EGLSurface target = surface != EGL_NO_SURFACE ? surface : fallback;
+        if (eglGetCurrentContext() == context && eglGetCurrentSurface(EGL_DRAW) == target) return;
         if (!eglMakeCurrent(display, target, target, context)) throw std::runtime_error("Could not activate PSP graphics.");
     }
     void graphics() {
@@ -113,6 +116,7 @@ struct Core {
         }
         current();
         eglSwapInterval(display, 0);
+        needsPresent = true;
     }
     ~Core() {
         if (context != EGL_NO_CONTEXT) {
@@ -188,7 +192,10 @@ int16_t input(unsigned port, unsigned device, unsigned index, unsigned id) {
     if (!active || port) return 0;
     if (device == RETRO_DEVICE_JOYPAD) return id == RETRO_DEVICE_ID_JOYPAD_MASK ? active->buttons :
         id < 16 && (active->buttons & (1 << id)) ? 1 : 0;
-    if (device == RETRO_DEVICE_ANALOG && index == 0) return id == 0 ? active->stickX : active->stickY;
+    if (device == RETRO_DEVICE_ANALOG && index == RETRO_DEVICE_INDEX_ANALOG_LEFT) {
+        if (id == RETRO_DEVICE_ID_ANALOG_X) return active->stickX;
+        if (id == RETRO_DEVICE_ID_ANALOG_Y) return active->stickY;
+    }
     return 0;
 }
 size_t audioBatch(const int16_t* data, size_t frames) {
@@ -200,6 +207,7 @@ void audioSample(int16_t left, int16_t right) { const int16_t pair[] = { left, r
 void video(const void* pixels, unsigned width, unsigned height, size_t pitch) {
     if (!active || !width || !height || width > 480 || height > 272) return;
     active->width = width; active->height = height;
+    if (pixels) active->needsPresent = true;
     if (pixels && pixels != RETRO_HW_FRAME_BUFFER_VALID) {
         if (pitch < width * 4) return;
         std::vector<uint8_t> rgba(width * height * 4);
@@ -272,7 +280,7 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_koki_psp_NativePspPlugin_nativeFra
         glViewport(0, 0, 480, 272);
         player.run();
         if (player.shutdown) throw std::runtime_error("The PSP engine stopped.");
-        if (player.surface != EGL_NO_SURFACE) {
+        if (player.surface != EGL_NO_SURFACE && player.needsPresent) {
             EGLint width, height;
             eglQuerySurface(player.display, player.surface, EGL_WIDTH, &width);
             eglQuerySurface(player.display, player.surface, EGL_HEIGHT, &height);
@@ -281,6 +289,7 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_koki_psp_NativePspPlugin_nativeFra
             glDisable(GL_SCISSOR_TEST);
             glBlitFramebuffer(0, 0, player.width, player.height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, player.smoothing ? GL_LINEAR : GL_NEAREST);
             eglSwapBuffers(player.display, player.surface);
+            player.needsPresent = false;
         }
         return player.av.timing.fps > 0 ? player.av.timing.fps : 60.0;
     } catch (const std::exception& error) { fail(env, error); return 60.0; }

@@ -3,6 +3,7 @@ package com.koki.psp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
@@ -32,7 +33,9 @@ public class NativePspPlugin extends Plugin {
     private PspLibrary library;
     private long core;
     private volatile boolean playing;
-    private volatile int buttons, stickX, stickY;
+    private final Object inputLock = new Object();
+    private int buttons, stickX, stickY, pendingPresses, lastPresses;
+    private Integer libraryOrientation;
     private volatile float volume=.8f;
     private long deadline;
     private int rate=44100;
@@ -84,6 +87,9 @@ public class NativePspPlugin extends Plugin {
     }
     private void attach() {
         if(picture!=null)return;
+        Activity activity = getActivity();
+        libraryOrientation = activity.getRequestedOrientation();
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         WebView web=getBridge().getWebView();
         if(container==null) {
             ViewGroup parent=(ViewGroup)web.getParent();int position=parent.indexOfChild(web);ViewGroup.LayoutParams params=web.getLayoutParams();
@@ -106,14 +112,24 @@ public class NativePspPlugin extends Plugin {
             public void onSurfaceTextureUpdated(SurfaceTexture texture) {}
         });
     }
-    private void detach() { if(picture!=null){container.removeView(picture);picture=null;}getBridge().getWebView().setBackgroundColor(getContext().getColor(com.koki.psp.R.color.koki_background)); }
+    private void detach() {
+        if (picture != null) {
+            container.removeView(picture);
+            picture = null;
+        }
+        getBridge().getWebView().setBackgroundColor(getContext().getColor(com.koki.psp.R.color.koki_background));
+        if (libraryOrientation != null) {
+            getActivity().setRequestedOrientation(libraryOrientation);
+            libraryOrientation = null;
+        }
+    }
     private void playerError(Throwable error) {
         playing=false;flushAudio();
         JSObject message=new JSObject();message.put("message",error.getMessage()==null?"The PSP engine stopped.":error.getMessage());notifyListeners("error",message);
     }
     private void flushAudio() { if(audio!=null){audio.pause();audio.flush();}if(pump!=null)pump.reset(); }
     private void closeCore() {
-        playing=false;engine.removeCallbacks(tick);
+        playing=false;engine.removeCallbacks(tick);resetInput();
         if(audio!=null){audio.pause();audio.flush();audio.release();audio=null;pump=null;}
         if(core!=0){nativeDestroy(core);core=0;}currentGame=null;
     }
@@ -126,18 +142,28 @@ public class NativePspPlugin extends Plugin {
         if(audio.getState()!=AudioTrack.STATE_INITIALIZED)throw new IllegalStateException("Could not start PSP audio.");
         audio.setVolume(volume);
         pump=new NativeAudioPump(new NativeAudioPump.Output() {
-            public int write(short[] data,int offset,int count) { return audio.write(data,offset,count,AudioTrack.WRITE_BLOCKING); }
+            public int write(short[] data,int offset,int count) { return audio.write(data,offset,count,AudioTrack.WRITE_NON_BLOCKING); }
             public void play() { audio.play(); }
-        },Math.min(rate/20,audio.getBufferSizeInFrames()/2)*2);
+        }, Math.min(rate/30, audio.getBufferSizeInFrames()/2)*2, rate/5*2);
     }
     private final Runnable tick=new Runnable() { public void run() {
         if(!playing || core==0)return;
         try {
-            double fps=nativeFrame(core,buttons,stickX,stickY);
-            int count=nativeAudio(core,pcm);if(count>0)pump.push(pcm,count);
-            deadline+=(long)(1_000_000_000.0/fps);
-            long now=System.nanoTime();if(now-deadline>100_000_000L)deadline=now;
-            engine.postDelayed(this,Math.max(0,(deadline-now)/1_000_000L));
+            int frameButtons, x, y;
+            synchronized (inputLock) {
+                frameButtons = buttons | pendingPresses | lastPresses;
+                lastPresses = pendingPresses;
+                pendingPresses = 0;
+                x = stickX;
+                y = stickY;
+            }
+            double fps = nativeFrame(core, frameButtons, x, y);
+            pump.push(pcm, nativeAudio(core, pcm));
+            long interval = (long)(1_000_000_000.0 / fps);
+            deadline += interval;
+            long now = System.nanoTime();
+            if (now - deadline > interval * 2) deadline = now;
+            engine.postDelayed(this, Math.max(0, (deadline - now + 500_000L) / 1_000_000L));
         } catch(Throwable error) { playerError(error); }
     }};
     private void copyAssets(String path,File destination) throws Exception {
@@ -187,8 +213,21 @@ public class NativePspPlugin extends Plugin {
             call.resolve();
         });
     }
+    private void resetInput() {
+        synchronized (inputLock) { buttons = stickX = stickY = pendingPresses = lastPresses = 0; }
+    }
     @PluginMethod public void input(PluginCall call) {
-        buttons=call.getInt("buttons",0)&0x7fff;stickX=Math.max(-32767,Math.min(32767,call.getInt("x",0)));stickY=Math.max(-32767,Math.min(32767,call.getInt("y",0)));call.resolve();
+        int next = call.getInt("buttons", 0) & 0x0fff;
+        int x = Math.max(-32767, Math.min(32767, call.getInt("x", 0)));
+        int y = Math.max(-32767, Math.min(32767, call.getInt("y", 0)));
+        synchronized (inputLock) {
+            // Keep quick presses visible across PSP controller sampling boundaries.
+            pendingPresses |= next & ~buttons;
+            buttons = next;
+            stickX = x;
+            stickY = y;
+        }
+        call.resolve();
     }
     @PluginMethod public void play(PluginCall call) {
         boolean paused=call.getBoolean("paused",true);boolean smoothing=call.getBoolean("smoothing",true);double requested=call.getDouble("volume",.8);
@@ -197,7 +236,7 @@ public class NativePspPlugin extends Plugin {
             try {
                 if(core==0){call.resolve();return;}
                 audio.setVolume(volume);nativeSmoothing(core,smoothing);
-                if(paused){playing=false;engine.removeCallbacks(tick);buttons=stickX=stickY=0;flushAudio();}
+                if(paused){playing=false;engine.removeCallbacks(tick);resetInput();flushAudio();}
                 else if(!playing){playing=true;deadline=System.nanoTime();engine.post(tick);}
                 call.resolve();
             } catch(Throwable error) { reject(call,error); }
@@ -265,6 +304,6 @@ public class NativePspPlugin extends Plugin {
         });
     }
     @PluginMethod public void stop(PluginCall call) { playing=false;engine.post(()->{try{closeCore();getActivity().runOnUiThread(()->{detach();call.resolve();});}catch(Throwable error){reject(call,error);}}); }
-    @Override protected void handleOnPause() { playing=false;buttons=stickX=stickY=0;if(engine!=null)engine.post(()->{engine.removeCallbacks(tick);flushAudio();}); }
+    @Override protected void handleOnPause() { playing=false;resetInput();if(engine!=null)engine.post(()->{engine.removeCallbacks(tick);flushAudio();}); }
     @Override protected void handleOnDestroy() { playing=false;files.shutdown();if(engine!=null)engine.post(()->{closeCore();engineThread.quitSafely();}); }
 }

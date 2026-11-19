@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FolderOpen, Heart, History, Library, Plus, Search, Settings2, SunMoon, Play, Trash2, Palette, LayoutGrid, List, ChevronDown } from 'lucide-react';
 import { markStartupReady, rememberStartupAppearance } from './startup';
-import { COLOR_PALETTES, createThemeTokens } from './lib/themes';
+import { createThemeTokens } from './lib/themes';
 import { readPspSettings, type PspSettings } from './lib/psp-settings';
 import { isPspAndroid } from './lib/psp-android';
 import { PspPlayer } from './components/PspPlayer';
+import { PaletteChooser } from './components/PaletteChooser';
 import { Select } from './components/Select';
 import type { PspCheckpoint, PspGame, PspTiming } from './psp-types';
 import pspNotice from '../licenses/psp/NOTICE.txt?raw';
@@ -68,7 +69,7 @@ export default function PspApp() {
   async function run(operation: () => Promise<void>) {
     if (working.current) return;
     working.current = true; setBusy(true); setError('');
-    try { await operation(); }
+    try { await operation(); markStartupReady(); }
     catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
     finally { setBusy(false); working.current = false; }
   }
@@ -100,22 +101,24 @@ export default function PspApp() {
       <div className="chrome-actions"><button className="icon-button" aria-label="Colors" onClick={() => { setColors(value => !value); setPage('settings'); }}><Palette size={18} /></button>
         <button className="icon-button" aria-label="Toggle light or dark mode" onClick={() => setSettings(value => ({ ...value, theme: dark ? 'light' : 'dark' }))}><SunMoon size={18} /></button></div></header>
       <div className="content motion-page"><div className="page-heading"><h1>{colors ? 'Colors' : page === 'library' ? 'Your library' : page === 'favorites' ? 'Favorites' : page === 'saves' ? 'Save history' : 'Settings'}</h1>
-        {(page === 'library' || page === 'favorites') && <button className="button" disabled={busy} onClick={choose}><Plus size={17} /> Add games</button>}</div>
+        {!colors && (page === 'library' || page === 'favorites') && <button className="button" disabled={busy} onClick={choose}><Plus size={17} /> Add games</button>}</div>
         {busy && <p className="settings-note" role="status">{importing ? 'Adding games… Large ZIP files may take a moment.' : 'Opening game…'}</p>}
         {error && <p className="psp-library-error" role="alert">{error}</p>}
-        {page === 'settings' ? <section className="settings-section psp-settings">
-          <div className="setting-row"><div className="setting-label"><h3>Theme</h3><p>Choose light, dark, or follow your device.</p></div><div className="theme-switch">{(['light', 'dark', 'system'] as const).map(theme => <button key={theme} aria-pressed={settings.theme === theme} className={settings.theme === theme ? 'active' : ''} onClick={() => setSettings(value => ({ ...value, theme }))}>{theme[0].toUpperCase() + theme.slice(1)}</button>)}</div></div>
-          <h2>Color for {dark ? 'dark' : 'light'} mode</h2><div className="psp-color-grid">{COLOR_PALETTES.map(color => <button key={color.value} className={(dark ? settings.darkColor : settings.lightColor) === color.value ? 'selected' : ''} aria-pressed={(dark ? settings.darkColor : settings.lightColor) === color.value} onClick={() => setSettings(value => ({ ...value, [dark ? 'darkColor' : 'lightColor']: color.value }))}><span style={{ background: color.swatch }} />{color.name}</button>)}</div>
-          {!colors && <><h2>Playback</h2><label className="setting-row"><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step=".05" value={settings.volume} onChange={event => setSettings(value => ({ ...value, volume: Number(event.target.value) }))} /></label>
+        {colors ? <div className="colors-layout"><section className="colors-section" aria-label="Color customization">
+          <div className="colors-mode"><div className="setting-row"><div className="setting-label"><h3>Theme</h3><p>Choose light, dark, or follow your device.</p></div><div className="theme-switch">{(['light', 'dark', 'system'] as const).map(theme => <button key={theme} aria-pressed={settings.theme === theme} className={settings.theme === theme ? 'active' : ''} onClick={() => setSettings(value => ({ ...value, theme }))}>{theme[0].toUpperCase() + theme.slice(1)}</button>)}</div></div></div>
+          <PaletteChooser mode={dark ? 'dark' : 'light'} value={dark ? settings.darkColor : settings.lightColor}
+            onChange={color => setSettings(value => ({ ...value, [dark ? 'darkColor' : 'lightColor']: color }))} />
+        </section></div> : page === 'settings' ? <section className="settings-section psp-settings">
+          <h2>Playback</h2><label className="setting-row"><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step=".05" value={settings.volume} onChange={event => setSettings(value => ({ ...value, volume: Number(event.target.value) }))} /></label>
             <label className="setting-row"><span>Smooth image scaling</span><input type="checkbox" checked={settings.smoothing} onChange={event => setSettings(value => ({ ...value, smoothing: event.target.checked }))} /></label>
             <label className="setting-row"><span>Show touch controls</span><input type="checkbox" checked={settings.showControls} onChange={event => setSettings(value => ({ ...value, showControls: event.target.checked }))} /></label>
-            <h2>Controller layouts</h2><p className="settings-note">Open a game and choose Edit controls to move buttons. Portrait and landscape layouts are saved for all PSP games.</p>
+            <h2>Controller layouts</h2><p className="settings-note">Open a game and choose Edit controls to move buttons. Your landscape layout applies to all PSP games.</p>
             <h2>Keyboard and gamepad</h2><p className="settings-note">Arrow keys · D-pad. I J K L · analog stick. Z X A S · Cross, Circle, Square, Triangle. Q E · shoulders. Enter · Start. Right Shift · Select. Escape · pause. Standard Bluetooth and USB gamepads are supported.</p>
             <h2>Game saves</h2><p className="settings-note">In-game saves use the PSP memory stick. Checkpoints are available in Save history.</p>
             <button className="button" onClick={() => void run(() => bridge.saves())} disabled={busy}><FolderOpen size={16} />{isPspAndroid ? 'Export PSP memory stick' : 'Open PSP memory stick'}</button>
-            <h2>About Koki PSP</h2><p className="settings-note">Version 0.2.0 · Powered by PPSSPP, GPL-2.0-or-later. PPSSPP and its contributors are credited in the bundled license notices. Import your own PSP games. Games are supplied separately.</p>
+            <h2>About Koki PSP</h2><p className="settings-note">Version 0.2.1 · Powered by PPSSPP, GPL-2.0-or-later. PPSSPP and its contributors are credited in the bundled license notices. Import your own PSP games. Games are supplied separately.</p>
             <p className="settings-note">Support · johnfrancismarabe040905@gmail.com</p>
-            <details className="psp-license"><summary>Open-source licenses</summary><pre>{pspNotice + '\n' + pspLicense + '\n' + pspThirdParty}</pre></details></>}
+            <details className="psp-license"><summary>Open-source licenses</summary><pre>{pspNotice + '\n' + pspLicense + '\n' + pspThirdParty}</pre></details>
         </section> : page === 'saves' ? <section className="save-history">
           {!checkpoints.length && <section className="welcome"><div className="welcome-copy"><h2>Your progress, saved</h2><p>Save a checkpoint while playing to find it here.</p></div></section>}
           {games.filter(game => checkpoints.some(state => state.gameId === game.id)).map(game => <details className="save-game-group" key={game.id}><summary className="save-game-heading"><span className="save-game-art">{artwork(game)}</span><span className="save-game-heading-copy"><span className="save-game-title">{game.title}</span><span className="save-game-count">{checkpoints.filter(state => state.gameId === game.id).length} checkpoints</span></span><ChevronDown size={17} /></summary>

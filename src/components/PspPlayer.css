@@ -25,18 +25,16 @@
 .psp-player-menu { position: absolute; z-index: 8; top: 8px; right: max(12px,env(safe-area-inset-right)); width: min(310px,calc(100% - 24px)); max-height: calc(100% - 16px); overflow-y: auto; padding: 16px; display: grid; gap: 9px; background: #181818f5; border: 1px solid #393939; border-radius: 18px; box-shadow: 0 20px 60px #0008; }
 .psp-player-menu .button { justify-content: flex-start; }
 .psp-player-menu .button-row { justify-content: space-between; margin-bottom: 7px; }
-.psp-touch-controls { position: absolute; inset: 0; z-index: 3; pointer-events: none; touch-action: none; user-select: none; -webkit-user-select: none; }
+.psp-touch-controls { container-type: size; position: absolute; inset: 0; z-index: 3; pointer-events: none; touch-action: none; user-select: none; -webkit-user-select: none; }
 .psp-touch-piece { position: absolute; transform: translate(-50%,-50%) scale(var(--psp-control-scale)); pointer-events: auto; touch-action: none; width: 54px; height: 54px; display: grid; place-items: center; border: 1px solid #ffffff55; color: #fff; background: #161b22aa; border-radius: 50%; font-size: 12px; font-weight: 550; opacity: var(--psp-control-opacity); }
-.psp-touch-piece:active { background: #81818199; opacity: 1; }
+.psp-touch-piece.pressed,.psp-touch-dpad .touch-button.pressed { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .psp-touch-controls.editing .psp-touch-piece { outline: 1px dashed #fff9; cursor: move; opacity: 1; }
-.psp-touch-dpad { width: 112px; height: 112px; border: 0; border-radius: 0; background: transparent; }
-.psp-touch-dpad::before,.psp-touch-dpad::after { content: ''; position: absolute; background: #161b22aa; border: 1px solid #ffffff55; border-radius: 9px; z-index: -1; }
-.psp-touch-dpad::before { inset: 0 37px; }
-.psp-touch-dpad::after { inset: 37px 0; }
-.psp-touch-dpad svg { position: absolute; width: 21px; height: 21px; }
-.psp-touch-dpad .up { top: 8px; }.psp-touch-dpad .down { bottom: 8px; }.psp-touch-dpad .left { left: 8px; }.psp-touch-dpad .right { right: 8px; }
-.psp-touch-stick { width: 78px; height: 78px; background: #11172288; }
-.psp-touch-stick span { width: 45px; height: 45px; border: 1px solid #ffffff66; border-radius: 50%; background: #7777; box-shadow: 0 4px 10px #0006; }
+.psp-touch-piece.psp-touch-dpad { position: absolute; transform: translate(-50%,-50%) scale(var(--psp-control-scale)); transform-origin: center; --dpad-cell: clamp(28px,11cqh,44px); width: calc(3 * var(--dpad-cell)); height: calc(3 * var(--dpad-cell)); grid-template: repeat(3,var(--dpad-cell)) / repeat(3,var(--dpad-cell)); border: 0; border-radius: 0; background: transparent; }
+.psp-touch-dpad .touch-button,.psp-touch-dpad .dpad-center { width: 100%; height: 100%; pointer-events: none; }
+.psp-touch-dpad .touch-button { background: #181c22d9; border-color: #ffffff42; color: #f0f1f3; }
+.psp-touch-dpad .dpad-center { background: #181c22d9; }
+.psp-touch-stick { width: clamp(55px,23cqh,83px); height: clamp(55px,23cqh,83px); background: #11172288; }
+.psp-touch-stick span { pointer-events: none; width: 52%; height: 52%; border: 1px solid #ffffff66; border-radius: 50%; background: #7777; box-shadow: 0 4px 10px #0006; }
 .psp-touch-l,.psp-touch-r { width: 76px; height: 36px; border-radius: 12px; }
 .psp-touch-select,.psp-touch-start { width: 62px; height: 30px; border-radius: 20px; font-size: 10px; letter-spacing: .05em; }
 .psp-control-editor { position: absolute; z-index: 9; left: 50%; top: 10px; transform: translateX(-50%); width: min(340px,calc(100% - 24px)); padding: 15px; background: #191919f5; color: #eee; border: 1px solid #555; border-radius: 14px; box-shadow: 0 12px 40px #0008; }
@@ -81,9 +79,6 @@
 .psp-settings h2 { margin-top: 30px; margin-bottom: 14px; font-size: 16px; }
 .psp-settings .settings-note { max-width: 620px; line-height: 1.8; margin-bottom: 15px; }
 .psp-settings .setting-row p { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.psp-color-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(130px,1fr)); gap: 10px; }
-.psp-color-grid button { padding: 18px 12px; text-align: left; display: flex; gap: 9px; align-items: center; font-size: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; }
-.psp-color-grid button span { height: 13px; width: 13px; border-radius: 50%; }.psp-color-grid .selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .psp-app .mobile-nav { position: fixed; }
 @media(max-width:650px) {
  .psp-games { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 14px; }
@@ -91,14 +86,7 @@
  .psp-app .library-toolbar { flex-wrap: wrap; }.psp-app .search-field { flex-basis: 100%; }
  .psp-app .library-toolbar>.custom-select { flex: 1; }
  .psp-resume .resume-copy { padding: 25px; }.psp-resume h2 { font-size: 26px; }
- .psp-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
- .psp-color-grid button { font-size: 10px; padding: 15px 8px; gap: 6px; }
  .psp-stage-bar { padding: 7px 12px; }.psp-stage-bar h1 { font-size: 11px; }
-}
-@media(orientation:portrait) and (max-width:700px) {
- .psp-mobile .psp-screen { align-self: start; width: 100%; margin-top: 24px; border-radius: 0; }
- .psp-mobile .psp-actions { padding-bottom: max(8px,env(safe-area-inset-bottom)); }
- .psp-mobile .psp-actions .button { min-height: 34px; padding: 6px 16px; }
 }
 @media(orientation:landscape) and (max-height:650px) {
  .psp-mobile .psp-screen { width: min(calc(100% - 212px),calc((100dvh - 62px) * 480 / 272)); }

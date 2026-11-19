@@ -17,7 +17,7 @@
   ],
   "extraMetadata": {
     "kokiSystem": "psp",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "extraResources": [
     {
@@ -48,6 +48,6 @@
     "signExecutable": false
   },
   "portable": {
-    "artifactName": "Koki-PSP-0.2.0-Windows.exe"
+    "artifactName": "Koki-PSP-0.2.1-Windows.exe"
   }
 }

@@ -1,4 +1,4 @@
-# Koki PSP 0.2.0
+# Koki PSP 0.2.1
 
 Koki PSP provides the Koki library interface on Windows x64 and Android arm64.
 The Android APK requires Android 8 or newer and OpenGL ES 3. It uses the native
@@ -44,8 +44,8 @@ Android shell, copies Koki's PSP native integration and system assets, and build
 a compact APK signed with the local development certificate. A Google Play AAB
 requires a separately configured release build and upload signing.
 
-Outputs are release-psp/Koki-PSP-0.2.0-Windows.exe and
-release-psp/Koki-PSP-0.2.0-Android.apk. Generated Android projects, native
+Outputs are release-psp/Koki-PSP-0.2.1-Windows.exe and
+release-psp/Koki-PSP-0.2.1-Android.apk. Generated Android projects, native
 binaries and installers are excluded from Git.
 
 ## Validation
