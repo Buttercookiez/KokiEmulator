@@ -45,6 +45,7 @@ struct Core {
     EGLConfig config{};
     EGLSurface fallback = EGL_NO_SURFACE, surface = EGL_NO_SURFACE;
     ANativeWindow* window = nullptr;
+    EGLint windowVisual = 0;
     GLuint framebuffer = 0, texture = 0, depth = 0;
     retro_hw_render_callback hardware{};
     retro_system_av_info av{};
@@ -100,6 +101,21 @@ struct Core {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) throw std::runtime_error("Could not create the PSP screen.");
     }
+    void updateWindowBuffers() {
+        if (!window) return;
+        // Android can scale the native PSP buffer during composition. Keep the
+        // full-size destination when the player chooses nearest-neighbor scaling.
+        const int bufferWidth = smoothing ? 480 : 0;
+        const int bufferHeight = smoothing ? 272 : 0;
+        if (ANativeWindow_setBuffersGeometry(window, bufferWidth, bufferHeight, windowVisual) != 0)
+            ANativeWindow_setBuffersGeometry(window, 0, 0, windowVisual);
+        needsPresent = true;
+    }
+    void setSmoothing(bool enabled) {
+        if (smoothing == enabled) return;
+        smoothing = enabled;
+        updateWindowBuffers();
+    }
     void setSurface(JNIEnv* env, jobject target) {
         if (display == EGL_NO_DISPLAY) return;
         eglMakeCurrent(display, fallback, fallback, context);
@@ -108,9 +124,8 @@ struct Core {
         if (target) {
             window = ANativeWindow_fromSurface(env, target);
             if (!window) throw std::runtime_error("The PSP display surface is unavailable.");
-            EGLint visual;
-            eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &visual);
-            ANativeWindow_setBuffersGeometry(window, 0, 0, visual);
+            eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &windowVisual);
+            updateWindowBuffers();
             surface = eglCreateWindowSurface(display, config, window, nullptr);
             if (surface == EGL_NO_SURFACE) throw std::runtime_error("Could not attach the PSP display.");
         }
@@ -232,9 +247,11 @@ extern "C" JNIEXPORT jlong JNICALL Java_com_koki_psp_NativePspPlugin_nativeCreat
         auto instance = std::make_unique<Core>();
         active = instance.get();
         instance->system = string(env, system); instance->saves = string(env, saves);
+        // The frontend clocks retro_run at the PSP refresh rate. End each run
+        // at a vblank even when the game has no new picture to present.
         instance->options = { {"ppsspp_backend", "opengl"}, {"ppsspp_software_rendering", "disabled"},
             {"ppsspp_cpu_core", "JIT"}, {"ppsspp_internal_resolution", "480x272"}, {"ppsspp_cropto16x9", "disabled"},
-            {"ppsspp_enable_wlan", "disabled"}, {"ppsspp_frame_duplication", "disabled"} };
+            {"ppsspp_enable_wlan", "disabled"}, {"ppsspp_frame_duplication", "enabled"} };
         instance->library = dlopen((string(env, libs) + "/libppsspp_libretro.so").c_str(), RTLD_NOW | RTLD_LOCAL);
         if (!instance->library) throw std::runtime_error(std::string("Could not load PPSSPP: ") + dlerror());
         instance->graphics();
@@ -331,5 +348,5 @@ extern "C" JNIEXPORT void JNICALL Java_com_koki_psp_NativePspPlugin_nativeState(
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_koki_psp_NativePspPlugin_nativeSmoothing(JNIEnv* env, jclass, jlong handle, jboolean enabled) {
-    try { core(handle).smoothing = enabled; } catch (const std::exception& error) { fail(env, error); }
+    try { core(handle).setSmoothing(enabled); } catch (const std::exception& error) { fail(env, error); }
 }

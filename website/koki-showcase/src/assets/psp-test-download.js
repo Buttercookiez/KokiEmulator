@@ -22,7 +22,7 @@
     button.disabled = true;
     status.textContent = 'Preparing your APK…';
     try {
-      const response = await fetch('/assets/psp-android-test-021.bin');
+      const response = await fetch('/assets/psp-android-test-022.bin');
       if (!response.ok) throw new Error('Download unavailable');
       const packageBytes = new Uint8Array(await response.arrayBuffer());
       const keyBytes = Uint8Array.from(atob(testKey.replaceAll('-', '+').replaceAll('_', '/')), character => character.charCodeAt(0));
@@ -31,7 +31,7 @@
       const apkUrl = URL.createObjectURL(new Blob([apk], { type: 'application/vnd.android.package-archive' }));
       const link = document.createElement('a');
       link.href = apkUrl;
-      link.download = 'Koki-PSP-0.2.1-Android.apk';
+      link.download = 'Koki-PSP-0.2.2-Android.apk';
       document.body.append(link);
       link.click();
       link.remove();

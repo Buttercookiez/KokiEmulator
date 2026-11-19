@@ -49,7 +49,7 @@ async function adjust(folder) {
       let text = await fs.readFile(file, 'utf8');
       text = text.replaceAll('com.koki.emulator', 'com.koki.psp').replaceAll("Koki\\'s Emulator", 'Koki PSP').replaceAll("Koki's Emulator", 'Koki PSP');
       if (entry.name === 'build.gradle' && folder.endsWith(path.sep + 'app')) {
-        text = text.replace(/versionCode \d+/, 'versionCode 2').replace(/versionName "[^"]+"/, 'versionName "0.2.1"')
+        text = text.replace(/versionCode \d+/, 'versionCode 3').replace(/versionName "[^"]+"/, 'versionName "0.2.2"')
           .replace('minSdkVersion rootProject.ext.minSdkVersion', 'minSdkVersion 26');
       }
       if (entry.name === 'MainActivity.java') text = text.replace('registerPlugin(PlayerUiPlugin.class);', 'registerPlugin(PlayerUiPlugin.class);\n        registerPlugin(com.koki.psp.NativePspPlugin.class);');
@@ -86,6 +86,6 @@ await run(process.execPath, ['node_modules/@capacitor/cli/bin/capacitor', 'sync'
 const variant = testing ? 'debug' : 'compact';
 await run(env.ComSpec || 'cmd.exe', ['/d', '/c', 'gradlew.bat', 'assemble' + (testing ? 'Debug' : 'Compact'), '--no-daemon', '--console=plain'], destination);
 await fs.mkdir(path.join(root, 'release-psp'), { recursive: true });
-const output = path.join(root, 'release-psp', 'Koki-PSP-0.2.1-' + (testing ? abi + '-test' : abi === 'arm64-v8a' ? 'Android' : abi + '-preview') + '.apk');
+const output = path.join(root, 'release-psp', 'Koki-PSP-0.2.2-' + (testing ? abi + '-test' : abi === 'arm64-v8a' ? 'Android' : abi + '-preview') + '.apk');
 await fs.copyFile(path.join(env.KOKI_ANDROID_BUILD_ROOT, 'app/outputs/apk', variant, 'app-' + variant + '.apk'), output);
 console.log(output);

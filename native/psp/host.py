@@ -55,6 +55,8 @@ def main():
         b'ppsspp_cpu_core': b'JIT',
         b'ppsspp_internal_resolution': b'480x272',
         b'ppsspp_cropto16x9': b'disabled',
+        # Keep each host frame to one PSP vblank, even if the image is unchanged.
+        b'ppsspp_frame_duplication': b'enabled',
     }
     frame = None
     audio = bytearray()

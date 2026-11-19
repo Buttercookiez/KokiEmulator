@@ -148,6 +148,7 @@ public class NativePspPlugin extends Plugin {
     }
     private final Runnable tick=new Runnable() { public void run() {
         if(!playing || core==0)return;
+        long started = System.nanoTime();
         try {
             int frameButtons, x, y;
             synchronized (inputLock) {
@@ -159,11 +160,13 @@ public class NativePspPlugin extends Plugin {
             }
             double fps = nativeFrame(core, frameButtons, x, y);
             pump.push(pcm, nativeAudio(core, pcm));
-            long interval = (long)(1_000_000_000.0 / fps);
+            long interval = Math.round(1_000_000_000.0 / fps);
+            // Preserve cadence for small scheduling jitter. Rebase after a
+            // stall so overdue frames do not run in a burst.
+            if (started - deadline > interval / 2) deadline = started;
             deadline += interval;
-            long now = System.nanoTime();
-            if (now - deadline > interval * 2) deadline = now;
-            engine.postDelayed(this, Math.max(0, (deadline - now + 500_000L) / 1_000_000L));
+            long remaining = deadline - System.nanoTime();
+            engine.postDelayed(this, Math.max(0, (remaining + 500_000L) / 1_000_000L));
         } catch(Throwable error) { playerError(error); }
     }};
     private void copyAssets(String path,File destination) throws Exception {

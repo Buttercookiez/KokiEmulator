@@ -116,7 +116,7 @@ export default function PspApp() {
             <h2>Keyboard and gamepad</h2><p className="settings-note">Arrow keys · D-pad. I J K L · analog stick. Z X A S · Cross, Circle, Square, Triangle. Q E · shoulders. Enter · Start. Right Shift · Select. Escape · pause. Standard Bluetooth and USB gamepads are supported.</p>
             <h2>Game saves</h2><p className="settings-note">In-game saves use the PSP memory stick. Checkpoints are available in Save history.</p>
             <button className="button" onClick={() => void run(() => bridge.saves())} disabled={busy}><FolderOpen size={16} />{isPspAndroid ? 'Export PSP memory stick' : 'Open PSP memory stick'}</button>
-            <h2>About Koki PSP</h2><p className="settings-note">Version 0.2.1 · Powered by PPSSPP, GPL-2.0-or-later. PPSSPP and its contributors are credited in the bundled license notices. Import your own PSP games. Games are supplied separately.</p>
+            <h2>About Koki PSP</h2><p className="settings-note">Version 0.2.2 · Powered by PPSSPP, GPL-2.0-or-later. PPSSPP and its contributors are credited in the bundled license notices. Import your own PSP games. Games are supplied separately.</p>
             <p className="settings-note">Support · johnfrancismarabe040905@gmail.com</p>
             <details className="psp-license"><summary>Open-source licenses</summary><pre>{pspNotice + '\n' + pspLicense + '\n' + pspThirdParty}</pre></details>
         </section> : page === 'saves' ? <section className="save-history">
