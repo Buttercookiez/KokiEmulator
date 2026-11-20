@@ -110,8 +110,25 @@ try {
   await page.getByRole('button',{name:'Player menu',exact:true}).click();
   await page.getByRole('button',{name:'Return to library',exact:true}).last().click();
   await page.getByRole('heading',{name:'Your library',exact:true}).waitFor();
+  await page.locator('.mobile-nav').getByRole('button',{name:'Settings',exact:true}).click();
+  for(const name of ['Display','Play your way','Keyboard & controller','Touch controls','Your data, on your device']){
+    await page.getByRole('heading',{name,exact:true}).waitFor();
+  }
+  const filter=page.getByRole('combobox',{name:'Screen filter'});
+  await filter.click();
+  await page.getByRole('option',{name:'Crisp pixels'}).click();
+  await page.getByRole('checkbox',{name:'On-screen controls'}).uncheck();
+  assert.equal(await page.getByRole('slider',{name:'Default volume'}).inputValue(),'0.8');
+  assert.equal(await page.getByRole('slider',{name:'Touch button opacity'}).inputValue(),'0.7');
+  const preferences=await page.evaluate(()=>JSON.parse(localStorage.getItem('koki-psp-settings')));
+  assert.equal(preferences.smoothing,false);
+  assert.equal(preferences.showControls,false);
+  assert.ok(preferences.layout.landscape);
+  await page.getByRole('checkbox',{name:'Reduced motion'}).check();
+  await page.waitForFunction(()=>document.documentElement.dataset.reducedMotion==='true');
+  await fs.writeFile(path.join(directory,'android-settings.png'),await device.screenshot());
   assert.deepEqual(errors,[]);
-  console.log('Passed Android system ZIP import, native GLES/JIT playback, checkpoint save/restore, screenshots, automatic landscape, touch input and shared controls.');
+  console.log('Passed Android system ZIP import, native GLES/JIT playback, checkpoint save/restore, screenshots, automatic landscape, touch input, shared controls and Settings.');
 } catch(error) {
   if(page)console.log('Android page',await page.locator('body').innerText().catch(()=>''));
   console.log('Android log',String(await device.shell('logcat -d -s KokiPSP:E AndroidRuntime:E Capacitor/Console:E')).slice(-8000));

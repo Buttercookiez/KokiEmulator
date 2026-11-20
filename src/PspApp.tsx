@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FolderOpen, Heart, History, Library, Plus, Search, Settings2, SunMoon, Play, Trash2, Palette, LayoutGrid, List, ChevronDown } from 'lucide-react';
+import { FolderOpen, Heart, History, Library, Plus, Search, Settings2, SunMoon, Play, Trash2, Palette, LayoutGrid, List, ChevronDown, Monitor, SlidersHorizontal, Keyboard, Smartphone, HardDrive } from 'lucide-react';
 import { markStartupReady, rememberStartupAppearance } from './startup';
 import { createThemeTokens } from './lib/themes';
 import { readPspSettings, type PspSettings } from './lib/psp-settings';
@@ -7,6 +7,7 @@ import { isPspAndroid } from './lib/psp-android';
 import { PspPlayer } from './components/PspPlayer';
 import { PaletteChooser } from './components/PaletteChooser';
 import { Select } from './components/Select';
+import { SettingRow, Switch, ThemeSwitch } from './components/SettingsControls';
 import type { PspCheckpoint, PspGame, PspTiming } from './psp-types';
 import pspNotice from '../licenses/psp/NOTICE.txt?raw';
 import pspLicense from '../licenses/psp/GPL-3.0.txt?raw';
@@ -15,6 +16,7 @@ import './App.css';
 import './motion.css';
 import './components/PspPlayer.css';
 
+const PSP_VERSION = '0.2.3';
 const navigation = [
   { id: 'library', name: 'Library', Icon: Library }, { id: 'favorites', name: 'Favorites', Icon: Heart },
   { id: 'saves', name: 'Saves', Icon: History }, { id: 'settings', name: 'Settings', Icon: Settings2 },
@@ -29,6 +31,7 @@ export default function PspApp() {
   const [colors, setColors] = useState(false);
   const [query, setQuery] = useState('');
   const [settings, setSettings] = useState(readPspSettings);
+  const [reducedMotion, setReducedMotion] = useState(() => localStorage.getItem('koki-reduced-motion') === 'true');
   const [systemDark, setSystemDark] = useState(matchMedia('(prefers-color-scheme: dark)').matches);
   const [view, setView] = useState(() => localStorage.getItem('koki-psp-view') || 'grid');
   const [sort, setSort] = useState('recent');
@@ -66,6 +69,13 @@ export default function PspApp() {
     localStorage.setItem('koki-psp-settings', JSON.stringify(settings));
     rememberStartupAppearance(settings.theme, settings.lightColor, settings.darkColor);
   }, [settings, dark]);
+  useEffect(() => {
+    document.documentElement.dataset.reducedMotion = String(reducedMotion);
+    localStorage.setItem('koki-reduced-motion', String(reducedMotion));
+  }, [reducedMotion]);
+  function changeSettings(patch: Partial<PspSettings>) {
+    setSettings(current => ({ ...current, ...patch }));
+  }
   async function run(operation: () => Promise<void>) {
     if (working.current) return;
     working.current = true; setBusy(true); setError('');
@@ -94,8 +104,11 @@ export default function PspApp() {
   return <div className="app psp-app">
     <aside className="sidebar"><div className="sidebar-header"><a className="brand sidebar-brand system-brand" href="#" onClick={event => { event.preventDefault(); navigate('library'); }}>
       <img className="dark-invert" src="./brand/koki-wordmark.svg" alt="Koki" /><span className="system-brand-label">PSP</span></a></div>
-      <nav className="nav-items" aria-label="Main navigation">{navigation.map(({ id, name, Icon }) => <button key={id} type="button" className={'nav-item' + (page === id ? ' active' : '')} aria-current={page === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={17} /><span className="nav-label">{name}</span></button>)}</nav>
-      <div className="sidebar-bottom"><p className="muted">Koki PSP · 0.2.0</p></div>
+      <nav className="nav-items" aria-label="Main navigation">{navigation.slice(0, 3).map(({ id, name, Icon }) => <button key={id} type="button" className={'nav-item' + (page === id ? ' active' : '')} aria-current={page === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={17} /><span className="nav-label">{name}</span>{id === 'library' && <span className="nav-count">{String(games.length).padStart(2, '0')}</span>}</button>)}</nav>
+      <div className="sidebar-bottom"><button type="button" className={'nav-item' + (page === 'settings' && !colors ? ' active' : '')}
+        aria-label="Settings" aria-current={page === 'settings' && !colors ? 'page' : undefined} onClick={() => navigate('settings')}>
+        <Settings2 size={17} /><span className="nav-label">Settings</span>
+      </button></div>
     </aside>
     <main className="main-shell"><header className="app-chrome"><span className="brand mobile-brand system-brand"><img className="dark-invert" src="./brand/koki-wordmark.svg" alt="Koki" /><span className="system-brand-label">PSP</span></span>
       <div className="chrome-actions"><button className="icon-button" aria-label="Colors" onClick={() => { setColors(value => !value); setPage('settings'); }}><Palette size={18} /></button>
@@ -105,21 +118,69 @@ export default function PspApp() {
         {busy && <p className="settings-note" role="status">{importing ? 'Adding games… Large ZIP files may take a moment.' : 'Opening game…'}</p>}
         {error && <p className="psp-library-error" role="alert">{error}</p>}
         {colors ? <div className="colors-layout"><section className="colors-section" aria-label="Color customization">
-          <div className="colors-mode"><div className="setting-row"><div className="setting-label"><h3>Theme</h3><p>Choose light, dark, or follow your device.</p></div><div className="theme-switch">{(['light', 'dark', 'system'] as const).map(theme => <button key={theme} aria-pressed={settings.theme === theme} className={settings.theme === theme ? 'active' : ''} onClick={() => setSettings(value => ({ ...value, theme }))}>{theme[0].toUpperCase() + theme.slice(1)}</button>)}</div></div></div>
+          <div className="colors-mode"><SettingRow title="Theme" description="Choose light, dark, or follow your device.">
+            <ThemeSwitch theme={settings.theme} onChange={theme => changeSettings({ theme })} />
+          </SettingRow></div>
           <PaletteChooser mode={dark ? 'dark' : 'light'} value={dark ? settings.darkColor : settings.lightColor}
             onChange={color => setSettings(value => ({ ...value, [dark ? 'darkColor' : 'lightColor']: color }))} />
-        </section></div> : page === 'settings' ? <section className="settings-section psp-settings">
-          <h2>Playback</h2><label className="setting-row"><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step=".05" value={settings.volume} onChange={event => setSettings(value => ({ ...value, volume: Number(event.target.value) }))} /></label>
-            <label className="setting-row"><span>Smooth image scaling</span><input type="checkbox" checked={settings.smoothing} onChange={event => setSettings(value => ({ ...value, smoothing: event.target.checked }))} /></label>
-            <label className="setting-row"><span>Show touch controls</span><input type="checkbox" checked={settings.showControls} onChange={event => setSettings(value => ({ ...value, showControls: event.target.checked }))} /></label>
-            <h2>Controller layouts</h2><p className="settings-note">Open a game and choose Edit controls to move buttons. Your landscape layout applies to all PSP games.</p>
-            <h2>Keyboard and gamepad</h2><p className="settings-note">Arrow keys · D-pad. I J K L · analog stick. Z X A S · Cross, Circle, Square, Triangle. Q E · shoulders. Enter · Start. Right Shift · Select. Escape · pause. Standard Bluetooth and USB gamepads are supported.</p>
-            <h2>Game saves</h2><p className="settings-note">In-game saves use the PSP memory stick. Checkpoints are available in Save history.</p>
-            <button className="button" onClick={() => void run(() => bridge.saves())} disabled={busy}><FolderOpen size={16} />{isPspAndroid ? 'Export PSP memory stick' : 'Open PSP memory stick'}</button>
-            <h2>About Koki PSP</h2><p className="settings-note">Version 0.2.2 · Powered by PPSSPP, GPL-2.0-or-later. PPSSPP and its contributors are credited in the bundled license notices. Import your own PSP games. Games are supplied separately.</p>
-            <p className="settings-note">Support · johnfrancismarabe040905@gmail.com</p>
-            <details className="psp-license"><summary>Open-source licenses</summary><pre>{pspNotice + '\n' + pspLicense + '\n' + pspThirdParty}</pre></details>
-        </section> : page === 'saves' ? <section className="save-history">
+        </section></div> : page === 'settings' ? <div className="settings-layout">
+          <section className="settings-section">
+            <div className="settings-section-heading"><Monitor size={20} /><div><h2>Display</h2><p>Adjust image scaling and motion.</p></div></div>
+            <SettingRow title="Screen filter" description="Keep pixels crisp or soften the display.">
+              <Select value={settings.smoothing ? 'smooth' : 'pixel'} onChange={value => changeSettings({ smoothing: value === 'smooth' })}
+                aria-label="Screen filter" options={[{ value: 'pixel', label: 'Crisp pixels' }, { value: 'smooth', label: 'Smooth' }]} />
+            </SettingRow>
+            <SettingRow title="Reduced motion" description="Keep transitions and animations to a minimum.">
+              <Switch checked={reducedMotion} label="Reduced motion" onChange={setReducedMotion} />
+            </SettingRow>
+          </section>
+          <section className="settings-section">
+            <div className="settings-section-heading"><SlidersHorizontal size={20} /><div><h2>Play your way</h2></div></div>
+            <SettingRow title="Volume">
+              <input type="range" min={0} max={1} step={.05} value={settings.volume}
+                onChange={event => changeSettings({ volume: Number(event.target.value) })} aria-label="Default volume" />
+              <span className="range-value">{Math.round(settings.volume * 100)}%</span>
+            </SettingRow>
+          </section>
+          <section className="settings-section">
+            <div className="settings-section-heading"><Keyboard size={20} /><div><h2>Keyboard &amp; controller</h2><p>Standard Bluetooth and USB gamepads work automatically.</p></div></div>
+            <dl className="psp-key-guide">
+              <div><dt>D-pad</dt><dd><kbd>Arrow keys</kbd></dd></div>
+              <div><dt>Analog stick</dt><dd><kbd>I</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd></dd></div>
+              <div><dt>Cross / Circle</dt><dd><kbd>Z</kbd> <kbd>X</kbd></dd></div>
+              <div><dt>Square / Triangle</dt><dd><kbd>A</kbd> <kbd>S</kbd></dd></div>
+              <div><dt>L / R</dt><dd><kbd>Q</kbd> <kbd>E</kbd></dd></div>
+              <div><dt>Start / Select</dt><dd><kbd>Enter</kbd> <kbd>Right Shift</kbd></dd></div>
+              <div><dt>Pause</dt><dd><kbd>Esc</kbd></dd></div>
+            </dl>
+          </section>
+          <section className="settings-section">
+            <div className="settings-section-heading"><Smartphone size={20} /><div><h2>Touch controls</h2></div></div>
+            <SettingRow title="On-screen controls" description="Show the touch keypad while playing on a phone.">
+              <Switch checked={settings.showControls} label="On-screen controls" onChange={showControls => changeSettings({ showControls })} />
+            </SettingRow>
+            <SettingRow title="Button opacity">
+              <input type="range" min={.15} max={1} step={.05} value={settings.touchOpacity}
+                onChange={event => changeSettings({ touchOpacity: Number(event.target.value) })} aria-label="Touch button opacity" />
+              <span className="range-value">{Math.round(settings.touchOpacity * 100)}%</span>
+            </SettingRow>
+            <p className="settings-note">Open a game and choose Edit controls to move or resize buttons. Your landscape layout applies to all PSP games.</p>
+          </section>
+          <section className="settings-section">
+            <div className="settings-section-heading"><HardDrive size={20} /><div><h2>Your data, on your device</h2><p>Games, screenshots, and saves stay local.</p></div></div>
+            <p className="settings-note">In-game saves use the PSP memory stick. Checkpoints are available in Save history.</p>
+            <div className="storage-actions"><button className="button" onClick={() => void run(() => bridge.saves())} disabled={busy}>
+              <FolderOpen size={15} />{isPspAndroid ? 'Export PSP memory stick' : 'Open PSP memory stick'}
+            </button></div>
+          </section>
+          <section className="settings-section" aria-label="About Koki PSP">
+            <details className="psp-license"><summary>About Koki PSP</summary>
+              <p className="settings-note">Version {PSP_VERSION} · Powered by PPSSPP, GPL-2.0-or-later. Import your own PSP games.</p>
+              <p className="settings-note">Support · johnfrancismarabe040905@gmail.com</p>
+              <details className="psp-license"><summary>Open-source licenses</summary><pre>{pspNotice + '\n' + pspLicense + '\n' + pspThirdParty}</pre></details>
+            </details>
+          </section>
+        </div> : page === 'saves' ? <section className="save-history">
           {!checkpoints.length && <section className="welcome"><div className="welcome-copy"><h2>Your progress, saved</h2><p>Save a checkpoint while playing to find it here.</p></div></section>}
           {games.filter(game => checkpoints.some(state => state.gameId === game.id)).map(game => <details className="save-game-group" key={game.id}><summary className="save-game-heading"><span className="save-game-art">{artwork(game)}</span><span className="save-game-heading-copy"><span className="save-game-title">{game.title}</span><span className="save-game-count">{checkpoints.filter(state => state.gameId === game.id).length} checkpoints</span></span><ChevronDown size={17} /></summary>
             {checkpoints.filter(state => state.gameId === game.id).map(state => <div className="psp-checkpoint-row" key={state.id}><span>{date(state.created)}<small>{(state.bytes / 1048576).toFixed(1)} MB</small></span><button className="button" disabled={busy} onClick={() => launch(game, state.id)}><Play size={15} />Load</button><button className="icon-button" disabled={busy} aria-label="Delete checkpoint" onClick={() => { if (confirm('Delete this checkpoint?')) void run(async () => { await bridge.deleteCheckpoint(state.id); await refresh(); }); }}><Trash2 size={16} /></button></div>)}</details>)}
@@ -134,6 +195,6 @@ export default function PspApp() {
         </>}
       </div>
     </main>
-    <nav className="mobile-nav" aria-label="Mobile navigation">{navigation.map(({ id, name, Icon }) => <button key={id} className={page === id ? 'active' : ''} aria-current={page === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} /><span>{name}</span></button>)}</nav>
+    <nav className="mobile-nav" aria-label="Mobile navigation">{navigation.map(({ id, name, Icon }) => <button key={id} className={page === id && !colors ? 'active' : ''} aria-current={page === id && !colors ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} /><span>{name}</span></button>)}</nav>
   </div>;
 }

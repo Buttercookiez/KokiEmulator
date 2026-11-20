@@ -31,4 +31,4 @@ await run('scripts/generate-psp-icons.cjs', ['--windows-only']);
 await run('node_modules/electron-builder/cli.js', [
   '--config', 'electron/psp-builder.json', '--win', 'portable', '--x64', '--publish', 'never',
 ]);
-console.log(path.join(root, 'release-psp', 'Koki-PSP-0.2.2-Windows.exe'));
+console.log(path.join(root, 'release-psp', 'Koki-PSP-0.2.3-Windows.exe'));

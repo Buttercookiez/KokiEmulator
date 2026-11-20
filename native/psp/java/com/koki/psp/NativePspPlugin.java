@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
+import android.media.PlaybackParams;
 import android.media.*;
 import android.net.Uri;
 import android.os.*;
@@ -138,13 +139,23 @@ public class NativePspPlugin extends Plugin {
         if(minimum<0)throw new IllegalStateException("Could not initialize PSP audio.");
         audio=new AudioTrack.Builder().setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
             .setAudioFormat(new AudioFormat.Builder().setSampleRate(rate).setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).setEncoding(AudioFormat.ENCODING_PCM_16BIT).build())
-            .setBufferSizeInBytes(Math.max(minimum*3,rate/10*4)).setTransferMode(AudioTrack.MODE_STREAM).build();
+            .setBufferSizeInBytes(Math.max(minimum * 3, rate * 18 / 100 * 4)).setTransferMode(AudioTrack.MODE_STREAM).build();
         if(audio.getState()!=AudioTrack.STATE_INITIALIZED)throw new IllegalStateException("Could not start PSP audio.");
         audio.setVolume(volume);
+        int prerollFrames = Math.min(rate * 9 / 100, audio.getBufferSizeInFrames() / 2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) audio.setStartThresholdInFrames(prerollFrames);
         pump=new NativeAudioPump(new NativeAudioPump.Output() {
             public int write(short[] data,int offset,int count) { return audio.write(data,offset,count,AudioTrack.WRITE_NON_BLOCKING); }
             public void play() { audio.play(); }
-        }, Math.min(rate/30, audio.getBufferSizeInFrames()/2)*2, rate/5*2);
+            public void setSpeed(float speed) {
+                try {
+                    audio.setPlaybackParams(new PlaybackParams().setSpeed(speed).setPitch(1)
+                        .setAudioFallbackMode(PlaybackParams.AUDIO_FALLBACK_MODE_FAIL));
+                } catch (IllegalArgumentException ignored) {
+                    // Keep buffering on output routes that cannot apply time stretching.
+                }
+            }
+        }, rate, prerollFrames * 2, rate / 4 * 2);
     }
     private final Runnable tick=new Runnable() { public void run() {
         if(!playing || core==0)return;
@@ -159,7 +170,7 @@ public class NativePspPlugin extends Plugin {
                 y = stickY;
             }
             double fps = nativeFrame(core, frameButtons, x, y);
-            pump.push(pcm, nativeAudio(core, pcm));
+            pump.push(pcm, nativeAudio(core, pcm), System.nanoTime());
             long interval = Math.round(1_000_000_000.0 / fps);
             // Preserve cadence for small scheduling jitter. Rebase after a
             // stall so overdue frames do not run in a burst.

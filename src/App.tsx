@@ -1,6 +1,6 @@
 import { nativeNdsAvailable } from './lib/nds-native';
 import { IS_NDS, SYSTEM, ROM_ACCEPT, IMPORT_PATTERN } from './platform';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEvent } from 'react';
 import { AlertCircle, ArrowDownToLine, ArrowUpFromLine, Check, CheckCircle2, ChevronDown, Download, FolderClosed, FolderOpen, Gamepad2, Grid2X2, HardDrive, Heart, History, ImageOff, ImagePlus, Keyboard, Library, List, LoaderCircle, Monitor, Moon, Palette, PanelLeftClose, PanelLeftOpen, Play, Plus, RotateCcw, Search, Settings2, SlidersHorizontal, Smartphone, Sun, SunMoon, Trash2, Upload, Volume2, X } from 'lucide-react';
 import { DEFAULT_SETTINGS, type Game, type GameProfile, type Settings, type Snapshot } from './types';
 import { deleteGame, deleteSnapshot, downloadBlob, exportBattery, exportLibrary, getGames, getSettings, getSnapshots, importBattery, importGames, importLibrary, removeCover, restoreDefaultCover, saveCover, saveGameProfile, saveSettings, updateGame } from './lib/library';
@@ -9,6 +9,7 @@ import { useGamePreview } from './lib/use-game-preview';
 import { getGameCover } from './lib/artwork';
 import { Modal } from './components/Modal';
 import { Select } from './components/Select';
+import { SettingRow, Switch, ThemeSwitch } from './components/SettingsControls';
 import { Player } from './components/Player';
 import { PaletteChooser } from './components/PaletteChooser';
 import { createThemeTokens } from './lib/themes';
@@ -30,11 +31,6 @@ function bytes(value: number) { return value >= 1048576 ? `${(value / 1048576).t
 function playedTime(seconds: number) { if (seconds < 60) return 'Just started'; if (seconds < 3600) return `${Math.floor(seconds / 60)} min played`; return `${Math.floor(seconds / 3600)}h ${Math.floor(seconds % 3600 / 60)}m played`; }
 function relativeDate(time?: number) { if (!time) return 'Not played yet'; const age = Date.now() - time; if (age < 60000) return 'Just played'; if (age < 3600000) return `${Math.floor(age / 60000)} min ago`; if (age < 86400000) return `${Math.floor(age / 3600000)}h ago`; if (age < 86400000 * 2) return 'Yesterday'; return new Date(time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
 
-function ThemeSwitch({ theme, onChange }: { theme: Settings['theme']; onChange: (theme: Settings['theme']) => void }) {
-  return <div className="theme-switch" role="group" aria-label="Appearance">{(['light', 'dark', 'system'] as const).map(value => <button key={value} type="button" className={theme === value ? 'active' : ''} aria-pressed={theme === value} onClick={() => onChange(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div>;
-}
-function Switch({ checked, onChange, label }: { checked: boolean; onChange: (value: boolean) => void; label: string }) { return <label className="switch"><input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} aria-label={label} /><span /></label>; }
-function SettingRow({ title, description, children }: { title: string; description?: string; children: ReactNode }) { return <div className="setting-row"><div className="setting-row-text"><strong>{title}</strong>{description && <p>{description}</p>}</div><div className="setting-control">{children}</div></div>; }
 
 export default function App() {
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme:dark)').matches);
